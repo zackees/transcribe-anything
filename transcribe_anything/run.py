@@ -24,8 +24,13 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
     if url_or_file[:4] == "http":
         # Download via youtube-dl
         tmp_m4a = f"{out_wav}.m4a"
-        cmd = f'youtube-dl -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
-        subprocess.run(cmd, shell=True, check=True, capture_output=True)
+        try:
+            cmd = f'youtube-dl -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
+            subprocess.run(cmd, shell=True, check=True, capture_output=True)
+        except subprocess.CalledProcessError:
+            print("Could not just download audio stream, falling back to full video download")
+            cmd = f'youtube-dl {url_or_file} -o {tmp_m4a}'
+            subprocess.run(cmd, shell=True, check=True, capture_output=True)
         print("Downloading complete.")
         convert_to_deepspeech_wav(tmp_m4a, out_wav)
         os.remove(tmp_m4a)
