@@ -1,5 +1,8 @@
 # transcribe-anything
 Input a local file or url and this service will transcribe it using Mozilla Deepspeech 0.9.3.
+  * Example:
+    * `transcribe_anything <YOUTUBE_URL> out_subtitles.txt`
+    * `transcribe_anything <LOCAL.MP4/WAV> out_subtitles.txt`
 
 # Quick start
 
