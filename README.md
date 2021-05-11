@@ -33,3 +33,6 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * static-ffmpeg
     * github: https://github.com/zackees/static_ffmpeg
     * pypi: https://pypi.org/project/static-ffmpeg/
+
+# Testing
+  * All tests are run by `tox`, simply go to the project directory root and run it.
