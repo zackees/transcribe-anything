@@ -2,11 +2,8 @@ import unittest
 import subprocess
 
 class TranscribeAnythingTester(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cleanup = []
-
     def test_fetch_url(self) -> None:
+        """Check that the command is installed by the setup process."""
         subprocess.check_output(['transcribe_anything', '-h'])
 
 
