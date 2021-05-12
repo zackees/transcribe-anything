@@ -27,7 +27,8 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 
 # Tech Stack
   * Mozilla DeepSpeech: https://github.com/mozilla/DeepSpeech
-  * mic_vad_streaming: https://github.com/hadran9/DeepSpeech-examples/tree/r0.9/mic_vad_streaming
+  * pydeepspeech: https://github.com/zackees/pydeepspeech
+    * mic_vad_streaming: https://github.com/hadran9/DeepSpeech-examples/tree/r0.9/mic_vad_streaming
   * youtube-dl:
     * github: https://github.com/ytdl-org/youtube-dl
   * static-ffmpeg
