@@ -1,7 +1,10 @@
-import unittest
-import subprocess
 import os
+import subprocess
 import tempfile
+import unittest
+
+from transcribe_anything.transcribe_anything import bulk_fetch_subtitles
+
 
 class TranscribeAnythingTester(unittest.TestCase):
 
@@ -15,9 +18,17 @@ class TranscribeAnythingTester(unittest.TestCase):
         tmp_name = tmp_file.name
         try:
             tmp_file.close()
-            subprocess.check_output(['transcribe_anything', 'https://www.youtube.com/watch?v=8Wg8f2g_GQY', tmp_name])
+            subprocess.check_output(['transcribe_anything', 'https://www.youtube.com/watch?v=8Wg8f2g_GQY', '--out', tmp_name])
         finally:
             os.remove(tmp_name)
+
+    def test_empty_bulk_fetch(self) -> None:
+        """Check that the function can be called with empty args."""
+        urls = []
+        def onresolve(url: str, sub: str):
+            self.fail()
+        bulk_fetch_subtitles(urls, onresolve=onresolve)
+        
 
 
 if __name__ == '__main__':

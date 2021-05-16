@@ -4,18 +4,28 @@
 
 import argparse
 import os
+import sys
+import shutil
 import subprocess
 import tempfile
 
+_VERBOSE = False
 
-def convert_to_deepspeech_wav(in_media, out_wav):
+
+def vprint(msg: str) -> None:
+    """Prints but only if _VERBOSE has been set to true"""
+    if _VERBOSE:
+        sys.stderr.write(f"{msg}\n")
+
+
+def convert_to_deepspeech_wav(in_media: str, out_wav: str) -> None:
     """
     Convert to wave format compatible with pydeepspeech which is:
       * mono audio channel.
       * sample rate of 16000
     """
     cmd = f"static_ffmpeg -y -i {in_media} -ac 1 -ar 16000 {out_wav}"
-    print(f'Running cmd: "{cmd}"')
+    vprint(f'Running cmd: "{cmd}"')
     subprocess.run(cmd, shell=True, check=True, capture_output=True)
 
 
@@ -28,12 +38,12 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
             cmd = f'youtube-dl -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
         except subprocess.CalledProcessError:
-            print(
+            vprint(
                 "Could not just download audio stream, falling back to full video download"
             )
             cmd = f"youtube-dl {url_or_file} -o {tmp_m4a}"
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
-        print("Downloading complete.")
+        vprint("Downloading complete.")
         convert_to_deepspeech_wav(tmp_m4a, out_wav)
         os.remove(tmp_m4a)
     else:
@@ -41,7 +51,7 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
         convert_to_deepspeech_wav(url_or_file, out_wav)
 
 
-def main():
+def main() -> None:
     """Main entry point for the command line tool."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -49,19 +59,37 @@ def main():
         help="Provide file path or url (includes youtube/facebook/twitter/etc)",
     )
     parser.add_argument(
-        "out",
-        help="First argument is the mp4 or url to youtube/mp4",
-        nargs="?",
-        default="subtitles.txt",
+        "--out",
+        help="Output text file name",
+        default=None,
     )
     args = parser.parse_args()
     tmp_wav = tempfile.NamedTemporaryFile(  # pylint: disable=R1732
         suffix=".wav", delete=False
     )
     tmp_wav.close()
+    tmp_file = tempfile.NamedTemporaryFile(  # pylint: disable=R1732
+        suffix=".txt", delete=False
+    )
+    tmp_file.close()
+
     try:
         fetch_mono_16000_audio(args.url_or_file, tmp_wav.name)
-        print(f"Wrote out {tmp_wav.name}")
-        os.system(f"pydeepspeech --wav_file {tmp_wav.name} --out_file {args.out}")
+        subprocess.check_output(
+            f"pydeepspeech --wav_file {tmp_wav.name} --out_file {tmp_file.name}",
+            shell=True,
+            stderr=subprocess.DEVNULL,
+        )
+        if args.out is not None:
+            shutil.copy(tmp_file.name, args.out)
+        else:
+            with open(tmp_file.name) as fd:
+                content = fd.read()
+            sys.stdout.write(f"{content}\n")
     finally:
         os.remove(tmp_wav.name)
+        os.remove(tmp_file.name)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,8 +1,15 @@
 # transcribe-anything
 Input a local file or url and this service will transcribe it using Mozilla Deepspeech 0.9.3.
-  * Example:
+  * Example (cmd):
     * `transcribe_anything <YOUTUBE_URL> out_subtitles.txt`
     * `transcribe_anything <LOCAL.MP4/WAV> out_subtitles.txt`
+  * Example (api):
+    `
+    from transcribe_anything.transcribe_anything import bulk_fetch_subtitles
+    urls = ['https://www.youtube.com/watch?v=Erk4_jFDjzQ']
+    def onresolve(url, sub): print(url, sub)
+    bulk_fetch_subtitles(urls, onresolve=onresolve)
+    `
 
 # Quick start
 
