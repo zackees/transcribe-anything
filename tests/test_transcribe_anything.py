@@ -27,8 +27,20 @@ class TranscribeAnythingTester(unittest.TestCase):
         urls = []
         def onresolve(url: str, sub: str):
             self.fail()
-        bulk_fetch_subtitles(urls, onresolve=onresolve)
-        
+        def onfail(url: str):
+            self.fail()
+        bulk_fetch_subtitles(urls, onresolve=onresolve, onfail=onfail)
+
+    def test_one_bulk_fetch(self) -> None:
+        """Tests that one fetch will be completed ok."""
+        urls = ['https://www.youtube.com/watch?v=h0vG6Emuhvs']
+        resolved = {'value': False}
+        def onresolve(url: str, sub: str):
+            resolved['value'] = True
+        def onfail(url: str):
+            self.fail()
+        bulk_fetch_subtitles(urls=urls, onresolve=onresolve, onfail=onfail)
+        self.assertTrue(resolved.get('value'))
 
 
 if __name__ == '__main__':

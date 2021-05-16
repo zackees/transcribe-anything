@@ -29,12 +29,16 @@ def fetch_subtitle(url: str) -> str:
 
 
 def bulk_fetch_subtitles(
-    urls: List[str], onresolve: Callable[[str, str], None], num_cpus: int = -1
+    urls: List[str],
+    onresolve: Callable[[str, str], None],
+    onfail: Callable[[str], None],
+    num_cpus: int = -1,
 ) -> None:
     """On each completed url onresolve(url, subtitle) will be called."""
     url_work_q = list(urls)
     if num_cpus == -1:
         num_cpus = max(1, int(multiprocessing.cpu_count() / 2))
+    print(f"Num cpus={num_cpus}")
     procs: List[Any] = [None for _ in range(num_cpus)]
     while True:
         n_active_procs = len([p for p in procs if p])
@@ -50,10 +54,15 @@ def bulk_fetch_subtitles(
             if rtn is None:
                 # Still running
                 continue
-            assert rtn == 0, f"Unexpected result: {rtn}"
-            stdout = p.stdout.read()
-            url = p.url
-            onresolve(url, stdout)
+            print(f"{p.url} finished running.")
+            if rtn != 0:
+                print(f"{p.url} failed.")
+                onfail(p.url)
+            else:
+                stdout = p.stdout.read()
+                url = p.url
+                print(f"{p.url} resolved.")
+                onresolve(url, stdout)
             procs[i] = None
         # Search for empty processes and replace them with more work from the workq.
         for i, _ in enumerate(procs):
@@ -61,6 +70,7 @@ def bulk_fetch_subtitles(
                 # Push a new process onto the array, attaching the url to the process
                 # as an attribute.
                 cmd = f"transcribe_anything {url_work_q[0]}"
+                print(f"Cmd: {cmd}")
                 proc = subprocess.Popen(  # pylint: disable=R1732
                     cmd, shell=True, stdout=subprocess.PIPE
                 )
@@ -76,8 +86,11 @@ def unit_test() -> None:
     def onresolve(url: str, sub: str) -> None:
         print(url, sub)
 
+    def onfail(url: str) -> None:
+        print(f"Failed to resolve {url}")
+
     urls = ["https://www.youtube.com/watch?v=Erk4_jFDjzQ"]
-    bulk_fetch_subtitles(urls, onresolve=onresolve, num_cpus=2)
+    bulk_fetch_subtitles(urls, onresolve=onresolve, onfail=onfail, num_cpus=2)
 
 
 if __name__ == "__main__":
