@@ -8,6 +8,7 @@ import sys
 import shutil
 import subprocess
 import tempfile
+import time
 
 _VERBOSE = False
 
@@ -75,11 +76,17 @@ def main() -> None:
 
     try:
         fetch_mono_16000_audio(args.url_or_file, tmp_wav.name)
-        subprocess.check_output(
-            f"pydeepspeech --wav_file {tmp_wav.name} --out_file {tmp_file.name}",
-            shell=True,
-            stderr=subprocess.DEVNULL,
+        cmd = f"pydeepspeech --wav_file {tmp_wav.name} --out_file {tmp_file.name}"
+        proc = subprocess.Popen(  # pylint: disable=R1732
+            cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL
         )
+        while True:
+            rtn = proc.poll()
+            if rtn is None:
+                time.sleep(0.1)
+                continue
+            assert rtn == 0, f"Failed to execute {cmd}"
+            break
         if args.out is not None:
             shutil.copy(tmp_file.name, args.out)
         else:
