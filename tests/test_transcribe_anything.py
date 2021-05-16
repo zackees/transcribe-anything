@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import unittest
 
-from transcribe_anything.transcribe_anything import bulk_fetch_subtitles
+from transcribe_anything.api import bulk_transcribe
 
 
 class TranscribeAnythingTester(unittest.TestCase):
@@ -29,7 +29,7 @@ class TranscribeAnythingTester(unittest.TestCase):
             self.fail()
         def onfail(url: str):
             self.fail()
-        bulk_fetch_subtitles(urls, onresolve=onresolve, onfail=onfail)
+        bulk_transcribe(urls, onresolve=onresolve, onfail=onfail)
 
     def test_one_bulk_fetch(self) -> None:
         """Tests that one fetch will be completed ok."""
@@ -39,7 +39,7 @@ class TranscribeAnythingTester(unittest.TestCase):
             resolved['value'] = True
         def onfail(url: str):
             self.fail()
-        bulk_fetch_subtitles(urls=urls, onresolve=onresolve, onfail=onfail)
+        bulk_transcribe(urls=urls, onresolve=onresolve, onfail=onfail)
         self.assertTrue(resolved.get('value'))
 
 

@@ -13,7 +13,7 @@ URL = 'https://github.com/zackees/transcribe-anything'
 EMAIL = 'dont@email.me'
 AUTHOR = 'Zach Vorhies'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '1.1.3'
+VERSION = '1.2.0'
 
 # The text of the README file
 with open(os.path.join(HERE, "README.md")) as fd:
@@ -79,11 +79,12 @@ setup(
         'static-ffmpeg',
         'pydeepspeech',
         'youtube-dl',
+        'capturing-process',
     ],
 
     entry_points = {
         'console_scripts': [
-            'transcribe_anything = transcribe_anything.run:main',
+            'transcribe_anything = transcribe_anything.cmd:main',
         ],              
     },
     
