@@ -20,17 +20,17 @@ def set_logging_level(val: int) -> None:
 
 def log_debug(msg: str) -> None:
     """log debug messages."""
-    if LEVEL <= DEBUG:
+    if LEVEL >= DEBUG:
         print(msg)
 
 
 def log_error(msg: str) -> None:
     """log error messages."""
-    if LEVEL <= ERROR:
+    if LEVEL >= ERROR:
         print(msg)
 
 
 def log_info(msg: str) -> None:
     """log info messages."""
-    if LEVEL <= INFO:
+    if LEVEL >= INFO:
         print(msg)

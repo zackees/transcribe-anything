@@ -58,6 +58,7 @@ def transcribe(url_or_file: str) -> str:
             except OSError as err:
                 log_error(f"Failed to remove {name} because of {err}")
 
+
 def bulk_transcribe(
     urls: List[str],
     onresolve: Callable[[str, str], None],
