@@ -64,8 +64,11 @@ def bulk_transcribe(
     onresolve: Callable[[str, str], None],
     onfail: Callable[[str], None],
     num_cpus: int = -1,
+    verbose: bool = False,
 ) -> None:
     """On each completed url onresolve(url, subtitle) will be called."""
+    if verbose:
+        set_logging_level(INFO)
     url_work_q = list(urls)
     if num_cpus == -1:
         num_cpus = max(1, int(multiprocessing.cpu_count() / 2))
