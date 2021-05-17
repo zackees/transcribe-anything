@@ -39,6 +39,20 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * `transcribe_anything <YOUTUBE_URL> out_subtitles.txt`
   * -or- `transcribe_anything <MY_LOCAL.MP4/WAV> out_subtitles.txt`
 
+# How does it work?
+
+This program performs fetching using YouTube-dl for downloading videos from video services, and then
+stripping the audio track out.
+
+[static_ffmpeg](https://pypi.org/project/static-ffmpeg/) is then called to transcode the audio track into a specific format that DeepSpeech requires.
+
+Once the audio file has been prepared, [pydeepspeech](https://pypi.org/project/pydeepspeech/) is called. This little
+utility automatically downloads the proper AI models and installs them into the proper path so that deepspeech can be
+called. It also partitions the input wav file into chunks, split at the parts of silence, in order to make processing
+go easier (DeepSpeech degrades performance significantly with longer audio clips, so they have to be kept short.)
+
+
+
 # Tech Stack
   * Mozilla DeepSpeech: https://github.com/mozilla/DeepSpeech
   * pydeepspeech: https://github.com/zackees/pydeepspeech
