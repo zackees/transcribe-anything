@@ -45,7 +45,7 @@ def transcribe(url_or_file: str) -> str:
             if rtn is None:
                 time.sleep(0.25)
                 continue
-            assert rtn == 0, f"Failed to execute {cmd}"
+            assert rtn == 0, f"Failed to execute {cmd}\n stdout: {proc.get_stdout()}\n stderr: {proc.get_stderr()}"
             break
         with open(tmp_file.name) as fd:
             content = fd.read()
