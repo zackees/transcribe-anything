@@ -61,12 +61,13 @@ def transcribe(url_or_file: str) -> str:
             content = fd.read()
         return content
     finally:
-        for name in [tmp_wav.name, tmp_file.name]:
-            try:
-                if os.path.exists(name):
-                    os.remove(name)
-            except OSError as err:
-                log_error(f"Failed to remove {name} because of {err}")
+        pass
+        #for name in [tmp_wav.name, tmp_file.name]:
+        #    try:
+        #        if os.path.exists(name):
+        #            os.remove(name)
+        #    except OSError as err:
+        #        log_error(f"Failed to remove {name} because of {err}")
 
 
 def bulk_transcribe(  # pylint: disable=R0914
