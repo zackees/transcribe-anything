@@ -4,21 +4,18 @@
 
 import multiprocessing
 import os
-from io import StringIO
+import stat
+import sys
 import tempfile
 import time
-import sys
+from io import StringIO
 from typing import Any, Callable, List
+
 from capturing_process import CapturingProcess  # type: ignore
-from transcribe_anything.logger import (
-    log_debug,
-    log_error,
-    log_info,
-    set_logging_level,
-    INFO,
-)
 
 from transcribe_anything.audio import fetch_mono_16000_audio
+from transcribe_anything.logger import (INFO, log_debug, log_error, log_info,
+                                        set_logging_level)
 
 
 def transcribe(url_or_file: str) -> str:
@@ -31,10 +28,12 @@ def transcribe(url_or_file: str) -> str:
         suffix=".wav", delete=False
     )
     tmp_wav.close()
+    os.chmod(tmp_wav, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
     tmp_file = tempfile.NamedTemporaryFile(  # pylint: disable=R1732
         suffix=".txt", delete=False
     )
     tmp_file.close()
+    os.chmod(tmp_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
     try:
         fetch_mono_16000_audio(url_or_file, tmp_wav.name)
