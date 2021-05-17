@@ -46,7 +46,7 @@ def transcribe(url_or_file: str) -> str:
             if rtn is None:
                 time.sleep(0.25)
                 continue
-            if rtn == 0:
+            if rtn != 0:
                 msg = (
                     f"Failed to execute {cmd}\n "
                     f"stdout: {proc.get_stdout()}\n stderr: {proc.get_stderr()}"
