@@ -22,6 +22,7 @@ from transcribe_anything.logger import (
     set_logging_level,
 )
 
+PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
 
 def transcribe(url_or_file: str) -> str:
     """
@@ -33,12 +34,12 @@ def transcribe(url_or_file: str) -> str:
         suffix=".wav", delete=False
     )
     tmp_wav.close()
-    os.chmod(tmp_wav.name, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+    os.chmod(tmp_wav.name, PERMS)
     tmp_file = tempfile.NamedTemporaryFile(  # pylint: disable=R1732
         suffix=".txt", delete=False
     )
     tmp_file.close()
-    os.chmod(tmp_file.name, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP)
+    os.chmod(tmp_file.name, PERMS)
 
     try:
         fetch_mono_16000_audio(url_or_file, tmp_wav.name)
