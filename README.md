@@ -10,13 +10,13 @@ Input a local file or url and this service will transcribe it using Mozilla Deep
     * `transcribe_anything <YOUTUBE_URL> out_subtitles.txt`
     * `transcribe_anything <LOCAL.MP4/WAV> out_subtitles.txt`
   * Example (api):
-    `
+    ```
     from transcribe_anything.api import bulk_transcribe
     urls = ['https://www.youtube.com/watch?v=Erk4_jFDjzQ']
     def onresolve(url, sub): print(url, sub)
     def onfail(url): print(f'Failed: {url}')
     bulk_transcribe(urls, onresolve=onresolve, onfail=onfail)
-    `
+    ```
 
 # Quick start
 
