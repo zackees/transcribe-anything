@@ -14,8 +14,13 @@ from typing import Any, Callable, List
 from capturing_process import CapturingProcess  # type: ignore
 
 from transcribe_anything.audio import fetch_mono_16000_audio
-from transcribe_anything.logger import (INFO, log_debug, log_error, log_info,
-                                        set_logging_level)
+from transcribe_anything.logger import (
+    INFO,
+    log_debug,
+    log_error,
+    log_info,
+    set_logging_level,
+)
 
 
 def transcribe(url_or_file: str) -> str:

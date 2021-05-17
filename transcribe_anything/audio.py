@@ -10,7 +10,6 @@ from transcribe_anything.logger import log_debug, log_error
 
 _PROCESS_TIMEOUT = 4 * 60 * 60
 
-
 def _convert_to_deepspeech_wav(in_media: str, out_wav: str) -> None:
     """
     Convert to wave format compatible with pydeepspeech which is:
