@@ -38,7 +38,7 @@ def transcribe(url_or_file: str) -> str:
 
     try:
         fetch_mono_16000_audio(url_or_file, tmp_wav.name)
-        assert os.path.exists(tmp_wav.name), f'Path {tmp_wav.name} doesn\'t exist.'
+        assert os.path.exists(tmp_wav.name), f"Path {tmp_wav.name} doesn't exist."
         cmd = f"pydeepspeech --wav_file {tmp_wav.name} --out_file {tmp_file.name}"
         proc = CapturingProcess(cmd, stdout=StringIO(), stderr=StringIO())
         while True:
@@ -46,7 +46,12 @@ def transcribe(url_or_file: str) -> str:
             if rtn is None:
                 time.sleep(0.25)
                 continue
-            assert rtn == 0, f"Failed to execute {cmd}\n stdout: {proc.get_stdout()}\n stderr: {proc.get_stderr()}"
+            if rtn == 0:
+                msg = (
+                    f"Failed to execute {cmd}\n "
+                    f"stdout: {proc.get_stdout()}\n stderr: {proc.get_stderr()}"
+                )
+                raise OSError(msg)
             break
         with open(tmp_file.name) as fd:
             content = fd.read()
@@ -60,7 +65,7 @@ def transcribe(url_or_file: str) -> str:
                 log_error(f"Failed to remove {name} because of {err}")
 
 
-def bulk_transcribe(
+def bulk_transcribe(  # pylint: disable=R0914
     urls: List[str],
     onresolve: Callable[[str, str], None],
     onfail: Callable[[str], None],

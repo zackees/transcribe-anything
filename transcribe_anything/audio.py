@@ -44,7 +44,7 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
             cmd = f"youtube-dl {url_or_file} -o {tmp_m4a}"
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
         log_debug("Downloading complete.")
-        assert os.path.exists(tmp_m4a), f'The expected file {tmp_m4a} doesn\'t exist'
+        assert os.path.exists(tmp_m4a), f"The expected file {tmp_m4a} doesn't exist"
         _convert_to_deepspeech_wav(tmp_m4a, out_wav)
         os.remove(tmp_m4a)
     else:
