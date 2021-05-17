@@ -1,3 +1,9 @@
+
+[![Actions Status](https://github.com/zackees/transcribe-anything/workflows/MacOS_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_macos.yml)
+[![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Win_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_win.yml)
+[![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Ubuntu_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_ubuntu.yml)
+
+
 # transcribe-anything
 Input a local file or url and this service will transcribe it using Mozilla Deepspeech 0.9.3.
   * Example (cmd):
