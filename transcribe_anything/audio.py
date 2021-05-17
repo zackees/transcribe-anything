@@ -20,7 +20,7 @@ def _convert_to_deepspeech_wav(in_media: str, out_wav: str) -> None:
     log_debug(f'Running cmd: "{cmd}"')
     try:
         subprocess.run(
-            cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT, check=True
+            cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
         )
     except subprocess.TimeoutExpired as te:
         log_error(
