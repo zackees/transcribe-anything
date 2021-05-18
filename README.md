@@ -17,6 +17,7 @@ Input a local file or url and this service will transcribe it using Mozilla Deep
   * Example (api):
     ```
     from transcribe_anything.api import bulk_transcribe
+
     urls = ['https://www.youtube.com/watch?v=Erk4_jFDjzQ']
     def onresolve(url, sub): print(url, sub)
     def onfail(url): print(f'Failed: {url}')
@@ -26,7 +27,7 @@ Input a local file or url and this service will transcribe it using Mozilla Deep
 # Quick start
 
 ## Optional: Create a virtual python package
-  * Works for Ubuntu/MacOS bash or win32 git-bash
+  * Works for Ubuntu/MacOS/Win32
   * `mkdir transcribe_anything`
   * `cd transcribe_anything`
   * Download and install virtual env:
@@ -41,8 +42,8 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 ## Required: Install to current python environment
   * `pip install transcribe-anything`
     * The command `transcribe_anything` will magically become available.
-  * `transcribe_anything <YOUTUBE_URL> out_subtitles.txt`
-  * -or- `transcribe_anything <MY_LOCAL.MP4/WAV> out_subtitles.txt`
+  * `transcribe_anything <YOUTUBE_URL> > out_subtitles.txt`
+  * -or- `transcribe_anything <MY_LOCAL.MP4/WAV> > out_subtitles.txt`
 
 # How does it work?
 
