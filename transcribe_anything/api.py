@@ -45,6 +45,7 @@ def transcribe(url_or_file: str) -> str:
         fetch_mono_16000_audio(url_or_file, tmp_wav.name)
         assert os.path.exists(tmp_wav.name), f"Path {tmp_wav.name} doesn't exist."
         cmd = f"pydeepspeech --wav_file {tmp_wav.name} --out_file {tmp_file.name}"
+        print(f"Running:\n  {cmd}")
         proc = CapturingProcess(cmd, stdout=StringIO(), stderr=StringIO())
         while True:
             rtn = proc.poll()

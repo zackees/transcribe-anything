@@ -13,7 +13,7 @@ URL = 'https://github.com/zackees/transcribe-anything'
 EMAIL = 'dont@email.me'
 AUTHOR = 'Zach Vorhies'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '1.2.4'
+VERSION = '1.2.5'
 
 # The text of the README file
 with open(os.path.join(HERE, "README.md")) as fd:
@@ -78,7 +78,7 @@ setup(
     install_requires=[
         'static-ffmpeg',
         'pydeepspeech',
-        'youtube-dl',
+        'yt-dlp',
         'capturing-process',
     ],
 

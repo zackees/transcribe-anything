@@ -47,7 +47,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 
 # How does it work?
 
-This program performs fetching using YouTube-dl for downloading videos from video services, and then
+This program performs fetching using `yt-dlp` for downloading videos from video services, and then
 stripping the audio track out.
 
 [static_ffmpeg](https://pypi.org/project/static-ffmpeg/) is then called to transcode the audio track into a specific format that DeepSpeech requires.
@@ -63,11 +63,13 @@ go easier (DeepSpeech degrades performance significantly with longer audio clips
   * Mozilla DeepSpeech: https://github.com/mozilla/DeepSpeech
   * pydeepspeech: https://github.com/zackees/pydeepspeech
     * mic_vad_streaming: https://github.com/hadran9/DeepSpeech-examples/tree/r0.9/mic_vad_streaming
-  * youtube-dl:
-    * github: https://github.com/ytdl-org/youtube-dl
+  * yt-dlp: https://github.com/yt-dlp/yt-dlp
   * static-ffmpeg
     * github: https://github.com/zackees/static_ffmpeg
     * pypi: https://pypi.org/project/static-ffmpeg/
 
 # Testing
   * All tests are run by `tox`, simply go to the project directory root and run it.
+
+# Versions
+  * 1.2.5: `youtube-dl` -> `yt-dlp`

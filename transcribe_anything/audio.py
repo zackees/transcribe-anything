@@ -31,18 +31,19 @@ def _convert_to_deepspeech_wav(in_media: str, out_wav: str) -> None:
 def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
     """Fetches from the internet or from a local file and outputs a wav file."""
     if url_or_file[:4] == "http":
-        # Download via youtube-dl
+        # Download via yt-dlp
         tmp_m4a = f"{out_wav}.m4a"
         try:
-            cmd = f'youtube-dl -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
+            cmd = f'yt-dlp --no-check-certificate -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
+            print(f"Running:\n  {cmd}")
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
         except subprocess.CalledProcessError:
             log_debug(
                 "Could not just download audio stream, falling back to full video download"
             )
-            cmd = f"youtube-dl {url_or_file} -o {tmp_m4a}"
+            cmd = f"yt-dlp --no-check-certificate {url_or_file} -o {tmp_m4a}"
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
-        log_debug("Downloading complete.")
+        print("Downloading complete.")
         assert os.path.exists(tmp_m4a), f"The expected file {tmp_m4a} doesn't exist"
         _convert_to_deepspeech_wav(tmp_m4a, out_wav)
         os.remove(tmp_m4a)
