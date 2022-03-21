@@ -3,6 +3,7 @@
 """
 
 
+import sys
 import subprocess
 import os
 
@@ -35,7 +36,7 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
         tmp_m4a = f"{out_wav}.m4a"
         try:
             cmd = f'yt-dlp --no-check-certificate -f "bestaudio[ext=m4a]" {url_or_file} -o {tmp_m4a}'
-            print(f"Running:\n  {cmd}")
+            sys.stderr.write(f"Running:\n  {cmd}\n")
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
         except subprocess.CalledProcessError:
             log_debug(
@@ -43,7 +44,7 @@ def fetch_mono_16000_audio(url_or_file: str, out_wav: str) -> None:
             )
             cmd = f"yt-dlp --no-check-certificate {url_or_file} -o {tmp_m4a}"
             subprocess.run(cmd, shell=True, check=True, capture_output=True)
-        print("Downloading complete.")
+        sys.stderr.write("Downloading complete.\n")
         assert os.path.exists(tmp_m4a), f"The expected file {tmp_m4a} doesn't exist"
         _convert_to_deepspeech_wav(tmp_m4a, out_wav)
         os.remove(tmp_m4a)

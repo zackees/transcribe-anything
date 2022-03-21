@@ -13,7 +13,7 @@ URL = 'https://github.com/zackees/transcribe-anything'
 EMAIL = 'dont@email.me'
 AUTHOR = 'Zach Vorhies'
 REQUIRES_PYTHON = '>=3.8.0'
-VERSION = '1.2.5'
+VERSION = '1.2.5.1'
 
 # The text of the README file
 with open(os.path.join(HERE, "README.md")) as fd:
