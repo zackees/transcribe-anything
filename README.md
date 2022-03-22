@@ -72,4 +72,5 @@ go easier (DeepSpeech degrades performance significantly with longer audio clips
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
-  * 1.2.5: `youtube-dl` -> `yt-dlp`
+  * 1.2.5:
+    * Improved handling of YouTube downloads by switching `youtube-dl` -> `yt-dlp`
