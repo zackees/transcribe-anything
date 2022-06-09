@@ -17,7 +17,7 @@ def _convert_to_deepspeech_wav(in_media: str, out_wav: str) -> None:
       * mono audio channel.
       * sample rate of 16000
     """
-    cmd = f"static_ffmpeg -y -i {in_media} -ac 1 -ar 16000 {out_wav}"
+    cmd = f'static_ffmpeg -y -i "{in_media}" -ac 1 -ar 16000 "{out_wav}"'
     log_debug(f'Running cmd: "{cmd}"')
     try:
         subprocess.run(
