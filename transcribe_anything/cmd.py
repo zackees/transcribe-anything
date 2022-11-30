@@ -15,8 +15,13 @@ def main() -> None:
         "url_or_file",
         help="Provide file path or url (includes youtube/facebook/twitter/etc)",
     )
+    parser.add_argument(
+        "--output_dirname",
+        help="Provide output directory name",
+        default=None,
+    )
     args = parser.parse_args()
-    transcribe(url_or_file=args.url_or_file)
+    transcribe(url_or_file=args.url_or_file, output_dirname=args.output_dirname)
 
 
 if __name__ == "__main__":
