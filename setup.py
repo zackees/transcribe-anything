@@ -19,6 +19,9 @@ VERSION = '1.2.6.0'
 with open(os.path.join(HERE, "README.md")) as fd:
     README = fd.read()
 
+with open(os.path.join(HERE, "requirements.txt"), encoding="utf-8", mode="rt") as fd:
+    REQUIREMENTS = [line.strip() for line in fd.readlines() if line.strip()]
+
 
 class UploadCommand(Command):
     """Support setup.py upload."""
@@ -74,14 +77,7 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Environment :: Console",
     ],
-    
-    install_requires=[
-        'static-ffmpeg',
-        'pydeepspeech',
-        'yt-dlp',
-        'capturing-process',
-    ],
-
+    install_requires=REQUIREMENTS,
     entry_points = {
         'console_scripts': [
             'transcribe_anything = transcribe_anything.cmd:main',

@@ -1,0 +1,7 @@
+flake8
+mypy
+pylint
+pytest
+black
+tox
+requests
