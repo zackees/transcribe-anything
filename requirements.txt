@@ -1,4 +1,7 @@
 static-ffmpeg
-pydeepspeech==1.1.7
 yt-dlp
 capturing-process
+torch==1.11.0
+torchvision==0.12.0
+gradio
+whisper
