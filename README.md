@@ -1,7 +1,7 @@
 
 # transcribe-anything
 
-Input a local file or url and this service will transcribe it using Whisper AI
+Input a local file or url and this service will transcribe it using Whisper AI.
 
 # Usage
 
