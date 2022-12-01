@@ -21,7 +21,12 @@ def _ytdlp_download(url: str, outdir: str) -> str:
     cmd = f'yt-dlp --no-check-certificate -f bestaudio {url} -o {outdir}/%(title)s.%(ext)s'
     subprocess.run(cmd, shell=True, check=True, timeout=_PROCESS_TIMEOUT)
     new_files = os.listdir(outdir)
-    return os.path.join(outdir, new_files[0])
+    assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
+    print("New files: ", new_files)
+    downloaded_file = os.path.join(outdir, new_files[0])
+    print(f"Downloaded file: {downloaded_file}")
+    assert os.path.exists(downloaded_file), f"The expected file {downloaded_file} doesn't exist"
+    return downloaded_file
 
 
 def _convert_to_mp3(inpath: str, outpath: str) -> None:
@@ -40,7 +45,8 @@ def fetch_audio(url_or_file: str, out_mp3: str) -> None:
     static_ffmpeg.add_paths()
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
         with tempfile.TemporaryDirectory() as tmpdir:
-            downloaded_file = _ytdlp_download(url_or_file, tmpdir)
+            print(f"Using temporary directory {tmpdir}")
+            downloaded_file = _ytdlp_download(url_or_file, os.path.abspath(tmpdir))
             print("Downloaded file: ", downloaded_file)
             _convert_to_mp3(downloaded_file, out_mp3)
         sys.stderr.write("Downloading complete.\n")
