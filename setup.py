@@ -12,7 +12,7 @@ DESCRIPTION = 'Input a local file or url and this service will transcribe it usi
 URL = 'https://github.com/zackees/transcribe-anything'
 EMAIL = 'dont@email.me'
 AUTHOR = 'Zach Vorhies'
-REQUIRES_PYTHON = '>=3.8.0'
+REQUIRES_PYTHON = '>=3.10.0'
 VERSION = '2.0.0'
 
 # The text of the README file
