@@ -1,6 +1,6 @@
 static-ffmpeg==2.3
-yt-dlp
+yt-dlp==2022.11.11
 torch==1.11.0
 torchvision==0.12.0
-gradio
-whisper
+gradio==3.12.0
+whisper==1.1.10
