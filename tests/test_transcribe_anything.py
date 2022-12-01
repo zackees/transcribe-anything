@@ -24,9 +24,10 @@ class TranscribeAnythingTester(unittest.TestCase):
         cmd_list = [
             'transcribe_anything',
             'https://www.youtube.com/watch?v=8Wg8f2g_GQY',
+            '--model', 'small',
             '--output_dirname', TESTS_DATA_DIR,
         ]
-        rtn_val = subprocess.call(cmd_list)
+        rtn_val = subprocess.call(cmd_list, shell=True)
         self.assertEqual(rtn_val, 0, "command failed")
 
 

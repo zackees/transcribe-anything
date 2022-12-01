@@ -20,8 +20,13 @@ def main() -> None:
         help="Provide output directory name",
         default=None,
     )
+    parser.add_argument(
+        "--model",
+        help="Provide model name",
+        default="small",
+    )
     args = parser.parse_args()
-    transcribe(url_or_file=args.url_or_file, output_dirname=args.output_dirname)
+    transcribe(url_or_file=args.url_or_file, output_dirname=args.output_dirname, model=args.model)
 
 
 if __name__ == "__main__":

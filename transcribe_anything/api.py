@@ -26,7 +26,7 @@ def sanitize_folder_name(folder_name: str) -> str:
     return "".join([c for c in folder_name if c.isalnum() or c in ["-", "_"]])
 
 
-def transcribe(url_or_file: str, output_dirname: str | None = None) -> None:
+def transcribe(url_or_file: str, output_dirname: str | None = None, model: str = "small") -> None:
     """
     Runs the program.
     """
@@ -42,7 +42,7 @@ def transcribe(url_or_file: str, output_dirname: str | None = None) -> None:
     try:
         fetch_audio(url_or_file, tmp_mp3)
         assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
-        cmd = f"whisper {tmp_mp3} --output_dir {output_dirname}"
+        cmd = f"whisper {tmp_mp3} --model {model} --output_dir {output_dirname}"
         sys.stderr.write(f"Running:\n  {cmd}\n")
         # proc = CapturingProcess(cmd, stdout=StringIO(), stderr=StringIO())
         proc = subprocess.Popen(cmd, shell=True)  # pylint: disable=consider-using-with
