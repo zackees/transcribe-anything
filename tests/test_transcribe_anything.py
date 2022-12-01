@@ -22,7 +22,7 @@ class TranscribeAnythingTester(unittest.TestCase):
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
         cmd = (
-            "transcribe_anything https://www.youtube.com/watch?v=8Wg8f2g_GQY"
+            "transcribe_anything https://www.youtube.com/watch?v=DWtpNPZ4tb4"
             f" --model tiny --output_dirname {TESTS_DATA_DIR}"
         )
         rtn_val = subprocess.call(cmd, shell=True)
