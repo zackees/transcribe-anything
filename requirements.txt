@@ -1,6 +1,4 @@
 static-ffmpeg==2.3
 yt-dlp==2022.11.11
 torch==1.11.0
-torchvision==0.12.0
-gradio==3.12.0
-whisper==1.1.10
+whisper @ git+https://github.com/zackees/whisper.git#egg=whisper
