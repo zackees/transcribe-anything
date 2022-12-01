@@ -77,7 +77,11 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Environment :: Console",
     ],
-    install_requires=REQUIREMENTS,
+    install_requires=REQUIREMENTS + [
+        'whisper @ git+https://github.com/zackees/whisper.git#egg=whisper'
+        'yt-dlp',
+        'static-ffmpeg'
+    ],
     entry_points = {
         'console_scripts': [
             'transcribe_anything = transcribe_anything.cmd:main',
