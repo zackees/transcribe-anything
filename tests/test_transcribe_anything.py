@@ -21,13 +21,11 @@ class TranscribeAnythingTester(unittest.TestCase):
 
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
-        cmd_list = [
-            'transcribe_anything',
-            'https://www.youtube.com/watch?v=8Wg8f2g_GQY',
-            '--model', 'small',
-            '--output_dirname', TESTS_DATA_DIR,
-        ]
-        rtn_val = subprocess.call(cmd_list, shell=True)
+        cmd = (
+            "transcribe_anything https://www.youtube.com/watch?v=8Wg8f2g_GQY"
+            f" --model small --output_dirname {TESTS_DATA_DIR}"
+        )
+        rtn_val = subprocess.call(cmd, shell=True)
         self.assertEqual(rtn_val, 0, "command failed")
 
 
