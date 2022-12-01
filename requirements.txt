@@ -1,4 +1,4 @@
-static-ffmpeg
+static-ffmpeg==2.3
 yt-dlp
 torch==1.11.0
 torchvision==0.12.0
