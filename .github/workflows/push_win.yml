@@ -26,4 +26,4 @@ jobs:
         pip install -e '.[test]'
     - name: Run tests
       run: |
-        pytest
+        python -m unittest discover tests
