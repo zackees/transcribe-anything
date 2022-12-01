@@ -8,7 +8,10 @@ from setuptools import find_packages, setup, Command
 HERE = os.path.dirname(__file__)
 
 NAME = 'transcribe-anything'
-DESCRIPTION = 'Input a local file or url and this service will transcribe it using Mozilla Deepspeech'
+DESCRIPTION = (
+    'Uses whisper AI to transcribe speach from video and audio files. '
+    'Also accepts urls for youtube, rumble, bitchute, clear file, etc.'
+)
 URL = 'https://github.com/zackees/transcribe-anything'
 EMAIL = 'dont@email.me'
 AUTHOR = 'Zach Vorhies'
@@ -80,7 +83,8 @@ setup(
     install_requires=REQUIREMENTS + [
         'whisper @ git+https://github.com/zackees/whisper.git#egg=whisper'
         'yt-dlp',
-        'static-ffmpeg'
+        'static-ffmpeg',
+        'torch'
     ],
     entry_points = {
         'console_scripts': [

@@ -1,14 +1,21 @@
 
 # transcribe-anything
 
-Input a local file or url and this service will transcribe it using Whisper AI.
+Input a local file or url and this service will transcribe it using Whisper AI into subtitle files and raw text.
+
+Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
+
+Version 2.0 is CPU only for now.
+Pull requests welcome! Looking for help to getting the gpu accelerated pytorch installations running.
 
 # Usage
 
 ```bash
 > pip install transcribe-anything
 > transcribe_anything <YOUTUBE_URL>
+# Outputs the srt, vtt and txt files in YOUTUBE_URL/out.vtt
 > transcribe_anything <LOCAL.MP4/MP3/WAV>
+# Same but in LOCAL/out.vtt ...
 ```
 
 # Build Status
@@ -52,7 +59,4 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
-  * 2.0.0: Now uses whisper AI as the backend.
-  * 1.2.6: Supports spaces in file names now.
-  * 1.2.5:
-    * Improved handling of YouTube downloads by switching `youtube-dl` -> `yt-dlp`
+  * 2.0.0: New! Now a front end for Whisper ai!
