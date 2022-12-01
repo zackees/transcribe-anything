@@ -19,7 +19,7 @@ def _ytdlp_download(url: str, outdir: str) -> str:
     for file in os.listdir(outdir):
         os.remove(os.path.join(outdir, file))
     cmd = f'yt-dlp --no-check-certificate -f bestaudio {url}'
-    subprocess.run(cmd, shell=True, cwd="outdir", check=True, timeout=_PROCESS_TIMEOUT)
+    subprocess.run(cmd, shell=True, cwd=outdir, check=True, timeout=_PROCESS_TIMEOUT)
     new_files = os.listdir(outdir)
     assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
     print("New files: ", new_files)
