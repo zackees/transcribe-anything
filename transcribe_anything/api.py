@@ -34,7 +34,9 @@ def transcribe(url_or_file: str, output_dirname: str | None = None) -> None:
     if output_dirname is None:
         output_dirname = sanitize_folder_name(basename)
         # sanitize dirname
-        output_dirname = "".join([c for c in output_dirname if c.isalnum() or c in ["-", "_"]])
+        output_dirname = "".join(
+            [c for c in output_dirname if c.isalnum() or c in ["-", "_"]]
+        )
     os.makedirs(output_dirname, exist_ok=True)
     tmp_mp3 = os.path.join(output_dirname, "out.mp3")
     try:

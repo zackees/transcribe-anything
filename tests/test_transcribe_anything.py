@@ -11,6 +11,7 @@ import unittest
 HERE = os.path.abspath(os.path.dirname(__file__))
 TESTS_DATA_DIR = os.path.join(HERE, "test_data")
 
+
 class TranscribeAnythingTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
