@@ -1,6 +1,6 @@
-static-ffmpeg==2.3
-yt-dlp==2022.11.11
-torch==1.13.0
+static-ffmpeg
+yt-dlp
+torch
 # Work in progress
 # torchvision==0.14
 # torchaudio==0.13.0
