@@ -9,6 +9,7 @@ import time
 import subprocess
 
 from transcribe_anything.audio import fetch_audio
+from transcribe_anything.util import get_computing_device
 
 PERMS = (
     stat.S_IRUSR
@@ -42,7 +43,15 @@ def transcribe(url_or_file: str, output_dirname: str | None = None, model: str =
     try:
         fetch_audio(url_or_file, tmp_mp3)
         assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
-        cmd = f"whisper {tmp_mp3} --model {model} --output_dir {output_dirname}"
+        device = get_computing_device()
+        if device == "cuda":
+            print("Using GPU")
+        elif device == "cpu":
+            print("WARNING: Using CPU, this will be at least 10x slower.")
+        else:
+            raise ValueError(f"Unknown device {device}")
+        print(f"Using device {device}")
+        cmd = f"whisper {tmp_mp3} --device {device} --model {model} --output_dir {output_dirname}"
         sys.stderr.write(f"Running:\n  {cmd}\n")
         # proc = CapturingProcess(cmd, stdout=StringIO(), stderr=StringIO())
         proc = subprocess.Popen(cmd, shell=True)  # pylint: disable=consider-using-with
