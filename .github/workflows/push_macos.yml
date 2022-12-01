@@ -24,8 +24,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Install dependencies
-      run: |
-        pip install -e '.[test]'
+      run: pip install -e .
+    - name: Install testing dependencies
+      run: pip install -r requirements.testing.txt
     - name: Run tests
-      run: |
-        pytest
+      run: python -m unittest discover tests
