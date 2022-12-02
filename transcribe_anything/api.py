@@ -23,7 +23,6 @@ PERMS = (
 
 def sanitize_folder_name(folder_name: str) -> str:
     """Sanitize a folder name."""
-    folder_name = folder_name.split("?")[0]
     return "".join([c for c in folder_name if c.isalnum() or c in ["-", "_"]])
 
 
