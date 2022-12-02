@@ -5,4 +5,4 @@ torch
 # torchvision==0.14
 # torchaudio==0.13.0
 # cuda-python==11.8.1
-whisper @ git+https://github.com/zackees/whisper.git#egg=whisper
+whisper.ai==1.0.0.1
