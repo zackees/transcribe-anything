@@ -81,6 +81,8 @@ def transcribe(
         base_path = os.path.dirname(file)
         new_file = os.path.join(base_path, chop_double_extension(file_name))
         if file != new_file:
+            if os.path.exists(new_file):
+                os.remove(new_file)
             os.rename(file, new_file)
     return output_dir
 
