@@ -69,12 +69,13 @@ def sanitize_path(path: str) -> str:
     return out
 
 
-def chop_double_extension(path_name):
+def chop_double_extension(path_name) -> str:
     """takes in a path like out.mp3.txt and returns out.mp3"""
     # Split the path name on "."
     parts = path_name.split(".")
+    ext = parts[-1]
     # If there are fewer than two parts, return the original path name
-    if len(parts) < 2:
-        return path_name
+    while len(parts) > 1:
+        parts = parts[:-1]
     # Otherwise, return the second-to-last part followed by the last part
-    return parts[-2] + "." + parts[-1]
+    return ".".join(parts + [ext])

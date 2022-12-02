@@ -47,9 +47,9 @@ def main() -> None:
     transcribe(
         url_or_file=args.url_or_file,
         output_dir=args.output_dir,
-        model=args.model,
+        model=args.model if args.model != "None" else None,
         task=args.task,
-        language=args.language,
+        language=args.language if args.language != "None" else None,
     )
 
 
