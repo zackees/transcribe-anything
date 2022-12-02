@@ -22,9 +22,7 @@ def _ytdlp_download(url: str, outdir: str) -> str:
     subprocess.run(cmd, shell=True, cwd=outdir, check=True, timeout=_PROCESS_TIMEOUT)
     new_files = os.listdir(outdir)
     assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
-    print("New files: ", new_files)
     downloaded_file = os.path.join(outdir, new_files[0])
-    print(f"Downloaded file: {downloaded_file}")
     assert os.path.exists(downloaded_file), f"The expected file {downloaded_file} doesn't exist"
     return downloaded_file
 
