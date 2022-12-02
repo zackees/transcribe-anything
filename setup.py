@@ -22,9 +22,16 @@ VERSION = '2.0.0'
 with open(os.path.join(HERE, "README.md")) as fd:
     README = fd.read()
 
-with open(os.path.join(HERE, "requirements.txt"), encoding="utf-8", mode="rt") as fd:
-    REQUIREMENTS = [line.strip() for line in fd.readlines() if line.strip()]
 
+def parse_requirements(filename):
+    """ load requirements from a pip requirements file """
+    with open(filename, encoding="utf-8", mode="rt") as fd:
+        lines = [line.strip() for line in fd.readlines() if line.strip()]
+    lines = [line.split("#")[0].strip() for line in lines]
+    lines = [line for line in lines if line]
+    return lines
+
+REQUIREMENTS = parse_requirements(os.path.join(HERE, "requirements.txt"))
 
 class UploadCommand(Command):
     """Support setup.py upload."""

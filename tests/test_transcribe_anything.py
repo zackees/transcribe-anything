@@ -23,7 +23,7 @@ class TranscribeAnythingTester(unittest.TestCase):
         """Check that the command works on a live short video."""
         cmd = (
             "transcribe_anything https://www.youtube.com/watch?v=DWtpNPZ4tb4"
-            f" --model tiny --output_dirname {TESTS_DATA_DIR}"
+            f" --model tiny --output_dir {TESTS_DATA_DIR}"
         )
         rtn_val = subprocess.call(cmd, shell=True)
         self.assertEqual(rtn_val, 0, "command failed")

@@ -7,10 +7,12 @@ import sys
 
 from transcribe_anything.api import transcribe
 from transcribe_anything.util import get_computing_device
+from transcribe_anything.parse_whisper_options import parse_whisper_options
 
 
 def main() -> None:
     """Main entry point for the command line tool."""
+    whisper_options = parse_whisper_options()
     device = get_computing_device()
     help_str = f'transcribe_anything is using a "{device}" device'
     parser = argparse.ArgumentParser(description=help_str)
@@ -19,17 +21,36 @@ def main() -> None:
         help="Provide file path or url (includes youtube/facebook/twitter/etc)",
     )
     parser.add_argument(
-        "--output_dirname",
-        help="Provide output directory name",
+        "--output_dir",
+        help="Provide output directory name,d efaults to the filename of the file.",
         default=None,
     )
     parser.add_argument(
         "--model",
-        help="Provide model name",
+        help="name of the Whisper model to us",
         default="small",
+        choices=whisper_options["model"],
+    )
+    parser.add_argument(
+        "--task",
+        help="whether to perform transcription or translation",
+        default="transcribe",
+        choices=whisper_options["task"],
+    )
+    parser.add_argument(
+        "--language",
+        help="language to the target audio is in, default None will auto-detect",
+        default=None,
+        choices=[None] + whisper_options["language"]
     )
     args = parser.parse_args()
-    transcribe(url_or_file=args.url_or_file, output_dirname=args.output_dirname, model=args.model)
+    transcribe(
+        url_or_file=args.url_or_file,
+        output_dir=args.output_dir,
+        model=args.model,
+        task=args.task,
+        language=args.language,
+    )
 
 
 if __name__ == "__main__":
