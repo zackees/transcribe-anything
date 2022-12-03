@@ -28,6 +28,10 @@ def transcribe(
     Runs the program.
     """
     basename = os.path.basename(url_or_file)
+    if not basename or basename == ".":  # if url_or_file is a directory
+        # Defense against paths with a trailing /, for example:
+        # https://example.com/, which will yield a basename of "".
+        basename = os.path.basename(os.path.dirname(url_or_file))
     if output_dir is None:
         output_dir = sanitize_path(basename)
     os.makedirs(output_dir, exist_ok=True)
