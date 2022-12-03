@@ -7,16 +7,16 @@ from setuptools import find_packages, setup, Command
 # The directory containing this file
 HERE = os.path.dirname(__file__)
 
-NAME = 'transcribe-anything'
+NAME = "transcribe-anything"
 DESCRIPTION = (
-    'Uses whisper AI to transcribe speach from video and audio files. '
-    'Also accepts urls for youtube, rumble, bitchute, clear file, etc.'
+    "Uses whisper AI to transcribe speach from video and audio files. "
+    "Also accepts urls for youtube, rumble, bitchute, clear file, etc."
 )
-URL = 'https://github.com/zackees/transcribe-anything'
-EMAIL = 'dont@email.me'
-AUTHOR = 'Zach Vorhies'
-REQUIRES_PYTHON = '>=3.10.0'
-VERSION = '2.0.4'
+URL = "https://github.com/zackees/transcribe-anything"
+EMAIL = "dont@email.me"
+AUTHOR = "Zach Vorhies"
+REQUIRES_PYTHON = ">=3.10.0"
+VERSION = "2.0.4"
 
 # The text of the README file
 with open(os.path.join(HERE, "README.md")) as fd:
@@ -24,19 +24,21 @@ with open(os.path.join(HERE, "README.md")) as fd:
 
 
 def parse_requirements(filename):
-    """ load requirements from a pip requirements file """
+    """load requirements from a pip requirements file"""
     with open(filename, encoding="utf-8", mode="rt") as fd:
         lines = [line.strip() for line in fd.readlines() if line.strip()]
     lines = [line.split("#")[0].strip() for line in lines]
     lines = [line for line in lines if line]
     return lines
 
+
 REQUIREMENTS = parse_requirements(os.path.join(HERE, "requirements.txt"))
+
 
 class UploadCommand(Command):
     """Support setup.py upload."""
 
-    description = 'Build and publish the package.'
+    description = "Build and publish the package."
     user_options = []
 
     @staticmethod
@@ -51,22 +53,23 @@ class UploadCommand(Command):
 
     def run(self):
         try:
-            self.status('Removing previous builds…')
-            rmtree(os.path.join(HERE, 'dist'))
+            self.status("Removing previous builds…")
+            rmtree(os.path.join(HERE, "dist"))
         except OSError:
             pass
 
-        self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        self.status("Building Source and Wheel (universal) distribution…")
+        os.system("{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
 
-        self.status('Uploading the package to PyPI via Twine…')
-        os.system('twine upload dist/*')
+        self.status("Uploading the package to PyPI via Twine…")
+        os.system("twine upload dist/*")
 
-        self.status('Pushing git tags…')
-        os.system('git tag v{0}'.format(VERSION))
-        os.system('git push --tags')
+        self.status("Pushing git tags…")
+        os.system("git tag v{0}".format(VERSION))
+        os.system("git push --tags")
 
         sys.exit()
+
 
 setup(
     name=NAME,
@@ -88,17 +91,15 @@ setup(
         "Environment :: Console",
     ],
     install_requires=REQUIREMENTS,
-    entry_points = {
-        'console_scripts': [
-            'transcribe_anything = transcribe_anything.cmd:main',
-        ],              
+    entry_points={
+        "console_scripts": [
+            "transcribe_anything = transcribe_anything.cmd:main",
+        ],
     },
-    
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
-    package_data={
-    },
+    package_data={},
     include_package_data=True,
     cmdclass={
-        'upload': UploadCommand,
+        "upload": UploadCommand,
     },
 )
