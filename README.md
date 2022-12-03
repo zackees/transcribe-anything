@@ -16,8 +16,72 @@ To enable the GPU version, you *must install by cloning the github and running `
 > pip install transcribe-anything
 > transcribe_anything <YOUTUBE_URL>
 # Outputs the srt, vtt and txt files in YOUTUBE_URL/out.vtt
-> transcribe_anything <LOCAL.MP4/MP3/WAV>
-# Same but in LOCAL/out.vtt ...
+> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+Will output:
+
+```
+Detecting language using up to the first 30 seconds. Use `--language` to specify the language
+Detected language: English
+[00:00.000 --> 00:27.000]  We're no strangers to love, you know the rules, and so do I
+[00:27.000 --> 00:31.000]  I've built commitments while I'm thinking of
+[00:31.000 --> 00:35.000]  You wouldn't get this from any other guy
+[00:35.000 --> 00:40.000]  I just wanna tell you how I'm feeling
+[00:40.000 --> 00:43.000]  Gotta make you understand
+[00:43.000 --> 00:45.000]  Never gonna give you up
+[00:45.000 --> 00:47.000]  Never gonna let you down
+[00:47.000 --> 00:51.000]  Never gonna run around and desert you
+[00:51.000 --> 00:53.000]  Never gonna make you cry
+[00:53.000 --> 00:55.000]  Never gonna say goodbye
+[00:55.000 --> 00:58.000]  Never gonna tell a lie
+[00:58.000 --> 01:00.000]  And hurt you
+[01:00.000 --> 01:04.000]  We've known each other for so long
+[01:04.000 --> 01:09.000]  Your heart's been aching but you're too shy to say it
+[01:09.000 --> 01:13.000]  Inside we both know what's been going on
+[01:13.000 --> 01:17.000]  We know the game and we're gonna play it
+[01:17.000 --> 01:22.000]  And if you ask me how I'm feeling
+[01:22.000 --> 01:25.000]  Don't tell me you're too much to see
+[01:25.000 --> 01:27.000]  Never gonna give you up
+[01:27.000 --> 01:29.000]  Never gonna let you down
+[01:29.000 --> 01:33.000]  Never gonna run around and desert you
+[01:33.000 --> 01:35.000]  Never gonna make you cry
+[01:35.000 --> 01:38.000]  Never gonna say goodbye
+[01:38.000 --> 01:40.000]  Never gonna tell a lie
+[01:40.000 --> 01:42.000]  And hurt you
+[01:42.000 --> 01:44.000]  Never gonna give you up
+[01:44.000 --> 01:46.000]  Never gonna let you down
+[01:46.000 --> 01:50.000]  Never gonna run around and desert you
+[01:50.000 --> 01:52.000]  Never gonna make you cry
+[01:52.000 --> 01:54.000]  Never gonna say goodbye
+[01:54.000 --> 01:57.000]  Never gonna tell a lie
+[01:57.000 --> 01:59.000]  And hurt you
+[02:08.000 --> 02:10.000]  Never gonna give
+[02:12.000 --> 02:14.000]  Never gonna give
+[02:16.000 --> 02:19.000]  We've known each other for so long
+[02:19.000 --> 02:24.000]  Your heart's been aching but you're too shy to say it
+[02:24.000 --> 02:28.000]  Inside we both know what's been going on
+[02:28.000 --> 02:32.000]  We know the game and we're gonna play it
+[02:32.000 --> 02:37.000]  I just wanna tell you how I'm feeling
+[02:37.000 --> 02:40.000]  Gotta make you understand
+[02:40.000 --> 02:42.000]  Never gonna give you up
+[02:42.000 --> 02:44.000]  Never gonna let you down
+[02:44.000 --> 02:48.000]  Never gonna run around and desert you
+[02:48.000 --> 02:50.000]  Never gonna make you cry
+[02:50.000 --> 02:53.000]  Never gonna say goodbye
+[02:53.000 --> 02:55.000]  Never gonna tell a lie
+[02:55.000 --> 02:57.000]  And hurt you
+[02:57.000 --> 02:59.000]  Never gonna give you up
+[02:59.000 --> 03:01.000]  Never gonna let you down
+[03:01.000 --> 03:05.000]  Never gonna run around and desert you
+[03:05.000 --> 03:08.000]  Never gonna make you cry
+[03:08.000 --> 03:10.000]  Never gonna say goodbye
+[03:10.000 --> 03:12.000]  Never gonna tell a lie
+[03:12.000 --> 03:14.000]  And hurt you
+[03:14.000 --> 03:16.000]  Never gonna give you up
+[03:16.000 --> 03:23.000]  If you want, never gonna let you down Never gonna run around and desert you
+[03:23.000 --> 03:28.000]  Never gonna make you hide Never gonna say goodbye
+[03:28.000 --> 03:42.000]  Never gonna tell you I ain't ready
 ```
 
 # Build Status
