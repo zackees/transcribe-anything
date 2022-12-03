@@ -1,6 +1,8 @@
 
 # transcribe-anything
 
+### USES WHISPER AI
+
 Input a local file or url and this service will transcribe it using Whisper AI into subtitle files and raw text.
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
