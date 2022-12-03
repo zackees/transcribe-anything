@@ -32,6 +32,19 @@ def transcribe(
         # Defense against paths with a trailing /, for example:
         # https://example.com/, which will yield a basename of "".
         basename = os.path.basename(os.path.dirname(url_or_file))
+    if url_or_file.startswith("http"):
+        # Try and the title of the video using yt-dlp
+        # If that fails, use the basename of the url
+        try:
+            yt_dlp = subprocess.run(
+                ["yt-dlp", "--get-title", url_or_file],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            output_dir = "text_" + yt_dlp.stdout.strip()
+        except Exception:
+            pass
     if output_dir is None:
         output_dir = sanitize_path(basename)
     os.makedirs(output_dir, exist_ok=True)
@@ -52,7 +65,7 @@ def transcribe(
     language_str = f" --language {language}" if language else ""
     cmd_list = [
         "whisper",
-        tmp_mp3,
+        f'"{tmp_mp3}"',
         "--device",
         device,
         model_str,

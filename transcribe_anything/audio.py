@@ -18,7 +18,7 @@ def _ytdlp_download(url: str, outdir: str) -> str:
     # remove all files in the directory
     for file in os.listdir(outdir):
         os.remove(os.path.join(outdir, file))
-    cmd = f'yt-dlp --no-check-certificate -f bestaudio {url}'
+    cmd = f"yt-dlp --no-check-certificate -f bestaudio {url}"
     subprocess.run(cmd, shell=True, cwd=outdir, check=True, timeout=_PROCESS_TIMEOUT)
     new_files = os.listdir(outdir)
     assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
@@ -29,11 +29,9 @@ def _ytdlp_download(url: str, outdir: str) -> str:
 
 def _convert_to_mp3(inpath: str, outpath: str) -> None:
     """Converts a file to mp3."""
-    cmd = f'static_ffmpeg -y -i "{inpath}" -acodec libmp3lame "{outpath}"'
+    cmd = f'ffmpeg -y -i "{inpath}" -acodec libmp3lame "{outpath}"'
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    subprocess.run(
-        cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
-    )
+    subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
     assert os.path.exists(outpath), f"The expected file {outpath} doesn't exist"
 
 
@@ -51,19 +49,17 @@ def fetch_audio(url_or_file: str, out_mp3: str) -> None:
         assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
     else:
         assert os.path.isfile(url_or_file)
-        cmd = f'static_ffmpeg -i "{url_or_file}" -acodec libmp3lame "{out_mp3}"'
+        cmd = f'ffmpeg -i "{url_or_file}" -acodec libmp3lame "{out_mp3}"'
         sys.stderr.write(f"Running:\n  {cmd}\n")
-        subprocess.run(
-            cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
-        )
+        subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
         assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
 
 
 def unit_test() -> None:
     """Runs the program."""
-    url = 'https://www.youtube.com/watch?v=8Wg8f2g_GQY'
-    fetch_audio(url, 'out.mp3')
+    url = "https://www.youtube.com/watch?v=8Wg8f2g_GQY"
+    fetch_audio(url, "out.mp3")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unit_test()
