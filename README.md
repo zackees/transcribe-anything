@@ -68,7 +68,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
-  * 2.0.4: Fix bad filename on trailing urls ending with /, adds --keep-audio
+  * 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
   * 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
   * 2.0.2: Minor cleanup of file names (no more out.mp3.txt, it's now out.txt)
   * 2.0.1: Fixes missing dependencies and adds whisper option.
