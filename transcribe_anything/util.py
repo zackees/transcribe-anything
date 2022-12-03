@@ -2,6 +2,8 @@
 Determines whether this device is cpu or gpu.
 """
 
+import re
+
 import torch  # pylint: disable=import-outside-toplevel
 
 
@@ -18,6 +20,11 @@ def get_computing_device() -> str:
 def _sanitize_filepath(folder_name: str) -> str:
     """Sanitize a folder name."""
     return "".join([c for c in folder_name if c.isalnum() or c in ["-", "_"]])
+
+
+def _get_valid_filename(s):  # pylint: disable=invalid-name
+    s = str(s).strip().replace(" ", "_")
+    return re.sub(r"(?u)[^-\w.]", "", s)
 
 
 def sanitize_path(path: str) -> str:
@@ -61,11 +68,14 @@ def sanitize_path(path: str) -> str:
         .replace("\t", "_")
         .replace("\n", "_")
         .replace("\r", "_")
+        .replace("#", "_")
     )
     while len(out) > 4 and out[-1] == "_":
         out = out[:-1]
     while len(out) > 4 and "__" in out:
         out = out.replace("__", "_")
+    # use shutil to clean the filename
+    out = _get_valid_filename(out)
     return out
 
 

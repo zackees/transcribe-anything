@@ -45,7 +45,7 @@ def main() -> None:
     )
     # keep_audio
     parser.add_argument(
-        "--keep-audio",
+        "--no-keep-audio",
         help="whether to keep the audio file after processing",
         default=False,
         action="store_true",
@@ -57,7 +57,7 @@ def main() -> None:
         model=args.model if args.model != "None" else None,
         task=args.task,
         language=args.language if args.language != "None" else None,
-        keep_audio=args.keep_audio,
+        keep_audio=not args.no_keep_audio,
     )
 
 

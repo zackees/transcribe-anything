@@ -2,7 +2,7 @@
     Api for using transcribe_anything from python. Allows bulk processing.
 """
 
-# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation
+# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements
 
 import os
 import stat
@@ -32,6 +32,7 @@ def transcribe(
         # Defense against paths with a trailing /, for example:
         # https://example.com/, which will yield a basename of "".
         basename = os.path.basename(os.path.dirname(url_or_file))
+        basename = sanitize_path(basename)
     if url_or_file.startswith("http"):
         # Try and the title of the video using yt-dlp
         # If that fails, use the basename of the url
@@ -43,19 +44,22 @@ def transcribe(
                 check=True,
             )
             output_dir = "text_" + yt_dlp.stdout.strip()
+            output_dir = output_dir[:80].strip()
         except Exception:
             pass
     if output_dir is None:
-        output_dir = sanitize_path(basename)
+        output_dir = basename
     os.makedirs(output_dir, exist_ok=True)
     tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_mp3)
     assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
     device = get_computing_device()
     if device == "cuda":
-        print("############# Using GPU #############")
+        print("#####################################")
+        print("######### GPU ACCELERATED! ##########")
+        print("#####################################")
     elif device == "cpu":
-        print("WARNING: Using CPU, this will be at least 10x slower.")
+        print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
     else:
         raise ValueError(f"Unknown device {device}")
     print(f"Using device {device}")
@@ -103,4 +107,6 @@ def transcribe(
 
 
 if __name__ == "__main__":
+    # test case for twitter video
+    # transcribe(url_or_file="https://twitter.com/wlctv_ca/status/1598895698870951943")
     transcribe(url_or_file="https://www.youtube.com/watch?v=-4EDhdAHrOg")
