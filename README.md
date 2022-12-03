@@ -24,8 +24,19 @@ To enable the GPU version, you *must install by cloning the github and running `
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Win_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_win.yml)
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Ubuntu_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_ubuntu.yml)
 
+## Install CPU Version
 
-## Install dev
+If you want GPU acceleration then you need special installation instructions:
+
+```bash
+git clone https://github.com/zackees/transcribe-anything
+cd transcribe_anything
+./install_cuda.sh
+# Should now be installed
+> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+## Develop
 
 Works for Ubuntu/MacOS/Win32(in git-bash)
 This will create a virtual environment
@@ -36,7 +47,6 @@ This will create a virtual environment
 # Enter the environment:
 > source activate.sh
 ```
-
 
 The environment is now active and the next step will only install to the local python. If the terminal
 is closed then to get back into the environment `cd transcribe_anything` and execute `source activate.sh`
