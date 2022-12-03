@@ -7,7 +7,7 @@ Input a local file or url and this service will transcribe it using Whisper AI i
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
 
-If you install from PYPI then by default it will install the CPU version only.
+If you install from `pip install transcribe-anything` then by default it will install the CPU version only.
 To enable the GPU version, you *must install by cloning the github and running `install_cuda.sh` script, due to security lockdowns that can't be bypassed (pypi only allows dependencies within the ecosystem). Please note that whatever torch version you have will be purged with `install_cuda.sh` script.
 
 # Usage
