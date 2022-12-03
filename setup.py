@@ -19,7 +19,7 @@ REQUIRES_PYTHON = ">=3.10.0"
 VERSION = "2.0.5"
 
 # The text of the README file
-with open(os.path.join(HERE, "README.md")) as fd:
+with open(os.path.join(HERE, "README.md"), encoding="utf-8", mode="r") as fd:
     README = fd.read()
 
 
