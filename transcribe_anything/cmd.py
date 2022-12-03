@@ -43,6 +43,13 @@ def main() -> None:
         default=None,
         choices=[None] + whisper_options["language"]
     )
+    # keep_audio
+    parser.add_argument(
+        "--keep_audio",
+        help="whether to keep the audio file after processing",
+        default=False,
+        action="store_true",
+    )
     args = parser.parse_args()
     transcribe(
         url_or_file=args.url_or_file,
@@ -50,6 +57,7 @@ def main() -> None:
         model=args.model if args.model != "None" else None,
         task=args.task,
         language=args.language if args.language != "None" else None,
+        keep_audio=args.keep_audio,
     )
 
 

@@ -2,7 +2,7 @@
     Api for using transcribe_anything from python. Allows bulk processing.
 """
 
-# pylint: disable=too-many-arguments,broad-except,too-many-locals
+# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation
 
 import os
 import stat
@@ -28,7 +28,8 @@ def transcribe(
     output_dir: str | None = None,
     model: str | None = None,
     task: str | None = None,
-    language: str | None = None
+    language: str | None = None,
+    keep_audio: bool = False,
 ) -> str:
     """
     Runs the program.
@@ -42,7 +43,7 @@ def transcribe(
     assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
     device = get_computing_device()
     if device == "cuda":
-        print("Using GPU")
+        print("############# Using GPU #############")
     elif device == "cpu":
         print("WARNING: Using CPU, this will be at least 10x slower.")
     else:
@@ -84,6 +85,8 @@ def transcribe(
             if os.path.exists(new_file):
                 os.remove(new_file)
             os.rename(file, new_file)
+    if not keep_audio:
+        os.remove(tmp_mp3)
     return output_dir
 
 

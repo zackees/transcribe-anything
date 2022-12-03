@@ -40,7 +40,7 @@ def _convert_to_mp3(inpath: str, outpath: str) -> None:
 def fetch_audio(url_or_file: str, out_mp3: str) -> None:
     """Fetches from the internet or from a local file and outputs a wav file."""
     assert out_mp3.endswith(".mp3")
-    static_ffmpeg.add_paths()
+    static_ffmpeg.add_paths()  # pylint: disable=no-member
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
         with tempfile.TemporaryDirectory() as tmpdir:
             print(f"Using temporary directory {tmpdir}")
@@ -51,7 +51,6 @@ def fetch_audio(url_or_file: str, out_mp3: str) -> None:
         assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
     else:
         assert os.path.isfile(url_or_file)
-        # static_ffmpeg -i audio.wav -acodec libmp3lame audio.mp3
         cmd = f'static_ffmpeg -i "{url_or_file}" -acodec libmp3lame "{out_mp3}"'
         sys.stderr.write(f"Running:\n  {cmd}\n")
         subprocess.run(
