@@ -44,8 +44,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 ## Required: Install to current python environment
   * `pip install transcribe-anything`
     * The command `transcribe_anything` will magically become available.
-  * `transcribe_anything <YOUTUBE_URL> > out_subtitles.txt`
-  * -or- `transcribe_anything <MY_LOCAL.MP4/WAV> > out_subtitles.txt`
+  * `transcribe_anything <YOUTUBE_URL>`
 
 
 # Tech Stack
