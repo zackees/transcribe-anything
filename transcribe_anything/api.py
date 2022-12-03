@@ -13,14 +13,7 @@ import subprocess
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import get_computing_device, sanitize_path, chop_double_extension
 
-PERMS = (
-    stat.S_IRUSR
-    | stat.S_IRGRP
-    | stat.S_IROTH
-    | stat.S_IWOTH
-    | stat.S_IWUSR
-    | stat.S_IWGRP
-)
+PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
 
 
 def transcribe(
@@ -63,6 +56,8 @@ def transcribe(
         task_str,
         language_str,
     ]
+    # Remove the empty strings.
+    cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = subprocess.Popen(cmd, shell=True)  # pylint: disable=consider-using-with

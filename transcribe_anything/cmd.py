@@ -41,11 +41,11 @@ def main() -> None:
         "--language",
         help="language to the target audio is in, default None will auto-detect",
         default=None,
-        choices=[None] + whisper_options["language"]
+        choices=[None] + whisper_options["language"],
     )
     # keep_audio
     parser.add_argument(
-        "--keep_audio",
+        "--keep-audio",
         help="whether to keep the audio file after processing",
         default=False,
         action="store_true",
