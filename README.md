@@ -14,8 +14,7 @@ To enable the GPU version, you *must install by cloning the github and running `
 
 ```bash
 > pip install transcribe-anything
-> transcribe_anything <YOUTUBE_URL>
-# Outputs the srt, vtt and txt files in YOUTUBE_URL/out.vtt
+# Outputs the srt, vtt and txt files in title/out.vtt
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
