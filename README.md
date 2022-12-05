@@ -89,6 +89,17 @@ Detected language: English
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Win_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_win.yml)
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Ubuntu_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/push_ubuntu.yml)
 
+## Api
+
+```python
+from transcribe_anyting.api import transcribe_anything
+
+transcribe(
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "output_dir",
+)
+```
+
 ## Install CPU Version
 
 If you want GPU acceleration then you need special installation instructions:
