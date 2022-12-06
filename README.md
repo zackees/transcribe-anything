@@ -13,7 +13,7 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 If you install from `pip install transcribe-anything` then by default it will install the CPU version only.
 
-To enable the GPU version, you *must install by cloning the github and running `python install_cuda.py` script. Please note that whatever torch version you have will be purged with `install_cuda.py` script.
+To enable the GPU version, you *must install by cloning the github and running [`python install_cuda.py`](https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py) script. Please note that whatever torch version you have will be purged with `install_cuda.py` script.
 
 # Usage
 
