@@ -1,4 +1,4 @@
-name: Ubuntu_Lint
+name: Lint
 
 on: [push]
 
