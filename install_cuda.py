@@ -2,7 +2,9 @@
 Installs cuda + transcibe-anything
 """
 
+import argparse
 import os
+import shutil
 import subprocess
 import sys
 
@@ -14,7 +16,20 @@ TENSOR_VERSION = "1.12.1"
 CUDA_VERSION = "cu116"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = "https://download.pytorch.org/whl/cu116"
-FORCE = "--force" in sys.argv
+
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument("--display-cuda-version", default=CUDA_VERSION, help="displays cuda version")
+argparser.add_argument(
+    "--force", action="store_true", help="Force install and ignore missing nvida drivers"
+)
+args = argparser.parse_args()
+
+HAS_NVIDIA: bool = shutil.which("nvidia-smi") is not None
+
+if not HAS_NVIDIA and not args.force:
+    print("No nvidia-smi detected, skipping cuda install")
+    sys.exit(1)
 
 # Get the stdout from pip list
 pip_list_stdout = subprocess.run(
@@ -22,7 +37,7 @@ pip_list_stdout = subprocess.run(
 ).stdout
 
 # Delete the torch package if it doesn't have the cuda version
-if FORCE:
+if args.force:
     subprocess.run(["pip", "uninstall", "-y", "torch"], check=True)
     subprocess.run(["pip", "cache", "purge"], check=True)
 else:
