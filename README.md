@@ -98,13 +98,13 @@ transcribe(
 )
 ```
 
-## Install CPU Version
+## Install GPU/CUDA Accelerated version
 
-If you want GPU acceleration then you need special installation instructions:
+GPU acceleration is *much* faster than the CPU version. Install it using the following:
 
 ```bash
-> 
-# Should now be installed
+> curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
+# transcribe-anything should now be installed
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
@@ -140,7 +140,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
-  * 2.0.6: Fixes twitter video fetching.
+  * 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
   * 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
   * 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
   * 2.0.2: Minor cleanup of file names (no more out.mp3.txt, it's now out.txt)
