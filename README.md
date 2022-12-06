@@ -11,14 +11,18 @@ Input a local file or url and this service will transcribe it using Whisper AI i
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
 
-If you install from `pip install transcribe-anything` then by default it will install the CPU version only.
-
-To enable the GPU version please run `curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python`. Please note that whatever torch version you have will be purged with `install_cuda.py` script.
-
-# Usage
+# Usage (CPU Version)
 
 ```bash
 > pip install transcribe-anything
+# Outputs the srt, vtt and txt files in title/out.vtt
+> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+# Usage (GPU Accelrated Version)
+
+```bash
+> curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
 # Outputs the srt, vtt and txt files in title/out.vtt
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
