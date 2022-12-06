@@ -141,6 +141,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.0.7: `instal_cuda.sh` -> `install_cuda.py`
   * 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
   * 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
   * 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
