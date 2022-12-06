@@ -103,9 +103,7 @@ transcribe(
 If you want GPU acceleration then you need special installation instructions:
 
 ```bash
-> git clone https://github.com/zackees/transcribe-anything
-> cd transcribe_anything
-> ./install_cuda.sh  # will uninstall torch and replace with torch+cuda 1.12.0
+> 
 # Should now be installed
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```

@@ -68,4 +68,4 @@ else:
 print("Install transcribe_anything:\n", " ".join(install_cmd))
 subprocess.run(install_cmd, check=True)
 
-print("transcribe audio is installed, run it with\n  transcribe_audio <URL OR FILE>")
+print("\ntranscribe audio is installed, run it with\n  transcribe_audio <URL OR FILE>")
