@@ -95,7 +95,7 @@ Detected language: English
 ## Api
 
 ```python
-from transcribe_anyting.api import transcribe_anything
+from transcribe_anyting.api import transcribe
 
 transcribe(
     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
