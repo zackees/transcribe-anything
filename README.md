@@ -98,8 +98,8 @@ Detected language: English
 from transcribe_anyting.api import transcribe
 
 transcribe(
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "output_dir",
+    url_or_file="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    output_dir="output_dir",
 )
 ```
 
