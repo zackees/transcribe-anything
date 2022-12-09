@@ -145,6 +145,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.0.9: fixes sanitization of path names for some youtube videos
   * 2.0.8: fix `--output_dir` not being respected.
   * 2.0.7: `instal_cuda.sh` -> `install_cuda.py`
   * 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
