@@ -31,6 +31,10 @@ def sanitize_path(string: str) -> str:
     string = string.replace(":", "_").replace("/", "_").replace("\x00", "_")
     string = re.sub(r'[\n\\\*><?"|\t]', "", string)
     string = string.strip()
+    while string.endswith("_"):
+        string = string[:-1]
+    while string.startswith("_"):
+        string = string[1:]
     return string
 
 
