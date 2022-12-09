@@ -46,7 +46,7 @@ def transcribe(
                     check=True,
                 )
                 output_dir = "text_" + yt_dlp.stdout.strip()
-                output_dir = output_dir[:80].strip()
+                output_dir = sanitize_path(output_dir[:80].strip())
             except Exception:
                 log_error("yt-dlp failed to get title, using basename instead.")
                 output_dir = basename

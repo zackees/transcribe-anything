@@ -1,11 +1,4 @@
 static-ffmpeg
 yt-dlp
-# torch 1.13.0 generates a warning about a missing library numpy that
-# does not resolve even after installing numpy. 1.12.0 works fine.
 torch<1.13.0
-# Work in progress
-#torchvision
-#torchaudio
-#numpy
-# cuda-python==11.8.1
 whisper.ai==1.0.0.1
