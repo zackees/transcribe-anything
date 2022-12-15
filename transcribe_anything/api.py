@@ -51,7 +51,7 @@ def transcribe(
                 log_error("yt-dlp failed to get title, using basename instead.")
                 output_dir = basename
         else:
-            output_dir = basename
+            output_dir = os.path.splitext(basename)[0]
     os.makedirs(output_dir, exist_ok=True)
     tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_mp3)

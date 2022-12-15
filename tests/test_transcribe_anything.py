@@ -11,6 +11,7 @@ import shutil
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TESTS_DATA_DIR = os.path.join(HERE, "test_data")
+LOCALFILE_DIR = os.path.join(HERE, "localfile")
 
 
 class TranscribeAnythingTester(unittest.TestCase):
@@ -19,6 +20,13 @@ class TranscribeAnythingTester(unittest.TestCase):
     def test_fetch_command_help(self) -> None:
         """Check that the command is installed by the setup process."""
         subprocess.check_output(["transcribe_anything", "-h"])
+
+    def test_local_file(self) -> None:
+        """Check that the command works on a local file."""
+        shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
+        subprocess.check_output(
+            ["transcribe_anything", "video.mp4", "--language English"], cwd=LOCALFILE_DIR
+        )
 
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
