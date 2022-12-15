@@ -9,6 +9,7 @@ import stat
 import sys
 import time
 import subprocess
+import shutil
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import get_computing_device, sanitize_path, chop_double_extension
@@ -52,6 +53,8 @@ def transcribe(
                 output_dir = basename
         else:
             output_dir = os.path.splitext(basename)[0]
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
     tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_mp3)
