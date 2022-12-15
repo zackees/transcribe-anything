@@ -25,7 +25,7 @@ class TranscribeAnythingTester(unittest.TestCase):
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
         subprocess.check_output(
-            ["transcribe_anything", "video.mp4", "--language", "en", " --model", "tiny"],
+            ["transcribe_anything", "video.mp4", "--language", "en", "--model", "tiny"],
             cwd=LOCALFILE_DIR,
         )
 
