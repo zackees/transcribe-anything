@@ -51,6 +51,7 @@ def main() -> None:
         action="store_true",
     )
     args = parser.parse_args()
+    print(f"Running transcribe_audio on {args.url_or_file}")
     transcribe(
         url_or_file=args.url_or_file,
         output_dir=args.output_dir,
