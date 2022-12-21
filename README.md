@@ -145,6 +145,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.0.12: Adds --device to argument parameters. This will default to CUDA if available, else CPU.
   * 2.0.11: Automatically deletes files in the out directory if they already exist.
   * 2.0.10: fixes local file issue https://github.com/zackees/transcribe-anything/issues/2
   * 2.0.9: fixes sanitization of path names for some youtube videos

@@ -25,6 +25,7 @@ def transcribe(
     task: str | None = None,
     language: str | None = None,
     keep_audio: bool = False,
+    device: str | None = None,
 ) -> str:
     """
     Runs the program.
@@ -59,7 +60,7 @@ def transcribe(
     tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_mp3)
     assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
-    device = get_computing_device()
+    device = device or get_computing_device()
     if device == "cuda":
         print("#####################################")
         print("######### GPU ACCELERATED! ##########")

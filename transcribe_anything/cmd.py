@@ -50,6 +50,12 @@ def main() -> None:
         default=False,
         action="store_true",
     )
+    parser.add_argument(
+        "--device",
+        help="device to use for processing, None will auto select CUDA if available or else CPU",
+        default=None,
+        choices=[None, "cpu", "cuda"],
+    )
     args = parser.parse_args()
     print(f"Running transcribe_audio on {args.url_or_file}")
     transcribe(
@@ -59,6 +65,7 @@ def main() -> None:
         task=args.task,
         language=args.language if args.language != "None" else None,
         keep_audio=not args.no_keep_audio,
+        device=args.device,
     )
 
 
