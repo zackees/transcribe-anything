@@ -150,7 +150,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * 2.0.10: fixes local file issue https://github.com/zackees/transcribe-anything/issues/2
   * 2.0.9: fixes sanitization of path names for some youtube videos
   * 2.0.8: fix `--output_dir` not being respected.
-  * 2.0.7: `instal_cuda.sh` -> `install_cuda.py`
+  * 2.0.7: `install_cuda.sh` -> `install_cuda.py`
   * 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
   * 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
   * 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
