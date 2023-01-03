@@ -19,7 +19,7 @@ Uses whisper AI so this is state of the art translation service - completely fre
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
-# Usage (GPU Accelrated Version)
+# Usage (GPU Accelerated Version)
 
 ```bash
 > curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
