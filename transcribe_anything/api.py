@@ -10,6 +10,7 @@ import sys
 import time
 import subprocess
 import shutil
+from typing import Optional
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import get_computing_device, sanitize_path, chop_double_extension
@@ -20,12 +21,12 @@ PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR
 
 def transcribe(
     url_or_file: str,
-    output_dir: str | None = None,
-    model: str | None = None,
-    task: str | None = None,
-    language: str | None = None,
+    output_dir: Optional[str] = None,
+    model: Optional[str] = None,
+    task: Optional[str] = None,
+    language: Optional[str] = None,
     keep_audio: bool = False,
-    device: str | None = None,
+    device: Optional[str] = None,
 ) -> str:
     """
     Runs the program.
