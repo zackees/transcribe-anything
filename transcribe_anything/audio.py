@@ -20,12 +20,19 @@ def _ytdlp_download(url: str, outdir: str) -> str:
         os.remove(os.path.join(outdir, file))
     cmd = f'yt-dlp --no-check-certificate {url} -o "out.%(ext)s"'
     subprocess.run(
-        cmd, shell=True, cwd=outdir, check=True, timeout=_PROCESS_TIMEOUT, universal_newlines=True
+        cmd,
+        shell=True,
+        cwd=outdir,
+        check=True,
+        timeout=_PROCESS_TIMEOUT,
+        universal_newlines=True,
     )
     new_files = os.listdir(outdir)
     assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
     downloaded_file = os.path.join(outdir, new_files[0])
-    assert os.path.exists(downloaded_file), f"The expected file {downloaded_file} doesn't exist"
+    assert os.path.exists(
+        downloaded_file
+    ), f"The expected file {downloaded_file} doesn't exist"
     return downloaded_file
 
 
@@ -34,7 +41,9 @@ def _convert_to_mp3(inpath: str, outpath: str) -> None:
     cmd = f'ffmpeg -y -i "{inpath}" -acodec libmp3lame "{outpath}"'
     print(f"Running:\n  {cmd}")
     try:
-        subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
+        subprocess.run(
+            cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
+        )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
         print(f"stdout: {exc.stdout}")
@@ -59,7 +68,9 @@ def fetch_audio(url_or_file: str, out_mp3: str) -> None:
         assert os.path.isfile(url_or_file)
         cmd = f'ffmpeg -i "{url_or_file}" -acodec libmp3lame "{out_mp3}"'
         sys.stderr.write(f"Running:\n  {cmd}\n")
-        subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
+        subprocess.run(
+            cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
+        )
         assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
 
 

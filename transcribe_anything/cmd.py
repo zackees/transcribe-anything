@@ -14,7 +14,11 @@ def main() -> None:
     """Main entry point for the command line tool."""
     whisper_options = parse_whisper_options()
     device = get_computing_device()
-    help_str = f'transcribe_anything is using a "{device}" device'
+    help_str = (
+        f'transcribe_anything is using a "{device}" device.'
+        " Any unrecognized args are assumed to be for whisper"
+        " ai and will be passed as is to whisper ai."
+    )
     parser = argparse.ArgumentParser(description=help_str)
     parser.add_argument(
         "url_or_file",
@@ -56,7 +60,9 @@ def main() -> None:
         default=None,
         choices=[None, "cpu", "cuda"],
     )
-    args = parser.parse_args()
+    # add extra options that are passed into the transcribe function
+    args, unknown = parser.parse_known_args()
+    print(f"Unknown args: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
     transcribe(
         url_or_file=args.url_or_file,
@@ -66,9 +72,13 @@ def main() -> None:
         language=args.language if args.language != "None" else None,
         keep_audio=not args.no_keep_audio,
         device=args.device,
+        other_args=unknown,
     )
 
 
 if __name__ == "__main__":
+    # push sys argv prior to call
+    sys.argv.append("test.mp3")
+    sys.argv.append('--initial_prompt "What is your name?"')
     main()
     sys.exit(0)

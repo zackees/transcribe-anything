@@ -29,6 +29,23 @@ class TranscribeAnythingTester(unittest.TestCase):
             cwd=LOCALFILE_DIR,
         )
 
+    def test_initial_prompt(self) -> None:
+        """Check that the command works on a local file."""
+        shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
+        subprocess.check_output(
+            [
+                "transcribe_anything",
+                "video.mp4",
+                "--language",
+                "en",
+                "--model",
+                "tiny",
+                "--initial_prompt",
+                '"nervous"',
+            ],
+            cwd=LOCALFILE_DIR,
+        )
+
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
