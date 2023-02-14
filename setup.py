@@ -76,6 +76,7 @@ setup(
     python_requires=REQUIRES_PYTHON,
     version=VERSION,
     description=DESCRIPTION,
+    keywords="transcription translation speech-to-text speech-recognition command-line-tool ai whisper ml anything",
     long_description=README,
     long_description_content_type="text/markdown",
     url=URL,
@@ -84,7 +85,8 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.8",
+        "Environment :: Console",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Operating System :: MacOS :: MacOS X",
