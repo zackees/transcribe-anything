@@ -1,5 +1,5 @@
 """
-    Fetches audio and handles transcoding it for usage in Mozilla's Deepspeech.
+    Fetches audio and handles transcoding it for it.
 """
 
 
