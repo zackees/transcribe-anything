@@ -7,9 +7,11 @@
 
 ### USES WHISPER AI
 
-Input a local file or url and this service will transcribe it using Whisper AI into subtitle files and raw text.
+Input a local file or url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
+
+Your data stays private and is not uploaded to any service.
 
 # Usage (CPU Version)
 
