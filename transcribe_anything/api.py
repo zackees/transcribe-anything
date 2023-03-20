@@ -124,4 +124,8 @@ def transcribe(
 if __name__ == "__main__":
     # test case for twitter video
     # transcribe(url_or_file="https://twitter.com/wlctv_ca/status/1598895698870951943")
-    transcribe(url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test")
+    try:
+        transcribe(url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test")
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+        sys.exit(1)

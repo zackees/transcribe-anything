@@ -10,7 +10,7 @@ from transcribe_anything.util import get_computing_device
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for the command line tool."""
     whisper_options = parse_whisper_options()
     device = get_computing_device()
@@ -64,21 +64,25 @@ def main() -> None:
     args, unknown = parser.parse_known_args()
     print(f"Unknown args: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
-    transcribe(
-        url_or_file=args.url_or_file,
-        output_dir=args.output_dir,
-        model=args.model if args.model != "None" else None,
-        task=args.task,
-        language=args.language if args.language != "None" else None,
-        keep_audio=not args.no_keep_audio,
-        device=args.device,
-        other_args=unknown,
-    )
+    try:
+        transcribe(
+            url_or_file=args.url_or_file,
+            output_dir=args.output_dir,
+            model=args.model if args.model != "None" else None,
+            task=args.task,
+            language=args.language if args.language != "None" else None,
+            keep_audio=not args.no_keep_audio,
+            device=args.device,
+            other_args=unknown,
+        )
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
     # push sys argv prior to call
     sys.argv.append("test.mp3")
     sys.argv.append('--initial_prompt "What is your name?"')
-    main()
-    sys.exit(0)
+    sys.exit(main())
