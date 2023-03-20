@@ -147,6 +147,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.1.2: yt-dlp pinned to new minimum version. Fixes downloading issues from old lib. Adds audio normalization by default.
   * 2.1.1: Updates keywords for easier pypi finding.
   * 2.1.0: Unknown args are now assumed to be for whisper and passed to it as-is. Fixes https://github.com/zackees/transcribe-anything/issues/3
   * 2.0.13: Now works with python 3.9
