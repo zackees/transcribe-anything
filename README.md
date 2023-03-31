@@ -21,7 +21,7 @@ Your data stays private and is not uploaded to any service.
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
-# Usage (GPU Accelerated Version)
+# Usage (GPU Accelerated Version) (works on Python 3.10.X)
 
 ```bash
 > curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
