@@ -96,6 +96,7 @@ setup(
     entry_points={
         "console_scripts": [
             "transcribe_anything = transcribe_anything.cmd:main",
+            "transcribe-anything = transcribe_anything.cmd:main",
         ],
     },
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
