@@ -12,6 +12,8 @@ import subprocess
 import shutil
 from typing import Optional
 
+from static_ffmpeg import add_paths  # type: ignore
+
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import (
     get_computing_device,
@@ -21,6 +23,8 @@ from transcribe_anything.util import (
 from transcribe_anything.logger import log_error
 
 PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
+
+add_paths()
 
 
 def transcribe(
@@ -62,11 +66,14 @@ def transcribe(
                 output_dir = "text_" + basename
         else:
             output_dir = "text_" + os.path.splitext(basename)[0]
+    output_dir = sanitize_path(output_dir)
     if output_dir_was_generated and language is not None:
         output_dir = os.path.join(output_dir, language)
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
+    print(f"making dir {output_dir}")
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir, ignore_errors=True)
     os.makedirs(output_dir, exist_ok=True)
+    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
     tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_mp3)
     assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."

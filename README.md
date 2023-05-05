@@ -147,6 +147,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.3.3: Fix case where there spaces in name (happens on windows)
   * 2.3.2: Fix windows transcoding error
   * 2.3.1: static-ffmpeg >= 2.5 now specified
   * 2.3.0: Now uses the official version of whisper ai
