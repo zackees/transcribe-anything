@@ -86,7 +86,7 @@ def transcribe(
     language_str = f" --language {language}" if language else ""
     cmd_list = []
     if sys.platform == "win32":
-        cmd_list.append("chcp", "65001", "&&")
+        cmd_list.extend(["chcp", "65001", "&&"])
     cmd_list.extend(
         [
             "whisper",
@@ -105,9 +105,9 @@ def transcribe(
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = subprocess.Popen(
+    proc = subprocess.Popen(  # pylint: disable=consider-using-with
         cmd, shell=True, universal_newlines=True
-    )  # pylint: disable=consider-using-with
+    )
     while True:
         rtn = proc.poll()
         if rtn is None:
