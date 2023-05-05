@@ -42,7 +42,9 @@ def transcribe(
         # https://example.com/, which will yield a basename of "".
         basename = os.path.basename(os.path.dirname(url_or_file))
         basename = sanitize_path(basename)
+    output_dir_was_generated = False
     if output_dir is None:
+        output_dir_was_generated = True
         if url_or_file.startswith("http"):
             # Try and the title of the video using yt-dlp
             # If that fails, use the basename of the url
@@ -60,6 +62,8 @@ def transcribe(
                 output_dir = basename
         else:
             output_dir = os.path.splitext(basename)[0]
+    if output_dir_was_generated and language is not None:
+        output_dir = os.path.join(output_dir, language)
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
