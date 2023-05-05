@@ -18,7 +18,7 @@ def get_computing_device() -> str:
         return "cpu"
 
 
-def sanitize_path(string: str) -> str:
+def sanitize_filename(string: str) -> str:
     """
     Sanitize a string to be used as a filename.
 

@@ -17,7 +17,7 @@ from static_ffmpeg import add_paths  # type: ignore
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import (
     get_computing_device,
-    sanitize_path,
+    sanitize_filename,
     chop_double_extension,
 )
 from transcribe_anything.logger import log_error
@@ -45,7 +45,7 @@ def transcribe(
         # Defense against paths with a trailing /, for example:
         # https://example.com/, which will yield a basename of "".
         basename = os.path.basename(os.path.dirname(url_or_file))
-        basename = sanitize_path(basename)
+        basename = sanitize_filename(basename)
     output_dir_was_generated = False
     if output_dir is None:
         output_dir_was_generated = True
@@ -60,13 +60,12 @@ def transcribe(
                     check=True,
                 )
                 output_dir = "text_" + yt_dlp.stdout.strip()
-                output_dir = sanitize_path(output_dir[:80].strip())
+                output_dir = sanitize_filename(output_dir[:80].strip())
             except Exception:
                 log_error("yt-dlp failed to get title, using basename instead.")
                 output_dir = "text_" + basename
         else:
             output_dir = "text_" + os.path.splitext(basename)[0]
-    output_dir = sanitize_path(output_dir)
     if output_dir_was_generated and language is not None:
         output_dir = os.path.join(output_dir, language)
     print(f"making dir {output_dir}")
