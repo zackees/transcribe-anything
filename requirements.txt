@@ -1,4 +1,4 @@
-static-ffmpeg
+static-ffmpeg>=2.5
 yt-dlp>=2023.3.4
 torch<1.13.0
 whisper-openai==1.0.0
