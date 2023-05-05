@@ -84,23 +84,30 @@ def transcribe(
     output_dir_str = f' --output_dir "{output_dir}"' if output_dir else ""
     task_str = f" --task {task}" if task else ""
     language_str = f" --language {language}" if language else ""
-    cmd_list = [
-        "whisper",
-        f'"{tmp_mp3}"',
-        "--device",
-        device,
-        model_str,
-        output_dir_str,
-        task_str,
-        language_str,
-    ]
+    cmd_list = []
+    if sys.platform == "win32":
+        cmd_list.append("chcp", "65001", "&&")
+    cmd_list.extend(
+        [
+            "whisper",
+            f'"{tmp_mp3}"',
+            "--device",
+            device,
+            model_str,
+            output_dir_str,
+            task_str,
+            language_str,
+        ]
+    )
     if other_args:
         cmd_list.extend(other_args)
     # Remove the empty strings.
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = subprocess.Popen(cmd, shell=True)  # pylint: disable=consider-using-with
+    proc = subprocess.Popen(
+        cmd, shell=True, universal_newlines=True
+    )  # pylint: disable=consider-using-with
     while True:
         rtn = proc.poll()
         if rtn is None:
