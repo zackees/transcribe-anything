@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 activate.sh
 tests/test_data
-tests/localfile/video
+tests/localfile/text_video

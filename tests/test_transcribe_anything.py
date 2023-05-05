@@ -47,7 +47,7 @@ class TranscribeAnythingTester(unittest.TestCase):
         )
         # Expect that when the language is explicitly set that the output file ends up in
         # that language folder.
-        expected_output = os.path.join(LOCALFILE_DIR, "video", "en", "out.txt")
+        expected_output = os.path.join(LOCALFILE_DIR, "text_video", "en", "out.txt")
         self.assertTrue(
             os.path.exists(expected_output),
             f"Path {expected_output} doesn't exist, instead it was {os.listdir(LOCALFILE_DIR)}",  # pylint: disable=line-too-long
