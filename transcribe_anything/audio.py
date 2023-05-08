@@ -7,6 +7,7 @@ import sys
 import tempfile
 import subprocess
 import os
+import shutil
 import static_ffmpeg  # type: ignore
 
 _PROCESS_TIMEOUT = 4 * 60 * 60
@@ -74,9 +75,15 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
         assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
     else:
         assert os.path.isfile(url_or_file)
-        cmd = f'ffmpeg -i "{url_or_file}" -acodec pcm_s16le -ar 44100 -ac 1 "{out_wav}"'
-        sys.stderr.write(f"Running:\n  {cmd}\n")
-        subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
+        abspath = os.path.abspath(url_or_file)
+        out_wav_abs = os.path.abspath(out_wav)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cmd = f'ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
+            sys.stderr.write(f"Running:\n  {cmd}\n")
+            subprocess.run(
+                cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
+            )
+            shutil.copyfile("out.wav", out_wav_abs)
         assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
 
 
