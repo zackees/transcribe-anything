@@ -32,12 +32,19 @@ def make_temp_wav() -> str:
     """
     Makes a temporary mp3 file and returns the path to it.
     """
-    tmp_mp3 = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
+    tmp = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
         suffix=".wav", delete=False
     )
-    tmp_mp3.close()
-    atexit.register(os.remove, tmp_mp3.name)
-    return tmp_mp3.name
+
+    tmp.close()
+
+    def cleanup() -> None:
+        if os.path.exists(tmp.name):
+            print(f"make_temp_wav: Removing {tmp.name}")
+            os.remove(tmp.name)
+
+    atexit.register(cleanup)
+    return tmp.name
 
 
 def transcribe(

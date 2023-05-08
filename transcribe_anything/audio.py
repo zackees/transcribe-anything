@@ -40,9 +40,13 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
     cmd_audio_filter = ""
     if speech_normalization:
         cmd_audio_filter = "-filter:a speechnorm=e=12.5:r=0.00001:l=1"
-    cmd = (
-        f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} -acodec pcm_s16le -ar 44100 -ac 1 "{outpath}"'
+    tmpwav = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
+        suffix=".wav", delete=False
     )
+    tmpwav.close()
+    tmpwavepath = tmpwav.name
+    audio_encoder = "-acodec pcm_s16le -ar 44100 -ac 1"
+    cmd = f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
@@ -51,6 +55,8 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
         print(f"stdout: {exc.stdout}")
         print(f"stderr: {exc.stderr}")
         raise
+    os.remove(outpath)
+    os.rename(tmpwavepath, outpath)
     assert os.path.exists(outpath), f"The expected file {outpath} doesn't exist"
 
 
