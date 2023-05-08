@@ -145,7 +145,7 @@ def transcribe(
         outfile = os.path.join(base_path, f"out{ext}")
         if os.path.exists(outfile):
             os.remove(outfile)
-        os.rename(file_name, outfile)
+        os.rename(os.path.join(base_path, file_name), outfile)
     return output_dir
 
 
