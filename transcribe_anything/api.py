@@ -142,7 +142,7 @@ def transcribe(
         base_path = os.path.dirname(file)
         new_file = os.path.join(base_path, chop_double_extension(file_name))
         _, ext = os.path.splitext(new_file)
-        outfile = f"out{ext}"
+        outfile = os.path.join(base_path, f"out{ext}")
         if os.path.exists(outfile):
             os.remove(outfile)
         os.rename(file_name, outfile)
