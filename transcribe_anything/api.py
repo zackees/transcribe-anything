@@ -82,8 +82,6 @@ def transcribe(
     if output_dir_was_generated and language is not None:
         output_dir = os.path.join(output_dir, language)
     print(f"making dir {output_dir}")
-    if os.path.isdir(output_dir):
-        shutil.rmtree(output_dir, ignore_errors=True)
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
     assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
@@ -144,10 +142,11 @@ def transcribe(
         file_name = os.path.basename(file)
         base_path = os.path.dirname(file)
         new_file = os.path.join(base_path, chop_double_extension(file_name))
-        if file != new_file:
-            if os.path.exists(new_file):
-                os.remove(new_file)
-            os.rename(file, new_file)
+        _, ext = os.path.splitext(new_file)
+        outfile = f"out.{ext}"
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        os.rename(file, outfile)
     return output_dir
 
 
