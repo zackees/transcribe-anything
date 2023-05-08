@@ -47,13 +47,6 @@ def main() -> int:
         default=None,
         choices=[None] + whisper_options["language"],
     )
-    # keep_audio
-    parser.add_argument(
-        "--no-keep-audio",
-        help="whether to keep the audio file after processing",
-        default=False,
-        action="store_true",
-    )
     parser.add_argument(
         "--device",
         help="device to use for processing, None will auto select CUDA if available or else CPU",
@@ -71,7 +64,6 @@ def main() -> int:
             model=args.model if args.model != "None" else None,
             task=args.task,
             language=args.language if args.language != "None" else None,
-            keep_audio=not args.no_keep_audio,
             device=args.device,
             other_args=unknown,
         )

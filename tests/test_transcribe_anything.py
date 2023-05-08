@@ -64,7 +64,7 @@ class TranscribeAnythingTester(unittest.TestCase):
         self.assertEqual(rtn_val, 0, "command failed")
         expected_paths = [
             TESTS_DATA_DIR,
-            os.path.join(TESTS_DATA_DIR, "out.mp3"),
+            # os.path.join(TESTS_DATA_DIR, "out.mp3"),
             os.path.join(TESTS_DATA_DIR, "out.txt"),
             os.path.join(TESTS_DATA_DIR, "out.srt"),
             os.path.join(TESTS_DATA_DIR, "out.vtt"),

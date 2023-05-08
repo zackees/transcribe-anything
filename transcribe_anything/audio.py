@@ -35,12 +35,14 @@ def _ytdlp_download(url: str, outdir: str) -> str:
     return downloaded_file
 
 
-def _convert_to_mp3(inpath: str, outpath: str, speech_normalization: bool = False) -> None:
-    """Converts a file to mp3."""
+def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = False) -> None:
+    """Converts a file to wav."""
     cmd_audio_filter = ""
     if speech_normalization:
         cmd_audio_filter = "-filter:a speechnorm=e=12.5:r=0.00001:l=1"
-    cmd = f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} -acodec libmp3lame "{outpath}"'
+    cmd = (
+        f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} -acodec pcm_s16le -ar 44100 -ac 1 "{outpath}"'
+    )
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
@@ -52,30 +54,30 @@ def _convert_to_mp3(inpath: str, outpath: str, speech_normalization: bool = Fals
     assert os.path.exists(outpath), f"The expected file {outpath} doesn't exist"
 
 
-def fetch_audio(url_or_file: str, out_mp3: str) -> None:
+def fetch_audio(url_or_file: str, out_wav: str) -> None:
     """Fetches from the internet or from a local file and outputs a wav file."""
-    assert out_mp3.endswith(".mp3")
+    assert out_wav.endswith(".wav")
     static_ffmpeg.add_paths()  # pylint: disable=no-member
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
         with tempfile.TemporaryDirectory() as tmpdir:
             print(f"Using temporary directory {tmpdir}")
             downloaded_file = _ytdlp_download(url_or_file, os.path.abspath(tmpdir))
             print("Downloaded file: ", downloaded_file)
-            _convert_to_mp3(downloaded_file, out_mp3, speech_normalization=True)
+            _convert_to_wav(downloaded_file, out_wav, speech_normalization=True)
         sys.stderr.write("Downloading complete.\n")
-        assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
+        assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
     else:
         assert os.path.isfile(url_or_file)
-        cmd = f'ffmpeg -i "{url_or_file}" -acodec libmp3lame "{out_mp3}"'
+        cmd = f'ffmpeg -i "{url_or_file}" -acodec pcm_s16le -ar 44100 -ac 1 "{out_wav}"'
         sys.stderr.write(f"Running:\n  {cmd}\n")
         subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
-        assert os.path.exists(out_mp3), f"The expected file {out_mp3} doesn't exist"
+        assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
 
 
 def unit_test() -> None:
     """Runs the program."""
     url = "https://www.youtube.com/watch?v=8Wg8f2g_GQY"
-    fetch_audio(url, "out.mp3")
+    fetch_audio(url, "out.wav")
 
 
 if __name__ == "__main__":

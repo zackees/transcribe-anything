@@ -4,6 +4,7 @@
 
 # pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements
 
+import atexit
 import os
 import stat
 import sys
@@ -11,6 +12,7 @@ import time
 import subprocess
 import shutil
 from typing import Optional
+import tempfile
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
@@ -27,13 +29,24 @@ PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR
 ffmpeg_add_paths()
 
 
+def make_temp_wav() -> str:
+    """
+    Makes a temporary mp3 file and returns the path to it.
+    """
+    tmp_mp3 = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
+        suffix=".mp3", delete=False
+    )
+    tmp_mp3.close()
+    atexit.register(os.remove, tmp_mp3.name)
+    return tmp_mp3.name
+
+
 def transcribe(
     url_or_file: str,
     output_dir: Optional[str] = None,
     model: Optional[str] = None,
     task: Optional[str] = None,
     language: Optional[str] = None,
-    keep_audio: bool = False,
     device: Optional[str] = None,
     other_args: Optional[list[str]] = None,
 ) -> str:
@@ -72,10 +85,11 @@ def transcribe(
     if os.path.isdir(output_dir):
         shutil.rmtree(output_dir, ignore_errors=True)
     os.makedirs(output_dir, exist_ok=True)
+    tmp_wav = make_temp_wav()
     assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
-    tmp_mp3 = os.path.join(output_dir, "out.mp3")
-    fetch_audio(url_or_file, tmp_mp3)
-    assert os.path.exists(tmp_mp3), f"Path {tmp_mp3} doesn't exist."
+    # tmp_mp3 = os.path.join(output_dir, "out.mp3")
+    fetch_audio(url_or_file, tmp_wav)
+    assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
     device = device or get_computing_device()
     if device == "cuda":
         print("#####################################")
@@ -92,11 +106,12 @@ def transcribe(
     language_str = f" --language {language}" if language else ""
     cmd_list = []
     if sys.platform == "win32":
+        # Set the text mode to UTF-8 on Windows.
         cmd_list.extend(["chcp", "65001", "&&"])
     cmd_list.extend(
         [
             "whisper",
-            f'"{tmp_mp3}"',
+            f'"{tmp_wav}"',
             "--device",
             device,
             model_str,
@@ -133,8 +148,6 @@ def transcribe(
             if os.path.exists(new_file):
                 os.remove(new_file)
             os.rename(file, new_file)
-    if not keep_audio:
-        os.remove(tmp_mp3)
     return output_dir
 
 
