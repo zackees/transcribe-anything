@@ -12,6 +12,7 @@ import time
 import subprocess
 from typing import Optional
 import tempfile
+import shutil
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
@@ -154,7 +155,7 @@ def transcribe(
             os.remove(outfile)
         assert os.path.isfile(file), f"Path {file} doesn't exist."
         assert not os.path.exists(outfile), f"Path {outfile} already exists."
-        os.rename(file, outfile)
+        shutil.move(file, outfile)
     return output_dir
 
 

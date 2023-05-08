@@ -16,5 +16,5 @@ class WhisperTester(unittest.TestCase):
         subprocess.check_output("whisper --help", shell=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

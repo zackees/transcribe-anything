@@ -71,7 +71,8 @@ class TranscribeAnythingTester(unittest.TestCase):
         ]
         for expected_path in expected_paths:
             self.assertTrue(
-                os.path.exists(expected_path), f"expected path {expected_path} not found"
+                os.path.exists(expected_path),
+                f"expected path {expected_path} not found",
             )
 
 

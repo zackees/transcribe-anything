@@ -81,9 +81,14 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
             cmd = f'ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
             sys.stderr.write(f"Running:\n  {cmd}\n")
             subprocess.run(
-                cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT
+                cmd,
+                cwd=tmpdir,
+                shell=True,
+                check=True,
+                capture_output=True,
+                timeout=_PROCESS_TIMEOUT,
             )
-            shutil.copyfile("out.wav", out_wav_abs)
+            shutil.copyfile(os.path.join(tmpdir, "out.wav"), out_wav_abs)
         assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
 
 
