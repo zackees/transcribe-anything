@@ -12,7 +12,7 @@ import subprocess
 import shutil
 from typing import Optional
 
-from static_ffmpeg import add_paths  # type: ignore
+from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import (
@@ -24,7 +24,7 @@ from transcribe_anything.logger import log_error
 
 PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
 
-add_paths()
+ffmpeg_add_paths()
 
 
 def transcribe(
