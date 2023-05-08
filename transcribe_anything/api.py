@@ -41,7 +41,6 @@ def make_temp_wav() -> str:
 
     def cleanup() -> None:
         if os.path.exists(tmp.name):
-            print(f"make_temp_wav: Removing {tmp.name}")
             os.remove(tmp.name)
 
     atexit.register(cleanup)
@@ -106,56 +105,57 @@ def transcribe(
         raise ValueError(f"Unknown device {device}")
     print(f"Using device {device}")
     model_str = f" --model {model}" if model else ""
-    output_dir_str = f' --output_dir "{output_dir}"' if output_dir else ""
     task_str = f" --task {task}" if task else ""
     language_str = f" --language {language}" if language else ""
     cmd_list = []
     if sys.platform == "win32":
         # Set the text mode to UTF-8 on Windows.
         cmd_list.extend(["chcp", "65001", "&&"])
-    cmd_list.extend(
-        [
-            "whisper",
-            f'"{tmp_wav}"',
-            "--device",
-            device,
-            model_str,
-            output_dir_str,
-            task_str,
-            language_str,
-        ]
-    )
-    if other_args:
-        cmd_list.extend(other_args)
-    # Remove the empty strings.
-    cmd_list = [x.strip() for x in cmd_list if x.strip()]
-    cmd = " ".join(cmd_list)
-    sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = subprocess.Popen(  # pylint: disable=consider-using-with
-        cmd, shell=True, universal_newlines=True
-    )
-    while True:
-        rtn = proc.poll()
-        if rtn is None:
-            time.sleep(0.25)
-            continue
-        if rtn != 0:
-            msg = f"Failed to execute {cmd}\n "
-            raise OSError(msg)
-        break
-    files = [os.path.join(output_dir, name) for name in os.listdir(output_dir)]
-    for file in files:
-        # Change the filename to remove the double extension
-        file_name = os.path.basename(file)
-        base_path = os.path.dirname(file)
-        new_file = os.path.join(base_path, chop_double_extension(file_name))
-        _, ext = os.path.splitext(new_file)
-        outfile = os.path.join(base_path, f"out{ext}")
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        assert os.path.isfile(file), f"Path {file} doesn't exist."
-        assert not os.path.exists(outfile), f"Path {outfile} already exists."
-        shutil.move(file, outfile)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        cmd_list.extend(
+            [
+                "whisper",
+                f'"{tmp_wav}"',
+                "--device",
+                device,
+                model_str,
+                f'--output_dir "{tmpdir}"',
+                task_str,
+                language_str,
+            ]
+        )
+        if other_args:
+            cmd_list.extend(other_args)
+        # Remove the empty strings.
+        cmd_list = [x.strip() for x in cmd_list if x.strip()]
+        cmd = " ".join(cmd_list)
+        sys.stderr.write(f"Running:\n  {cmd}\n")
+        proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            cmd, shell=True, universal_newlines=True
+        )
+        while True:
+            rtn = proc.poll()
+            if rtn is None:
+                time.sleep(0.25)
+                continue
+            if rtn != 0:
+                msg = f"Failed to execute {cmd}\n "
+                raise OSError(msg)
+            break
+        files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
+        for file in files:
+            # Change the filename to remove the double extension
+            file_name = os.path.basename(file)
+            base_path = os.path.dirname(file)
+            new_file = os.path.join(base_path, chop_double_extension(file_name))
+            _, ext = os.path.splitext(new_file)
+            outfile = os.path.join(output_dir, f"out{ext}")
+            if os.path.exists(outfile):
+                os.remove(outfile)
+            assert os.path.isfile(file), f"Path {file} doesn't exist."
+            assert not os.path.exists(outfile), f"Path {outfile} already exists."
+            shutil.move(file, outfile)
     return output_dir
 
 
