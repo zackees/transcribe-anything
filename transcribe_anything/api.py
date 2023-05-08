@@ -34,7 +34,7 @@ def make_temp_wav() -> str:
     Makes a temporary mp3 file and returns the path to it.
     """
     tmp_mp3 = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
-        suffix=".mp3", delete=False
+        suffix=".wav", delete=False
     )
     tmp_mp3.close()
     atexit.register(os.remove, tmp_mp3.name)

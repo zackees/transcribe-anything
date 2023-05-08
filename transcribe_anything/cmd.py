@@ -75,6 +75,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     # push sys argv prior to call
-    sys.argv.append("test.mp3")
+    sys.argv.append("test.wav")
     sys.argv.append('--initial_prompt "What is your name?"')
     sys.exit(main())
