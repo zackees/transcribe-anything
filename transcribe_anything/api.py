@@ -54,6 +54,7 @@ def transcribe(
     task: Optional[str] = None,
     language: Optional[str] = None,
     device: Optional[str] = None,
+    embed: bool = False,
     other_args: Optional[list[str]] = None,
 ) -> str:
     """
@@ -144,6 +145,7 @@ def transcribe(
                 raise OSError(msg)
             break
         files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
+        srt_file: str | None = None
         for file in files:
             # Change the filename to remove the double extension
             file_name = os.path.basename(file)
@@ -156,6 +158,12 @@ def transcribe(
             assert os.path.isfile(file), f"Path {file} doesn't exist."
             assert not os.path.exists(outfile), f"Path {outfile} already exists."
             shutil.move(file, outfile)
+            if ext == ".srt":
+                srt_file = outfile
+        assert srt_file is not None, "No srt file found."
+        if embed:
+            # embed_srt(srt_file, url_or_file)
+            print("Embedding not implemented yet.")
     return output_dir
 
 

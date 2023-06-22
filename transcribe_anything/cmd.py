@@ -53,6 +53,11 @@ def main() -> int:
         default=None,
         choices=[None, "cpu", "cuda"],
     )
+    parser.add_argument(
+        "--embed",
+        help="whether to embed the translation file into the output file",
+        action="store_true",
+    )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
     print(f"Unknown args: {unknown}")
@@ -65,6 +70,7 @@ def main() -> int:
             task=args.task,
             language=args.language if args.language != "None" else None,
             device=args.device,
+            embed=args.embed,
             other_args=unknown,
         )
     except KeyboardInterrupt:
