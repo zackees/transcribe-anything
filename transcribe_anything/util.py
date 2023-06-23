@@ -8,6 +8,9 @@ from urllib.parse import unquote
 import torch  # pylint: disable=import-outside-toplevel
 
 
+PROCESS_TIMEOUT = 4 * 60 * 60
+
+
 def get_computing_device() -> str:
     """Get the computing device."""
     try:

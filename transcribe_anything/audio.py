@@ -10,33 +10,13 @@ import os
 import shutil
 import static_ffmpeg  # type: ignore
 
-_PROCESS_TIMEOUT = 4 * 60 * 60
+from transcribe_anything.util import PROCESS_TIMEOUT
+from transcribe_anything.ytldp_download import ytdlp_download
 
 
-def _ytdlp_download(url: str, outdir: str) -> str:
-    """Downloads a file using ytdlp."""
-    os.makedirs(outdir, exist_ok=True)
-    # remove all files in the directory
-    for file in os.listdir(outdir):
-        os.remove(os.path.join(outdir, file))
-    cmd = f'yt-dlp --no-check-certificate {url} -o "out.%(ext)s"'
-    print(f"Running:\n  {cmd}")
-    subprocess.run(
-        cmd,
-        shell=True,
-        cwd=outdir,
-        check=True,
-        timeout=_PROCESS_TIMEOUT,
-        universal_newlines=True,
-    )
-    new_files = os.listdir(outdir)
-    assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
-    downloaded_file = os.path.join(outdir, new_files[0])
-    assert os.path.exists(downloaded_file), f"The expected file {downloaded_file} doesn't exist"
-    return downloaded_file
-
-
-def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = False) -> None:
+def _convert_to_wav(
+    inpath: str, outpath: str, speech_normalization: bool = False
+) -> None:
     """Converts a file to wav."""
     cmd_audio_filter = ""
     if speech_normalization:
@@ -50,7 +30,9 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
     cmd = f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
     print(f"Running:\n  {cmd}")
     try:
-        subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=_PROCESS_TIMEOUT)
+        subprocess.run(
+            cmd, shell=True, check=True, capture_output=True, timeout=PROCESS_TIMEOUT
+        )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
         print(f"stdout: {exc.stdout}")
@@ -68,7 +50,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
         with tempfile.TemporaryDirectory() as tmpdir:
             print(f"Using temporary directory {tmpdir}")
-            downloaded_file = _ytdlp_download(url_or_file, os.path.abspath(tmpdir))
+            downloaded_file = ytdlp_download(url_or_file, os.path.abspath(tmpdir))
             print("Downloaded file: ", downloaded_file)
             _convert_to_wav(downloaded_file, out_wav, speech_normalization=True)
         sys.stderr.write("Downloading complete.\n")
@@ -86,7 +68,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                 shell=True,
                 check=True,
                 capture_output=True,
-                timeout=_PROCESS_TIMEOUT,
+                timeout=PROCESS_TIMEOUT,
             )
             shutil.copyfile(os.path.join(tmpdir, "out.wav"), out_wav_abs)
         assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"

@@ -2,7 +2,9 @@
     Api for using transcribe_anything from python. Allows bulk processing.
 """
 
-# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements
+# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements,disable=notimplemented-raised,unused-variable
+
+# flake8: noqa F401,E303,F821
 
 import atexit
 import os
@@ -13,6 +15,10 @@ import subprocess
 from typing import Optional
 import tempfile
 import shutil
+from hashlib import md5  # pylint: disable=unused-import
+
+from appdirs import user_config_dir  # type: ignore
+from disklru import DiskLRUCache  # type: ignore
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
@@ -24,7 +30,18 @@ from transcribe_anything.util import (
 )
 from transcribe_anything.logger import log_error
 
-PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
+
+
+CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
+
+PERMS = (
+    stat.S_IRUSR
+    | stat.S_IRGRP
+    | stat.S_IROTH
+    | stat.S_IWOTH
+    | stat.S_IWUSR
+    | stat.S_IWGRP
+)
 
 ffmpeg_add_paths()
 
@@ -60,6 +77,12 @@ def transcribe(
     """
     Runs the program.
     """
+    if not os.path.isfile(url_or_file) and embed:
+        raise NotImplementedError(
+            "Embedding is only supported for local files. "
+            "Please download the file first."
+        )
+    cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
     if not basename or basename == ".":  # if url_or_file is a directory
         # Defense against paths with a trailing /, for example:
@@ -91,10 +114,16 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
+    assert os.path.isdir(
+        output_dir
+    ), f"Path {output_dir} is not found or not a directory."
     # tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_wav)
     assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
+    #filemd5 = md5(file.encode("utf-8")).hexdigest()
+    #key = f"{file}-{filemd5}-{model}"
+    #cached_data = cache.get_json(key)
+    # print(f"Todo: cached data: {cached_data}")å
     device = device or get_computing_device()
     if device == "cuda":
         print("#####################################")
@@ -113,6 +142,7 @@ def transcribe(
         # Set the text mode to UTF-8 on Windows.
         cmd_list.extend(["chcp", "65001", "&&"])
 
+    print(f"Running whisper on {tmp_wav} (will install models on first run)")
     with tempfile.TemporaryDirectory() as tmpdir:
         cmd_list.extend(
             [
@@ -145,7 +175,7 @@ def transcribe(
                 raise OSError(msg)
             break
         files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
-        srt_file: str | None = None
+        srt_file: Optional[str] = None
         for file in files:
             # Change the filename to remove the double extension
             file_name = os.path.basename(file)
@@ -162,8 +192,14 @@ def transcribe(
                 srt_file = outfile
         assert srt_file is not None, "No srt file found."
         if embed:
+            assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
             # embed_srt(srt_file, url_or_file)
-            print("Embedding not implemented yet.")
+            #print("Embedding not implemented yet.")
+            out_mp4 = os.path.join(output_dir, "out.mp4")
+            #ffmpeg -i input.mp4 -c copy -vf "subtitles=subtitle.srt" output.mp4
+            embed_ffmpeg_cmd = f'ffmpeg -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" -c copy -c:s mov_text -metadata:s:s:0 language=eng "{out_mp4}"'  # pylint: disable=line-too-long
+            print(f"Running:\n  {embed_ffmpeg_cmd}")
+            os.system(embed_ffmpeg_cmd)
     return output_dir
 
 
@@ -171,7 +207,9 @@ if __name__ == "__main__":
     # test case for twitter video
     # transcribe(url_or_file="https://twitter.com/wlctv_ca/status/1598895698870951943")
     try:
-        transcribe(url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test")
+        transcribe(
+            url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test"
+        )
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         sys.exit(1)
