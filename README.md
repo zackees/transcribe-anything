@@ -147,6 +147,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.3.5: Now has `--embed` to burn the subtitles into the video itself. Only works on local mp4 files at the moment.
   * 2.3.4: Removed `out.mp3` and instead use a temporary wav file, as that is faster to process. --no-keep-audio has now been removed.
   * 2.3.3: Fix case where there spaces in name (happens on windows)
   * 2.3.2: Fix windows transcoding error

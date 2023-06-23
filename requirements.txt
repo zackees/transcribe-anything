@@ -3,4 +3,4 @@ yt-dlp>=2023.3.4
 torch<1.13.0
 whisper-openai==1.0.0
 appdirs==1.4.4
-disklru>=1.0.5
+disklru>=1.0.7

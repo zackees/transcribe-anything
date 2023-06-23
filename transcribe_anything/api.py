@@ -18,7 +18,7 @@ import shutil
 from hashlib import md5  # pylint: disable=unused-import
 
 from appdirs import user_config_dir  # type: ignore
-from disklru import DiskLRUCache  # type: ignore
+from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
@@ -82,7 +82,7 @@ def transcribe(
             "Embedding is only supported for local files. "
             "Please download the file first."
         )
-    cache = DiskLRUCache(CACHE_FILE, 16)
+    # cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
     if not basename or basename == ".":  # if url_or_file is a directory
         # Defense against paths with a trailing /, for example:
