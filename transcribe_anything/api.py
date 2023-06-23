@@ -197,7 +197,7 @@ def transcribe(
             #print("Embedding not implemented yet.")
             out_mp4 = os.path.join(output_dir, "out.mp4")
             #ffmpeg -i input.mp4 -c copy -vf "subtitles=subtitle.srt" output.mp4
-            embed_ffmpeg_cmd = f'ffmpeg -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" -c copy -c:s mov_text -metadata:s:s:0 language=eng "{out_mp4}"'  # pylint: disable=line-too-long
+            embed_ffmpeg_cmd = f'ffmpeg -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" "{out_mp4}"'  # pylint: disable=line-too-long
             print(f"Running:\n  {embed_ffmpeg_cmd}")
             os.system(embed_ffmpeg_cmd)
     return output_dir
