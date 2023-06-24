@@ -60,7 +60,8 @@ def main() -> int:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
-    print(f"Unknown args: {unknown}")
+    if unknown:
+        print(f"Unknown args: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
     try:
         transcribe(
