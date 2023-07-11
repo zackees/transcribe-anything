@@ -20,7 +20,8 @@ pip install transcribe-anything
 
 # Usage (GPU Accelerated Version) (works on Python 3.10.X)
 
-One line install gpu version
+GPU acceleration is *much* faster than the CPU version. Install it using the following:
+
 ```bash
 curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
 ```
@@ -105,16 +106,6 @@ transcribe(
     url_or_file="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     output_dir="output_dir",
 )
-```
-
-## Install GPU/CUDA Accelerated version
-
-GPU acceleration is *much* faster than the CPU version. Install it using the following:
-
-```bash
-> curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
-# transcribe-anything should now be installed
-> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
 ## Develop
