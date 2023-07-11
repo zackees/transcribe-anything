@@ -39,12 +39,14 @@ def _convert_to_wav(
         print(f"stderr: {exc.stderr}")
         raise
     os.remove(outpath)
-    os.rename(tmpwavepath, outpath)
+    # os.rename(tmpwavepath, outpath)
+    # overwrite file at outpath
+    shutil.copyfile(tmpwavepath, outpath)
     assert os.path.exists(outpath), f"The expected file {outpath} doesn't exist"
 
 
 def fetch_audio(url_or_file: str, out_wav: str) -> None:
-    """Fetches from the internet or from a local file and outputs a wav file."""
+    """Fetches from the internet or from a local file and outputs a wav file.""" 
     assert out_wav.endswith(".wav")
     static_ffmpeg.add_paths()  # pylint: disable=no-member
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
