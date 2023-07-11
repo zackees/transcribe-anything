@@ -24,6 +24,10 @@ Your data stays private and is not uploaded to any service.
 # Usage (GPU Accelerated Version) (works on Python 3.10.X)
 
 ```bash
+
+One line install gpu version
+`curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python`
+
 > curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
 # Outputs the srt, vtt and txt files in title/out.vtt
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
