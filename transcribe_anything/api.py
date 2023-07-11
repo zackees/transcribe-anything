@@ -2,7 +2,7 @@
     Api for using transcribe_anything from python. Allows bulk processing.
 """
 
-# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements,disable=notimplemented-raised,unused-variable
+# pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements,disable=notimplemented-raised,unused-variable,line-too-long
 
 # flake8: noqa F401,E303,F821
 

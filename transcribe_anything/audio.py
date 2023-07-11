@@ -46,7 +46,7 @@ def _convert_to_wav(
 
 
 def fetch_audio(url_or_file: str, out_wav: str) -> None:
-    """Fetches from the internet or from a local file and outputs a wav file.""" 
+    """Fetches from the internet or from a local file and outputs a wav file."""
     assert out_wav.endswith(".wav")
     static_ffmpeg.add_paths()  # pylint: disable=no-member
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
