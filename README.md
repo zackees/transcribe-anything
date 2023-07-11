@@ -1,4 +1,4 @@
-
+![image](https://github.com/zackees/transcribe-anything/assets/6856673/853feb17-a7db-46b5-be93-1a57719a73d1)![image](https://github.com/zackees/transcribe-anything/assets/6856673/571eba24-9e60-40a2-814f-54efe3ec36ef)
 # transcribe-anything
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/MacOS_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml)
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Win_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml)
@@ -13,12 +13,10 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 Your data stays private and is not uploaded to any service.
 
-# Usage (CPU Version)
+# Install (CPU Version)
 
 ```bash
-> pip install transcribe-anything
-# Outputs the srt, vtt and txt files in title/out.vtt
-> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+pip install transcribe-anything
 ```
 
 # Usage (GPU Accelerated Version) (works on Python 3.10.X)
@@ -34,7 +32,15 @@ curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_
 > transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
+# Usage
+
+```bash
+ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
 Will output:
+
+
 
 ```
 Detecting language using up to the first 30 seconds. Use `--language` to specify the language
