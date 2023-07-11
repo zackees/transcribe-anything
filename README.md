@@ -1,4 +1,3 @@
-![image](https://github.com/zackees/transcribe-anything/assets/6856673/853feb17-a7db-46b5-be93-1a57719a73d1)![image](https://github.com/zackees/transcribe-anything/assets/6856673/571eba24-9e60-40a2-814f-54efe3ec36ef)
 # transcribe-anything
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/MacOS_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml)
 [![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Win_Tests/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml)
