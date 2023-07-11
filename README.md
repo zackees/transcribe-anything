@@ -26,12 +26,6 @@ One line install gpu version
 curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
 ```
 
-```bash
-> curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
-# Outputs the srt, vtt and txt files in title/out.vtt
-> transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
-```
-
 # Usage
 
 ```bash
@@ -39,8 +33,6 @@ curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_
 ```
 
 Will output:
-
-
 
 ```
 Detecting language using up to the first 30 seconds. Use `--language` to specify the language
