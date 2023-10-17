@@ -6,6 +6,8 @@
 
 ### USES WHISPER AI
 
+Over 200+⭐because this program just works!!
+
 Input a local file or url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
