@@ -2,7 +2,7 @@
 [![MacOS_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml)
 [![Win_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml)
 [![Ubuntu_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml)
-[![Actions Status](https://github.com/zackees/transcribe-anything/workflows/Lint/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml)
+[![Lint](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml)
 
 ### USES WHISPER AI
 
