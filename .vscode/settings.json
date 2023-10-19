@@ -7,7 +7,12 @@
     ],
     "python.pythonPath": "venv/bin/python",
     "python.defaultInterpreterPath": "venv/bin/python",
-    "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe",
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.profiles.windows": {
+        "Git Bash": {
+            "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+        }
+    },
     "python.linting.pylintEnabled": true,
     "files.eol": "\n", // Unix
     "editor.tabSize": 4,
