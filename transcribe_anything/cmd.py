@@ -6,11 +6,13 @@
 
 import argparse
 import sys
+import os
 
 from transcribe_anything.api import transcribe
 from transcribe_anything.util import get_computing_device
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 def main() -> int:
     """Main entry point for the command line tool."""

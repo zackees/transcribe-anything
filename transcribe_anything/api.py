@@ -17,6 +17,7 @@ import subprocess
 from typing import Optional
 import tempfile
 import shutil
+from pathlib import Path
 
 from appdirs import user_config_dir  # type: ignore
 # from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
@@ -63,6 +64,25 @@ def make_temp_wav() -> str:
 
     atexit.register(cleanup)
     return tmp.name
+
+def fix_subtitles_path(_path: str) -> str:
+    """Fixes windows subtitles path, which is weird."""
+    if sys.platform != "win32":
+        return _path
+    # On Windows, ffmpeg 5 requires the path to be escaped.
+    # For example, "C:\Users\user\file.srt" should be "C\\:/\Users/\user/\file.srt".
+    # See https://stackoverflow.com/questions/60440793/how-can-i-use-windows-absolute-paths-with-the-movie-filter-on-ffmpeg
+    path = Path(_path)
+    # get the C:\ part
+    drive = path.drive
+    # get the \Users\user\file.srt part
+    path = path.relative_to(drive)
+    drive_fixed = str(drive).replace(":", "\\\\:")
+    new_token = "/\\"
+    old_token = "\\"
+    path_fixed = str(path).replace(old_token, new_token)
+    out_path = drive_fixed + path_fixed
+    return out_path
 
 
 def transcribe(
@@ -197,14 +217,18 @@ def transcribe(
         srt_file = os.path.abspath(srt_file)
         if embed:
             assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
-            # embed_srt(srt_file, url_or_file)
-            #print("Embedding not implemented yet.")
             out_mp4 = os.path.join(output_dir, "out.mp4")
-            #ffmpeg -i input.mp4 -c copy -vf "subtitles=subtitle.srt" output.mp4
-            embed_ffmpeg_cmd = f'ffmpeg -y -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" "{out_mp4}"'  # pylint: disable=line-too-long
+            embed_ffmpeg_cmd_list = [
+                "ffmpeg",
+                "-y",
+                "-i", url_or_file,
+                "-i", srt_file,
+                "-vf", f"subtitles={fix_subtitles_path(srt_file)}",
+                out_mp4
+            ]
+            embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
             print(f"Running:\n  {embed_ffmpeg_cmd}")
-            # os.system(embed_ffmpeg_cmd)
-            rtn = subprocess.call(embed_ffmpeg_cmd, shell=True, universal_newlines=True)
+            rtn = subprocess.call(embed_ffmpeg_cmd_list, universal_newlines=True)
             if rtn != 0:
                 warnings.warn(f"ffmpeg failed with return code {rtn}")
     return output_dir
