@@ -32,7 +32,7 @@ from transcribe_anything.util import (
 )
 from transcribe_anything.logger import log_error
 
-
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
 
