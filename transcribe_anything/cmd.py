@@ -2,6 +2,8 @@
     Entry point for running the transcribe-anything prgram.
 """
 
+# flake8: noqa E501
+
 import argparse
 import sys
 

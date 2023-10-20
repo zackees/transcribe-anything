@@ -8,6 +8,7 @@
 
 import atexit
 import os
+import warnings
 import stat
 import sys
 import time
@@ -163,7 +164,8 @@ def transcribe(
         cmd = " ".join(cmd_list)
         sys.stderr.write(f"Running:\n  {cmd}\n")
         proc = subprocess.Popen(  # pylint: disable=consider-using-with
-            cmd, shell=True, universal_newlines=True
+            cmd, shell=True, universal_newlines=True,
+            encoding="utf-8"
         )
         while True:
             rtn = proc.poll()
@@ -190,16 +192,21 @@ def transcribe(
             shutil.move(file, outfile)
             if ext == ".srt":
                 srt_file = outfile
+        output_dir = os.path.abspath(output_dir)
         assert srt_file is not None, "No srt file found."
+        srt_file = os.path.abspath(srt_file)
         if embed:
             assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
             # embed_srt(srt_file, url_or_file)
             #print("Embedding not implemented yet.")
             out_mp4 = os.path.join(output_dir, "out.mp4")
             #ffmpeg -i input.mp4 -c copy -vf "subtitles=subtitle.srt" output.mp4
-            embed_ffmpeg_cmd = f'ffmpeg -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" "{out_mp4}"'  # pylint: disable=line-too-long
+            embed_ffmpeg_cmd = f'ffmpeg -y -i "{url_or_file}" -i "{srt_file}" -vf "subtitles={srt_file}" "{out_mp4}"'  # pylint: disable=line-too-long
             print(f"Running:\n  {embed_ffmpeg_cmd}")
-            os.system(embed_ffmpeg_cmd)
+            # os.system(embed_ffmpeg_cmd)
+            rtn = subprocess.call(embed_ffmpeg_cmd, shell=True, universal_newlines=True)
+            if rtn != 0:
+                warnings.warn(f"ffmpeg failed with return code {rtn}")
     return output_dir
 
 

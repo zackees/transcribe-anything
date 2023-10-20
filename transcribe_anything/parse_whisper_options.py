@@ -25,7 +25,8 @@ def _parse_item(item: str) -> tuple[str, Any]:
 def parse_whisper_options() -> dict:
     """Parses the whisper options."""
     stdout = subprocess.check_output(
-        "whisper --help", shell=True, universal_newlines=True
+        "whisper --help", shell=True, universal_newlines=True,
+        encoding="utf-8"
     )
     lines = stdout.splitlines()
     data = {}

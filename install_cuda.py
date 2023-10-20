@@ -2,6 +2,8 @@
 Installs cuda + transcibe-anything
 """
 
+# flake8: noqa E501
+
 import argparse
 import os
 import shutil
