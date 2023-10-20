@@ -5,6 +5,7 @@
 # pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements,disable=notimplemented-raised,unused-variable,line-too-long
 
 # flake8: noqa F401,E303,F821
+# ruff: noqa F401
 
 import atexit
 import os
@@ -16,10 +17,9 @@ import subprocess
 from typing import Optional
 import tempfile
 import shutil
-from hashlib import md5  # pylint: disable=unused-import
 
 from appdirs import user_config_dir  # type: ignore
-from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
+# from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
