@@ -14,6 +14,18 @@ from transcribe_anything.parse_whisper_options import parse_whisper_options
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
+WHISPER_MODEL_OPTIONS = [
+    "tiny",
+    "tiny.en",
+    "base",
+    "base.en",
+    "small",
+    "small.en",
+    "medium",
+    "medium.en",
+    "large",
+]
+
 def main() -> int:
     """Main entry point for the command line tool."""
     whisper_options = parse_whisper_options()
@@ -37,7 +49,7 @@ def main() -> int:
         "--model",
         help="name of the Whisper model to us",
         default="small",
-        choices=whisper_options["model"],
+        choices=WHISPER_MODEL_OPTIONS,
     )
     parser.add_argument(
         "--task",
@@ -87,5 +99,7 @@ def main() -> int:
 if __name__ == "__main__":
     # push sys argv prior to call
     sys.argv.append("test.wav")
+    sys.argv.append("--model")
+    sys.argv.append("large")
     sys.argv.append('--initial_prompt "What is your name?"')
     sys.exit(main())
