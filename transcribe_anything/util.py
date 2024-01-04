@@ -14,7 +14,7 @@ PROCESS_TIMEOUT = 4 * 60 * 60
 def get_computing_device() -> str:
     """Get the computing device."""
     try:
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and torch.cuda._check_capability():  # pylint: disable=protected-access
             return "cuda"
         return "cpu"
     except ImportError:
