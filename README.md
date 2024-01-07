@@ -144,6 +144,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.5.0: `--model large` now aliases to `--model large-v3`. Use `--model large-legacy` to use original large model.
   * 2.4.0: pytorch updated to 2.1.2, gpu install script updated to same + cuda version is now 121.
   * 2.3.9: Fallback to `cpu` device if `gpu` device is not compatible.
   * 2.3.8: Fix --models arg which
