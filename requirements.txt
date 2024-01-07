@@ -1,6 +1,6 @@
 static-ffmpeg>=2.5
 yt-dlp>=2023.3.4
-torch<1.13.0
+torch>=2.1.2
 openai-whisper
 appdirs==1.4.4
 disklru>=1.0.7
