@@ -23,7 +23,10 @@ WHISPER_MODEL_OPTIONS = [
     "small.en",
     "medium",
     "medium.en",
+    "large-legacy",
     "large",
+    "large-v2",
+    "large-v3"
 ]
 
 def main() -> int:
@@ -76,6 +79,11 @@ def main() -> int:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
+    if args.model == "large-legacy":
+        args.model = "large"
+    elif args.model == "large":
+        args.model = "large-v3"
+
     if unknown:
         print(f"Unknown args: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
