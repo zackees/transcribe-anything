@@ -14,10 +14,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 API_PY = os.path.join(HERE, "api.py")
 
 # Set the versions
-TENSOR_VERSION = "1.12.1"
-CUDA_VERSION = "cu116"
+TENSOR_VERSION = "2.1.2"
+CUDA_VERSION = "cu121"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
-EXTRA_INDEX_URL = "https://download.pytorch.org/whl/cu116"
+EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 
 argparser = argparse.ArgumentParser()
