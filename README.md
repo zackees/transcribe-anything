@@ -14,15 +14,17 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 Your data stays private and is not uploaded to any service.
 
-# Install (CPU Version)
+# Install (CPU Version - Windows / GPU - Linux)
+
+For linux, gpu/cuda mode is enabled by default. Windows however will be CPU only.
 
 ```bash
 pip install transcribe-anything
 ```
 
-# Usage (GPU Accelerated Version) (works on Python 3.10.X)
+# Usage (GPU Accelerated Version - For Windows) (works on Python 3.10.X)
 
-GPU acceleration is *much* faster than the CPU version. Install it using the following:
+Windows users have need a special script to install GPU acceleration, which is *much* faster than the CPU version. Install it using the following:
 
 ```bash
 curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
