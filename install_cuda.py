@@ -46,7 +46,7 @@ if args.force or True:  # always do this path now.
         "torchdata",
         "torchaudio",
         "torchvision",
-        "torch-directm"
+        "torch-directml"
     ]
     for package in uninstall:
         subprocess.run(["pip", "uninstall", "-y", package], check=True)
