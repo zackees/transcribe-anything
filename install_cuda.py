@@ -39,7 +39,7 @@ pip_list_stdout = subprocess.run(
 ).stdout
 
 # Delete the torch package if it doesn't have the cuda version
-if args.force:
+if args.force or True:  # always do this path now.
     subprocess.run(["pip", "uninstall", "-y", "torch"], check=True)
     subprocess.run(["pip", "uninstall", "-y", "torchvision"], check=True)
     subprocess.run(["pip", "uninstall", "-y", "torch-directml"], check=True)
