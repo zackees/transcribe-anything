@@ -158,10 +158,6 @@ def transcribe(
     model_str = f" --model {model}" if model else ""
     task_str = f" --task {task}" if task else ""
     language_str = f" --language {language}" if language else ""
-    cmd_list = []
-    if sys.platform == "win32":
-        # Set the text mode to UTF-8 on Windows.
-        cmd_list.extend(["chcp", "65001", "&&"])
 
     print(f"Running whisper on {tmp_wav} (will install models on first run)")
     with tempfile.TemporaryDirectory() as tmpdir:
