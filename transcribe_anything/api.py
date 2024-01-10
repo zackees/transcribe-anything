@@ -12,7 +12,6 @@ import os
 import warnings
 import stat
 import sys
-import time
 import subprocess
 from typing import Optional
 import tempfile
@@ -31,6 +30,7 @@ from transcribe_anything.util import (
     chop_double_extension,
 )
 from transcribe_anything.logger import log_error
+from transcribe_anything.whisper import run_whisper
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -144,7 +144,7 @@ def transcribe(
     #filemd5 = md5(file.encode("utf-8")).hexdigest()
     #key = f"{file}-{filemd5}-{model}"
     #cached_data = cache.get_json(key)
-    # print(f"Todo: cached data: {cached_data}")å
+    # print(f"Todo: cached data: {cached_data}")
     device = device or get_computing_device()
     if device == "cuda":
         print("#####################################")
@@ -165,37 +165,15 @@ def transcribe(
 
     print(f"Running whisper on {tmp_wav} (will install models on first run)")
     with tempfile.TemporaryDirectory() as tmpdir:
-        cmd_list.extend(
-            [
-                "whisper",
-                f'"{tmp_wav}"',
-                "--device",
-                device,
-                model_str,
-                f'--output_dir "{tmpdir}"',
-                task_str,
-                language_str,
-            ]
+        run_whisper(
+            Path(tmp_wav),
+            device,
+            model_str,
+            Path(tmpdir),
+            task_str,
+            language_str,
+            other_args or [],
         )
-        if other_args:
-            cmd_list.extend(other_args)
-        # Remove the empty strings.
-        cmd_list = [x.strip() for x in cmd_list if x.strip()]
-        cmd = " ".join(cmd_list)
-        sys.stderr.write(f"Running:\n  {cmd}\n")
-        proc = subprocess.Popen(  # pylint: disable=consider-using-with
-            cmd, shell=True, universal_newlines=True,
-            encoding="utf-8"
-        )
-        while True:
-            rtn = proc.poll()
-            if rtn is None:
-                time.sleep(0.25)
-                continue
-            if rtn != 0:
-                msg = f"Failed to execute {cmd}\n "
-                raise OSError(msg)
-            break
         files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
         srt_file: Optional[str] = None
         for file in files:
