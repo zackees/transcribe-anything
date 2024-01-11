@@ -54,8 +54,9 @@ def get_computing_device() -> str:
     if CUDA_AVAILABLE is None:
         iso_env = get_environment()
         env = iso_env.environment()
+        py_file = HERE / "cuda_available.py"
         rtn = subprocess.run([
-            "python", "-m", "transcribe_anything.cuda_available"
+            "python", py_file
         ], check=False, env=env).returncode
         CUDA_AVAILABLE = rtn == 0
     return "cuda" if CUDA_AVAILABLE else "cpu"
