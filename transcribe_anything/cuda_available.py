@@ -4,7 +4,7 @@ designed to be run in an isolated environment.
 """
 
 import sys
-import torch  # pylint: disable
+import torch  # pylint: disable=import-error
 
 def main() -> int:
     """Returns 0 if cuda is available, 1 otherwise."""
