@@ -7,13 +7,20 @@ Tests whisper ai cmd
 import unittest
 import subprocess
 
+from transcribe_anything.whisper import get_environment
+
 
 class WhisperTester(unittest.TestCase):
     """Tester for whisper ai."""
 
     def test_whisper_cmd(self) -> None:
         """Check that the command is installed by the setup process."""
-        subprocess.check_output("whisper --help", shell=True)
+        env = get_environment()
+        subprocess.check_output(
+            "whisper --help",
+            shell=True,
+            env=env,
+        )
 
 
 if __name__ == "__main__":
