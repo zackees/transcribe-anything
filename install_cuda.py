@@ -1,4 +1,6 @@
 """
+DEPRECATED: This script should no longer be necessary do to isolated environments,
+but I'm keeping it around for now just in case.
 Installs cuda + transcibe-anything
 """
 

@@ -22,13 +22,13 @@ For linux, gpu/cuda mode is enabled by default. Windows however will be CPU only
 pip install transcribe-anything
 ```
 
-# Usage (GPU Accelerated Version - For Windows) (works on Python 3.10.X)
+# GPU Acceleration
 
-Windows users have need a special script to install GPU acceleration, which is *much* faster than the CPU version. Install it using the following:
+Unlike other whisper implementations, this one should be automatically bind to the GPU if `nvidia-smi` drivers
+are installed on Windows. This is due to the use of `isolated-environment` which will lazily install the GPU accelerated
+version of Torch on first use.
 
-```bash
-curl https://raw.githubusercontent.com/zackees/transcribe-anything/main/install_cuda.py | python
-```
+Because of this isolation, this tool should not interfere with torch and other AI dependencies.
 
 # Usage
 
@@ -144,6 +144,8 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.6.0: GPU acceleration now happens automatically on Windows thanks to `isolated-environment`. This will also prevent
+           interference with different versions of torch for other AI tools.
   * 2.5.0: `--model large` now aliases to `--model large-v3`. Use `--model large-legacy` to use original large model.
   * 2.4.0: pytorch updated to 2.1.2, gpu install script updated to same + cuda version is now 121.
   * 2.3.9: Fallback to `cpu` device if `gpu` device is not compatible.
