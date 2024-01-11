@@ -14,9 +14,7 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 Your data stays private and is not uploaded to any service.
 
-# Install (CPU Version - Windows / GPU - Linux)
-
-For linux, gpu/cuda mode is enabled by default. Windows however will be CPU only.
+# Install
 
 ```bash
 pip install transcribe-anything
@@ -24,8 +22,8 @@ pip install transcribe-anything
 
 # GPU Acceleration
 
-Unlike other whisper implementations, this one should be automatically bind to the GPU if `nvidia-smi` drivers
-are installed on Windows. This is due to the use of `isolated-environment` which will lazily install the GPU accelerated
+Unlike other whisper implementations, this one should automatically bind to the GPU if `nvidia-smi` drivers
+are installed. This is due to the use of `isolated-environment` which will lazily install the GPU-accelerated
 version of Torch on first use.
 
 Because of this isolation, this tool should not interfere with torch and other AI dependencies.
