@@ -9,7 +9,7 @@ import sys
 import os
 
 from transcribe_anything.api import transcribe
-from transcribe_anything.util import get_computing_device
+from transcribe_anything.whisper import get_computing_device
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 
 os.environ["PYTHONIOENCODING"] = "utf-8"

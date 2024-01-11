@@ -25,12 +25,11 @@ from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.util import (
-    get_computing_device,
     sanitize_filename,
     chop_double_extension,
 )
 from transcribe_anything.logger import log_error
-from transcribe_anything.whisper import run_whisper
+from transcribe_anything.whisper import run_whisper, get_computing_device
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
