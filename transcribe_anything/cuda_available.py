@@ -1,3 +1,6 @@
+
+# pylint: disable
+
 """
 Queries the system for CUDA devices and returns a json string with the information.
 This is meant to be run under a "isolated-environment".
