@@ -9,8 +9,6 @@ from dataclasses import dataclass, asdict, fields
 import json
 from typing import Any
 
-import torch
-
 
 @dataclass
 class CudaDevice:
@@ -67,6 +65,8 @@ def cuda_cards_available() -> CudaInfo:
     Returns a CudaInfo object with information about the CUDA cards,
     ordered by VRAM and multiprocessors.
     """
+    # Have to import here, since others will import CudaDevice and CudaInfo.
+    import torch  # pylint: disable=import-outside-toplevel
     if torch.cuda.is_available():
         devices = [
             CudaDevice(
