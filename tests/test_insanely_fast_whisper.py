@@ -10,31 +10,40 @@ import unittest
 import shutil
 from pathlib import Path
 
+from transcribe_anything.insanely_fast_whisper import (
+    run_insanely_fast_whisper, has_nvidia_smi, CudaInfo, get_cuda_info
+)
+
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
-TESTS_DATA_DIR = LOCALFILE_DIR / "text_video" / "en"
+TESTS_DATA_DIR = LOCALFILE_DIR / "text_video_insane" / "en"
 TEST_WAV = LOCALFILE_DIR  / "video.wav"
 
 
 class InsanelFastWhisperTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
-    @unittest.skip("DISABLED FOR NOW - WORK IN PROGRESS")
+    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
-        #run_insanely_fast_whisper(
-        #    input_wav=TEST_WAV,
-        #    #device="cuda",
-        #    #device="cpu",
-        #    device="cuda:0",
-        #    model="small",
-        #    output_dir=TESTS_DATA_DIR,
-        #    task="transcribe",
-        #    language="en",
-        #    other_args=None,
-        #)
+        run_insanely_fast_whisper(
+            input_wav=TEST_WAV,
+            model="small",
+            output_dir=TESTS_DATA_DIR,
+            task="transcribe",
+            language="en",
+            other_args=None,
+        )
 
+    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
+    def test_cuda_info(self) -> None:
+        """Check that the command works on a local file."""
+        cuda_info0 = get_cuda_info()
+        out = cuda_info0.to_json_str()
+        cuda_info1 = CudaInfo.from_json_str(out)
+        print(out)
+        self.assertEqual(cuda_info0, cuda_info1)
 
 
 if __name__ == "__main__":

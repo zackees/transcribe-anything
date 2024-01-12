@@ -36,7 +36,7 @@ def get_environment() -> IsolatedEnvironment:
     if ENV is not None:
         return ENV
     venv_dir = HERE / "venv" / "whisper"
-    env = IsolatedEnvironment(HERE / "venv" / "whisper")
+    env = IsolatedEnvironment(venv_dir)
     if not venv_dir.exists():
         env.install_environment()
         if has_nvidia_smi():
