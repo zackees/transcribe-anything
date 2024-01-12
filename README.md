@@ -142,6 +142,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.7.0: Introduces an `insanely-fast-whisper`, enable by using `--device insane`
   * 2.6.0: GPU acceleration now happens automatically on Windows thanks to `isolated-environment`. This will also prevent
            interference with different versions of torch for other AI tools.
   * 2.5.0: `--model large` now aliases to `--model large-v3`. Use `--model large-legacy` to use original large model.
