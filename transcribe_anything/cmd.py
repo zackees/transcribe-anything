@@ -70,7 +70,7 @@ def main() -> int:
         "--device",
         help="device to use for processing, None will auto select CUDA if available or else CPU",
         default=None,
-        choices=[None, "cpu", "cuda"],
+        choices=[None, "cpu", "cuda", "insane"],
     )
     parser.add_argument(
         "--embed",
