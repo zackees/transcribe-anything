@@ -1,5 +1,5 @@
 
-# pylint: disable
+# pylint: skip-file
 
 """
 Queries the system for CUDA devices and returns a json string with the information.
