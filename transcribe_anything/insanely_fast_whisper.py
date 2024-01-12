@@ -141,9 +141,10 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
         "--device-id", f"{device_id}",
         "--model-name", model,
         "--task", task,
-        "--language", language,
         "--transcript-path", str(outfile),
     ]
+    if language:
+        cmd_list += ["--language", language]
     batch_size = get_batch_size()
     if batch_size is not None:
         cmd_list += ["--batch-size", f"{batch_size}"]
