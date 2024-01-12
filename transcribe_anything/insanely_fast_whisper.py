@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import subprocess
 from typing import Optional, Any
+from filelock import FileLock
 
 from isolated_environment import IsolatedEnvironment  # type: ignore
 from transcribe_anything.cuda_available import CudaInfo
@@ -19,7 +20,7 @@ from transcribe_anything.cuda_available import CudaInfo
 HERE = Path(__file__).parent
 ENV: Optional[IsolatedEnvironment] = None
 CUDA_INFO: Optional[CudaInfo] = None
-
+ENV_LOCK = FileLock(HERE / "insane_whisper_env.lock")
 
 # Set the versions
 TENSOR_VERSION = "2.1.2"
@@ -41,20 +42,21 @@ def has_nvidia_smi() -> bool:
 def get_environment() -> IsolatedEnvironment:
     """Returns the environment."""
     global ENV  # pylint: disable=global-statement
-    if ENV is not None:
-        return ENV
-    venv_dir = HERE / "venv" / "insanely_fast_whisper"
-    env = IsolatedEnvironment(venv_dir)
-    if not venv_dir.exists():
-        env.install_environment()
-        if has_nvidia_smi():
-            env.pip_install(f"torch=={TENSOR_VERSION}", extra_index=EXTRA_INDEX_URL)
-        else:
-            env.pip_install(f"torch=={TENSOR_VERSION}")
-        env.pip_install("openai-whisper")
-        env.pip_install("insanely-fast-whisper")
-    ENV = env
-    return env
+    with ENV_LOCK:
+        if ENV is not None:
+            return ENV
+        venv_dir = HERE / "venv" / "insanely_fast_whisper"
+        env = IsolatedEnvironment(venv_dir)
+        if not venv_dir.exists():
+            env.install_environment()
+            if has_nvidia_smi():
+                env.pip_install(f"torch=={TENSOR_VERSION}", extra_index=EXTRA_INDEX_URL)
+            else:
+                env.pip_install(f"torch=={TENSOR_VERSION}")
+            env.pip_install("openai-whisper")
+            env.pip_install("insanely-fast-whisper")
+        ENV = env
+        return env
 
 
 def get_cuda_info() -> CudaInfo:

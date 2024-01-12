@@ -9,12 +9,14 @@ import time
 from pathlib import Path
 import subprocess
 from typing import Optional
+from filelock import FileLock
 
 from isolated_environment import IsolatedEnvironment  # type: ignore
 
 HERE = Path(__file__).parent
 ENV: Optional[IsolatedEnvironment] = None
 CUDA_AVAILABLE: Optional[bool] = None
+ENV_LOCK = FileLock(HERE / "whisper_env.lock")
 
 # Set the versions
 TENSOR_VERSION = "2.1.2"
@@ -48,18 +50,20 @@ def get_environment() -> IsolatedEnvironment:
     return env
 
 
+
 def get_computing_device() -> str:
     """Get the computing device."""
-    global CUDA_AVAILABLE  # pylint: disable=global-statement
-    if CUDA_AVAILABLE is None:
-        iso_env = get_environment()
-        env = iso_env.environment()
-        py_file = HERE / "cuda_available.py"
-        rtn = subprocess.run([
-            "python", py_file
-        ], check=False, env=env).returncode
-        CUDA_AVAILABLE = rtn == 0
-    return "cuda" if CUDA_AVAILABLE else "cpu"
+    with ENV_LOCK:
+        global CUDA_AVAILABLE  # pylint: disable=global-statement
+        if CUDA_AVAILABLE is None:
+            iso_env = get_environment()
+            env = iso_env.environment()
+            py_file = HERE / "cuda_available.py"
+            rtn = subprocess.run([
+                "python", py_file
+            ], check=False, env=env).returncode
+            CUDA_AVAILABLE = rtn == 0
+        return "cuda" if CUDA_AVAILABLE else "cpu"
 
 def run_whisper(  # pylint: disable=too-many-arguments
     input_wav: Path,
@@ -71,25 +75,23 @@ def run_whisper(  # pylint: disable=too-many-arguments
     other_args: Optional[list[str]]
 ) -> None:
     """Runs whisper."""
-
     iso_env = get_environment()
     cmd_list = []
     if sys.platform == "win32":
         # Set the text mode to UTF-8 on Windows.
         cmd_list.extend(["chcp", "65001", "&&"])
+    cmd_list.append("whisper")
+    cmd_list.append(f'"{input_wav}"')
+    cmd_list.append("--device")
+    cmd_list.append(device)
+    cmd_list.append("--model")
+    cmd_list.append(model)
+    cmd_list.append(f'--output_dir "{output_dir}"')
+    cmd_list.append("--task")
+    cmd_list.append(task)
+    if language:
+        cmd_list.append(f'--language "{language}"')
 
-    cmd_list.extend(
-        [
-            "whisper",
-            f'"{input_wav}"',
-            "--device",
-            device,
-            model,
-            f'--output_dir "{output_dir}"',
-            task,
-            language,
-        ]
-    )
     if other_args:
         cmd_list.extend(other_args)
     # Remove the empty strings.

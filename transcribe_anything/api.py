@@ -17,6 +17,7 @@ from typing import Optional
 import tempfile
 import shutil
 from pathlib import Path
+from enum import Enum
 
 from appdirs import user_config_dir  # type: ignore
 # from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
@@ -30,6 +31,7 @@ from transcribe_anything.util import (
 )
 from transcribe_anything.logger import log_error
 from transcribe_anything.whisper import run_whisper, get_computing_device
+from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -43,6 +45,30 @@ PERMS = (
     | stat.S_IWUSR
     | stat.S_IWGRP
 )
+
+class Device(Enum):
+    """Device enum."""
+    CPU = "cpu"
+    CUDA = "cuda"
+    INSANE = "insane"
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    @staticmethod
+    def from_str(device: str) -> "Device":
+        """Returns the device from a string."""
+        if device == "cpu":
+            return Device.CPU
+        if device == "cuda":
+            return Device.CUDA
+        if device == "insane":
+            return Device.INSANE
+        raise ValueError(f"Unknown device {device}")
+
 
 ffmpeg_add_paths()
 
@@ -145,30 +171,45 @@ def transcribe(
     #cached_data = cache.get_json(key)
     # print(f"Todo: cached data: {cached_data}")
     device = device or get_computing_device()
-    if device == "cuda":
+    device_enum = Device.from_str(device)
+    if device_enum == Device.CUDA:
         print("#####################################")
         print("######### GPU ACCELERATED! ##########")
         print("#####################################")
-    elif device == "cpu":
+    elif device_enum == Device.INSANE:
+        print("#####################################")
+        print("####### INSANE GPU MODE! ############")
+        print("#####################################")
+    elif device_enum == Device.CPU:
         print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
     else:
         raise ValueError(f"Unknown device {device}")
     print(f"Using device {device}")
-    model_str = f" --model {model}" if model else ""
-    task_str = f" --task {task}" if task else ""
-    language_str = f" --language {language}" if language else ""
+    model_str = f"{model}" if model else ""
+    task_str = f"{task}" if task else "transcribe"
+    language_str = f"{language}" if language else ""
 
     print(f"Running whisper on {tmp_wav} (will install models on first run)")
     with tempfile.TemporaryDirectory() as tmpdir:
-        run_whisper(
-            Path(tmp_wav),
-            device,
-            model_str,
-            Path(tmpdir),
-            task_str,
-            language_str,
-            other_args or [],
-        )
+        if device_enum == Device.INSANE:
+            run_insanely_fast_whisper(
+                Path(tmp_wav),
+                model_str,
+                Path(tmpdir),
+                task_str,
+                language_str,
+                other_args or [],
+            )
+        else:
+            run_whisper(
+                Path(tmp_wav),
+                str(device),
+                model_str,
+                Path(tmpdir),
+                task_str,
+                language_str,
+                other_args or [],
+            )
         files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
         srt_file: Optional[str] = None
         for file in files:

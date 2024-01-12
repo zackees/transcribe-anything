@@ -20,11 +20,14 @@ class TranscribeAnythingTester(unittest.TestCase):
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
-        subprocess.check_output(
-            ["transcribe_anything", "video.mp4", "--language", "en", "--model", "tiny"],
-            cwd=LOCALFILE_DIR,
-        )
-
+        try:
+            subprocess.check_output(
+                ["transcribe_anything", "video.mp4", "--language", "en", "--model", "tiny"],
+                cwd=LOCALFILE_DIR,
+            )
+        except subprocess.CalledProcessError as e:  # pylint: disable=R0801
+            print(e.output)
+            raise e
 
 if __name__ == "__main__":
     unittest.main()

@@ -131,3 +131,4 @@ activate.sh
 tests/test_data
 tests/localfile/text_video
 tests/localfile/text_video_insane
+tests/localfile/text_video_api_insane
