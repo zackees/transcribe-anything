@@ -3,7 +3,7 @@ Queries the system for CUDA devices and returns a json string with the informati
 This is meant to be run under a "isolated-environment".
 """
 
-
+import shutil
 import sys
 from dataclasses import dataclass, asdict, fields
 import json
@@ -66,6 +66,8 @@ def cuda_cards_available() -> CudaInfo:
     ordered by VRAM and multiprocessors.
     """
     # Have to import here, since others will import CudaDevice and CudaInfo.
+    if shutil.which('nvidia-smi') is None:
+        return CudaInfo(False, 0, [])
     import torch  # pylint: disable=import-outside-toplevel
     if torch.cuda.is_available():
         devices = [
