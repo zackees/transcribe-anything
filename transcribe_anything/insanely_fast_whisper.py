@@ -96,7 +96,8 @@ def convert_time_to_srt_format(timestamp: float) -> str:
     minutes, seconds = divmod(remainder, 60)
     milliseconds = int((seconds % 1) * 1000)
     seconds = int(seconds)
-    return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
+    return f"{int(hours):02}:{int(minutes):02}:{seconds:02},{milliseconds:03}"
+
 
 def convert_json_to_srt(json_data: dict[str, Any]) -> str:
     """Converts JSON data from speech-to-text tool to SRT format."""
