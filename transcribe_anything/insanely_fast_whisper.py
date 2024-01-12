@@ -171,8 +171,13 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     assert outfile.exists(), f"Expected {outfile} to exist."
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
-    srt_content = convert_json_to_srt(json_data)
-    srt_file = output_dir / "out.srt"
+    try:
+        srt_content = convert_json_to_srt(json_data)
+        srt_file = output_dir / "out.srt"
+    except Exception as exc:
+        print(f"Failed to convert to srt: {exc}")
+        print("Json data: ", json_data)
+        raise
     txt_content = convert_json_to_text(json_data)
     srt_file.write_text(srt_content, encoding="utf-8")
     txt_file = output_dir / "out.txt"
