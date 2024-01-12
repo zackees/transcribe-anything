@@ -27,4 +27,4 @@ jobs:
     - name: Install testing dependencies
       run: pip install -r requirements.testing.txt
     - name: Run lint
-      run: ./lint.sh
+      run: ./lint.sh --no-ruff

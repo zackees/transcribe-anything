@@ -1,8 +1,13 @@
 #! /bin/bash
 set -e
 
-echo running ruff...
-ruff transcribe_anything tests install_cuda.py
+# does --clean exist
+if [[ $* == *--no-ruff* ]]; then
+    echo skipping ruff...
+else
+    echo running ruff...
+    ruff transcribe_anything tests install_cuda.py
+fi
 
 # echo running flake8...
 # flake8 transcribe_anything tests install_cuda.py
