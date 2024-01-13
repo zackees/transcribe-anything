@@ -142,6 +142,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.7.8: During error of `--device insane`, write out the error.json file into the destination.
   * 2.7.7: Better error messages during failure.
   * 2.7.6: Improved generation of out.txt, removes linebreaks.
   * 2.7.5: `--device insane` now generates better conforming srt files.

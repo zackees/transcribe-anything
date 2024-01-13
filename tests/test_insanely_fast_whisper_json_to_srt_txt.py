@@ -94,7 +94,7 @@ class JsonToSrtTester(unittest.TestCase):
         """Check that the command works on a local file."""
         json_txt = PROBLEM_JSON.read_text()
         data = json.loads(json_txt)
-        out = convert_json_to_text(data)
+        _ = convert_json_to_text(data)
         print("Parsed problem json:")
 
 

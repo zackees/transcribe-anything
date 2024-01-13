@@ -28,16 +28,20 @@ CUDA_VERSION = "cu121"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
+
 def get_current_python_version() -> str:
     """Returns the current python version."""
     return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
+
 # for insanely fast whisper, use:
 #   pipx install insanely-fast-whisper --python python3.11
+
 
 def has_nvidia_smi() -> bool:
     """Returns True if nvidia-smi is installed."""
     return shutil.which("nvidia-smi") is not None
+
 
 def get_environment() -> IsolatedEnvironment:
     """Returns the environment."""
@@ -66,12 +70,17 @@ def get_cuda_info() -> CudaInfo:
         iso_env = get_environment()
         env = iso_env.environment()
         py_file = HERE / "cuda_available.py"
-        cp: subprocess.CompletedProcess = subprocess.run([
-            "python", py_file
-        ], check=False, env=env, universal_newlines=True, stdout=subprocess.PIPE)
+        cp: subprocess.CompletedProcess = subprocess.run(
+            ["python", py_file],
+            check=False,
+            env=env,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+        )
         stdout = cp.stdout
         CUDA_INFO = CudaInfo.from_json_str(stdout)
     return CUDA_INFO
+
 
 def get_device_id() -> str:
     """Get the device id."""
@@ -84,11 +93,13 @@ def get_device_id() -> str:
     device_id = cuda_info.cuda_devices[0].device_id
     return f"{device_id}"
 
+
 def get_batch_size() -> int | None:
     """Returns the batch size."""
     if sys.platform == "darwin":
         return 4
     return None
+
 
 def convert_time_to_srt_format(timestamp: float) -> str:
     """Converts timestamp in seconds to SRT time format (hours:minutes:seconds,milliseconds)."""
@@ -102,17 +113,26 @@ def convert_time_to_srt_format(timestamp: float) -> str:
 def convert_json_to_srt(json_data: dict[str, Any]) -> str:
     """Converts JSON data from speech-to-text tool to SRT format."""
     srt_content = ""
-    for index, chunk in enumerate(json_data['chunks'], start=1):
-        start_time, end_time = chunk['timestamp']
-        start_time_str = convert_time_to_srt_format(start_time)
-        end_time_str = convert_time_to_srt_format(end_time)
-        text = str(chunk['text']).strip()
+    for index, chunk in enumerate(json_data["chunks"], start=1):
+        start_time, end_time = chunk["timestamp"]
+        try:
+            start_time_str = convert_time_to_srt_format(start_time)
+        except Exception as exc:
+            print(f"Failed to convert start time {start_time} to srt format: {exc}")
+            raise
+        try:
+            end_time_str = convert_time_to_srt_format(end_time)
+        except Exception as exc:
+            print(f"Failed to convert end time {end_time} to srt format: {exc}")
+            raise
+        text = str(chunk["text"]).strip()
         srt_content += f"{index}\n{start_time_str} --> {end_time_str}\n{text}\n\n"
     return srt_content
 
+
 def convert_json_to_text(json_data: dict[str, Any]) -> str:
     """Converts JSON data from speech-to-text tool to text."""
-    return json_data['text']
+    return json_data["text"]
 
 
 def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
@@ -121,7 +141,7 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     output_dir: Path,
     task: str,
     language: str,
-    other_args: Optional[list[str]]
+    other_args: Optional[list[str]],
 ) -> None:
     """Runs insanely fast whisper."""
     iso_env = get_environment()
@@ -135,11 +155,16 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
         cmd_list.extend(["chcp", "65001", "&&"])
     cmd_list += [
         "insanely-fast-whisper",
-        "--file-name", str(input_wav),
-        "--device-id", f"{device_id}",
-        "--model-name", model,
-        "--task", task,
-        "--transcript-path", str(outfile),
+        "--file-name",
+        str(input_wav),
+        "--device-id",
+        f"{device_id}",
+        "--model-name",
+        model,
+        "--task",
+        task,
+        "--transcript-path",
+        str(outfile),
     ]
     if language:
         cmd_list += ["--language", language]
@@ -153,8 +178,7 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = subprocess.Popen(  # pylint: disable=consider-using-with
-        cmd, shell=True, universal_newlines=True,
-        encoding="utf-8", env=iso_env.environment()
+        cmd, shell=True, universal_newlines=True, encoding="utf-8", env=iso_env.environment()
     )
     while True:
         rtn = proc.poll()
@@ -175,8 +199,12 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
         print(f"Failed to convert to srt: {exc}")
         print("Json data: ", json_data)
         raise
-    txt_content = convert_json_to_text(json_data)
+    try:
+        txt_content = convert_json_to_text(json_data)
+    except Exception as exc:
+        error_file = output_dir / "transcribe-anything-error.json"
+        error_file.write_text(json_text, encoding="utf-8")
+        raise
     srt_file.write_text(srt_content, encoding="utf-8")
     txt_file = output_dir / "out.txt"
     txt_file.write_text(txt_content, encoding="utf-8")
-
