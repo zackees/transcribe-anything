@@ -115,13 +115,13 @@ def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
     """Converts JSON data from speech-to-text tool to SRT format."""
     srt_content = ""
     num_chunks = len(json_data["chunks"])
-    for index, chunk in enumerate(json_data["chunks"], start=0):
+    for index, chunk in enumerate(json_data["chunks"], start=1):
         # start_time, end_time = chunk["timestamp"]
         time_pair = chunk["timestamp"]
         start_time = time_pair[0]
         end_time = time_pair[1]
         if end_time is None:
-            assert index == num_chunks - 1
+            assert index == num_chunks
             end_time = duration  # Sometimes happens at the end
         try:
             start_time_str = convert_time_to_srt_format(start_time)
