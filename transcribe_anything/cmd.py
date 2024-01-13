@@ -7,6 +7,7 @@
 import argparse
 import sys
 import os
+import traceback
 
 from transcribe_anything.api import transcribe
 from transcribe_anything.whisper import get_computing_device
@@ -100,6 +101,10 @@ def main() -> int:
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
+        return 1
+    except Exception as e:  # pylint: disable=broad-except
+        stack = traceback.format_exc()
+        sys.stderr.write(f"Error: {e}\n{stack}\nwhile processing {args.url_or_file}\n")
         return 1
     return 0
 
