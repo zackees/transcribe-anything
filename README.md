@@ -142,6 +142,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.7.5: `--device insane` now generates better conforming srt files.
   * 2.7.3: Various fixes for the `insane` mode backend.
   * 2.7.0: Introduces an `insanely-fast-whisper`, enable by using `--device insane`
   * 2.6.0: GPU acceleration now happens automatically on Windows thanks to `isolated-environment`. This will also prevent
