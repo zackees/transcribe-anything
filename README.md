@@ -14,6 +14,10 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 Your data stays private and is not uploaded to any service.
 
+#### Insanely fast on `cuda` platforms
+
+If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper
+
 # Install
 
 ```bash
