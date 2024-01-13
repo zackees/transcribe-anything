@@ -211,6 +211,8 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
     json_data_str = json.dumps(json_data, indent=2)
+    # now write the pretty formatted json data back to the text file.
+    outfile.write_text(json_data_str, encoding="utf-8")
     try:
         srt_content = convert_json_to_srt(json_data, wave_duration)
         srt_file = output_dir / "out.srt"
