@@ -118,7 +118,6 @@ def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
     for index, chunk in enumerate(json_data["chunks"], start=0):
         # start_time, end_time = chunk["timestamp"]
         time_pair = chunk["timestamp"]
-        print("parsed time pair: ", time_pair)
         start_time = time_pair[0]
         end_time = time_pair[1]
         if end_time is None:
