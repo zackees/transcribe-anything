@@ -27,8 +27,9 @@ WHISPER_MODEL_OPTIONS = [
     "large-legacy",
     "large",
     "large-v2",
-    "large-v3"
+    "large-v3",
 ]
+
 
 def main() -> int:
     """Main entry point for the command line tool."""
@@ -86,7 +87,7 @@ def main() -> int:
         args.model = "large-v3"
 
     if unknown:
-        print(f"Unknown args: {unknown}")
+        print(f"Args passed to whisper backend: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
     try:
         transcribe(

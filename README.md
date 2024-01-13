@@ -184,5 +184,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 
 ## Notes:
 
-  * Faster whisper
+  * Insanely Fast whisper for GPU
     * https://github.com/Vaibhavs10/insanely-fast-whisper
+  * Fast Whisper for CPU
+    * https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file
