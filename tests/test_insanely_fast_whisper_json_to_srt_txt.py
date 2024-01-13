@@ -51,6 +51,28 @@ EXAMPLE_JSON = """
 }
 """
 
+EXPECTED_SRT_FILE = """
+1
+00:00:00,000 --> 00:00:03,240
+Oh wow, I'm so nervous.
+
+2
+00:00:03,240 --> 00:00:06,559
+Gosh, these lights are so bright.
+
+3
+00:00:06,559 --> 00:00:08,519
+Is this mic on?
+
+4
+00:00:08,519 --> 00:00:09,519
+Is there even a mic?
+""".strip()
+
+EXPECTED_TXT_FILE = """
+Oh wow, I'm so nervous. Gosh, these lights are so bright. Is this mic on? Is there even a mic?
+""".strip()
+
 class JsonToSrtTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
@@ -58,15 +80,13 @@ class JsonToSrtTester(unittest.TestCase):
         """Check that the command works on a local file."""
         data = json.loads(EXAMPLE_JSON)
         out = convert_json_to_srt(data)
-        print(out)
-        print()
+        self.assertIn(EXPECTED_SRT_FILE, out)
 
     def test_json_to_txt(self) -> None:
         """Check that the command works on a local file."""
         data = json.loads(EXAMPLE_JSON)
         out = convert_json_to_text(data)
-        print(out)
-        print()
+        self.assertIn(EXPECTED_TXT_FILE, out)
 
 
 if __name__ == "__main__":

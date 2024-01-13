@@ -245,7 +245,7 @@ def transcribe(
             rtn = subprocess.call(embed_ffmpeg_cmd_list, universal_newlines=True)
             if rtn != 0:
                 warnings.warn(f"ffmpeg failed with return code {rtn}")
-    print(f"Done! File was saved to {output_dir}")
+    print(f"Done! Files were saved to {output_dir}")
     return output_dir
 
 

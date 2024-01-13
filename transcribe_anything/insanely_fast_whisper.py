@@ -112,10 +112,7 @@ def convert_json_to_srt(json_data: dict[str, Any]) -> str:
 
 def convert_json_to_text(json_data: dict[str, Any]) -> str:
     """Converts JSON data from speech-to-text tool to text."""
-    text = ""
-    for chunk in json_data['chunks']:
-        text += str(chunk['text']).strip() + "\n"
-    return text
+    return json_data['text']
 
 
 def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
