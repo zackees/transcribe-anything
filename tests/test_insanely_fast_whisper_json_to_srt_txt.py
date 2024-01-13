@@ -81,7 +81,7 @@ class JsonToSrtTester(unittest.TestCase):
     def test_json_to_srt(self) -> None:
         """Check that the command works on a local file."""
         data = json.loads(EXAMPLE_JSON)
-        out = convert_json_to_srt(data)
+        out = convert_json_to_srt(data, 9.0)
         self.assertIn(EXPECTED_SRT_FILE, out)
 
     def test_json_to_txt(self) -> None:
@@ -94,7 +94,7 @@ class JsonToSrtTester(unittest.TestCase):
         """Check that the command works on a local file."""
         json_txt = PROBLEM_JSON.read_text()
         data = json.loads(json_txt)
-        _ = convert_json_to_text(data)
+        _ = convert_json_to_srt(data, 9999)
         print("Parsed problem json:")
 
 

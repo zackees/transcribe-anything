@@ -8,7 +8,8 @@ Runs whisper api.
 import shutil
 import sys
 import time
-import json
+import wave
+import json5 as json  # type: ignore
 from pathlib import Path
 import subprocess
 from typing import Optional, Any
@@ -110,11 +111,19 @@ def convert_time_to_srt_format(timestamp: float) -> str:
     return f"{int(hours):02}:{int(minutes):02}:{seconds:02},{milliseconds:03}"
 
 
-def convert_json_to_srt(json_data: dict[str, Any]) -> str:
+def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
     """Converts JSON data from speech-to-text tool to SRT format."""
     srt_content = ""
-    for index, chunk in enumerate(json_data["chunks"], start=1):
-        start_time, end_time = chunk["timestamp"]
+    num_chunks = len(json_data["chunks"])
+    for index, chunk in enumerate(json_data["chunks"], start=0):
+        # start_time, end_time = chunk["timestamp"]
+        time_pair = chunk["timestamp"]
+        print("parsed time pair: ", time_pair)
+        start_time = time_pair[0]
+        end_time = time_pair[1]
+        if end_time is None:
+            assert index == num_chunks - 1
+            end_time = duration  # Sometimes happens at the end
         try:
             start_time_str = convert_time_to_srt_format(start_time)
         except Exception as exc:
@@ -135,6 +144,15 @@ def convert_json_to_text(json_data: dict[str, Any]) -> str:
     return json_data["text"]
 
 
+def get_wave_duration(wave_file: Path) -> float:
+    """Returns the duration of a wave file."""
+    with wave.open(str(wave_file), "rb") as wav:
+        frames = wav.getnframes()
+        rate = wav.getframerate()
+        duration = frames / float(rate)
+        return duration
+
+
 def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     input_wav: Path,
     model: str,
@@ -150,6 +168,7 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     output_dir.mkdir(parents=True, exist_ok=True)
     outfile = output_dir / "out.json"
     model = f"openai/whisper-{model}"
+    wave_duration = get_wave_duration(input_wav)
     if sys.platform == "win32":
         # Set the text mode to UTF-8 on Windows.
         cmd_list.extend(["chcp", "65001", "&&"])
@@ -192,17 +211,20 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     assert outfile.exists(), f"Expected {outfile} to exist."
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
+    json_data_str = json.dumps(json_data, indent=2)
     try:
-        srt_content = convert_json_to_srt(json_data)
+        srt_content = convert_json_to_srt(json_data, wave_duration)
         srt_file = output_dir / "out.srt"
     except Exception as exc:
         print(f"Failed to convert to srt: {exc}")
-        print("Json data: ", json_data)
+        print("Json data: ", json_data_str)
+        error_file = Path("transcribe-anything-error.json")
+        error_file.write_text(json_text, encoding="utf-8")
         raise
     try:
         txt_content = convert_json_to_text(json_data)
     except Exception as exc:
-        error_file = output_dir / "transcribe-anything-error.json"
+        error_file = Path("transcribe-anything-error.json")
         error_file.write_text(json_text, encoding="utf-8")
         raise
     srt_file.write_text(srt_content, encoding="utf-8")

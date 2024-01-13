@@ -3,4 +3,5 @@ yt-dlp>=2023.3.4
 appdirs==1.4.4
 disklru>=1.0.7
 isolated-environment>=1.0.1
+json5
 FileLock
