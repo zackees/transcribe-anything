@@ -1,7 +1,3 @@
-
-
-
-
 """
 Tests transcribe_anything
 """
@@ -9,10 +5,15 @@ Tests transcribe_anything
 # pylint: disable=bad-option-value,useless-option-value,no-self-use,protected-access,R0801
 # flake8: noqa E501
 
+from pathlib import Path
 import unittest
 import json
 
 from transcribe_anything.insanely_fast_whisper import convert_json_to_srt, convert_json_to_text
+
+HERE = Path(__file__).parent
+LOCALFILE_DIR = HERE / "localfile"
+PROBLEM_JSON = LOCALFILE_DIR / "problem.json"
 
 EXAMPLE_JSON = """
 {
@@ -73,6 +74,7 @@ EXPECTED_TXT_FILE = """
 Oh wow, I'm so nervous. Gosh, these lights are so bright. Is this mic on? Is there even a mic?
 """.strip()
 
+
 class JsonToSrtTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
@@ -87,6 +89,13 @@ class JsonToSrtTester(unittest.TestCase):
         data = json.loads(EXAMPLE_JSON)
         out = convert_json_to_text(data)
         self.assertIn(EXPECTED_TXT_FILE, out)
+
+    def test_problem_json_to_txt(self) -> None:
+        """Check that the command works on a local file."""
+        json_txt = PROBLEM_JSON.read_text()
+        data = json.loads(json_txt)
+        out = convert_json_to_text(data)
+        print("Parsed problem json:")
 
 
 if __name__ == "__main__":
