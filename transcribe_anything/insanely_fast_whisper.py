@@ -152,6 +152,24 @@ def get_wave_duration(wave_file: Path) -> float:
         return duration
 
 
+def trim_text_chunks(json_data: dict[str, Any]) -> None:
+    """'text' chunks seem to have an extra space at the beginning, remove it."""
+
+    # visit all the nodes in the json data, when we see one that has a 'text' key,
+    # then apply a trim.
+    def visit(node: dict[str, Any]) -> None:
+        if isinstance(node, dict):
+            if "text" in node:
+                node["text"] = node["text"].strip()
+            for key, value in node.items():
+                visit(value)
+        elif isinstance(node, list):
+            for item in node:
+                visit(item)
+
+    visit(json_data)
+
+
 def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     input_wav: Path,
     model: str,
@@ -166,7 +184,9 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     cmd_list = []
     output_dir.mkdir(parents=True, exist_ok=True)
     outfile = output_dir / "out.json"
-    model = f"openai/whisper-{model}"
+    if "/" not in model:
+        # Assume it's not a namespace model, so add the namespace.
+        model = f"openai/whisper-{model}"
     wave_duration = get_wave_duration(input_wav)
     if sys.platform == "win32":
         # Set the text mode to UTF-8 on Windows.
@@ -210,6 +230,7 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     assert outfile.exists(), f"Expected {outfile} to exist."
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
+    trim_text_chunks(json_data)
     json_data_str = json.dumps(json_data, indent=2)
     # now write the pretty formatted json data back to the text file.
     outfile.write_text(json_data_str, encoding="utf-8")
@@ -231,3 +252,5 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     srt_file.write_text(srt_content, encoding="utf-8")
     txt_file = output_dir / "out.txt"
     txt_file.write_text(txt_content, encoding="utf-8")
+    # print srt file
+    print(srt_content)
