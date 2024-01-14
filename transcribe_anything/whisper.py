@@ -9,12 +9,10 @@ from pathlib import Path
 import subprocess
 from typing import Optional
 from typing import Any
-from filelock import FileLock
 from isolated_environment import isolated_environment  # type: ignore
 
 HERE = Path(__file__).parent
 CUDA_AVAILABLE: Optional[bool] = None
-ENV_LOCK = FileLock(HERE / "whisper_env.lock")
 
 # Set the versions
 TENSOR_VERSION = "2.1.2"
@@ -38,7 +36,7 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
     ]
     if has_nvidia_smi():
-        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION}")
+        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
     env = isolated_environment(venv_dir, deps)

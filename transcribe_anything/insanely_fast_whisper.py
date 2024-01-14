@@ -13,6 +13,7 @@ import json5 as json  # type: ignore
 from pathlib import Path
 import subprocess
 from typing import Optional, Any
+import warnings
 
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
@@ -26,6 +27,7 @@ TENSOR_VERSION = "2.1.2"
 CUDA_VERSION = "cu121"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+WRAP_SRT_PY = HERE / "srt_wrap.py"
 
 
 def get_current_python_version() -> str:
@@ -50,7 +52,7 @@ def get_environment() -> dict[str, Any]:
         "insanely-fast-whisper",
     ]
     if has_nvidia_smi():
-        deps.append(f"torch=={TENSOR_CUDA_VERSION}")
+        deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
     deps += [
@@ -68,6 +70,7 @@ def get_cuda_info() -> CudaInfo:
         py_file = HERE / "cuda_available.py"
         cp: subprocess.CompletedProcess = subprocess.run(
             ["python", py_file],
+            shell=True,
             check=False,
             env=env,
             universal_newlines=True,
@@ -180,8 +183,26 @@ def trim_text_chunks(json_data: dict[str, Any]) -> None:
     visit(json_data)
 
 
+def srt_wrap_to_string(srt_file: Path) -> str:
+    env = get_environment()
+    process = subprocess.run(
+        ["python", str(WRAP_SRT_PY), str(srt_file)],
+        env=env,
+        capture_output=True,
+        text=True,
+        shell=True,
+    )
+    out = process.stdout
+    return out
+
+
 def srt_wrap(srt_file: Path) -> None:
-    pass
+    try:
+        out = srt_wrap_to_string(srt_file)
+        WRAP_SRT_PY.write_text(out, encoding="utf-8")
+    except subprocess.CalledProcessError as exc:
+        warnings.warn(f"Failed to run srt_wrap: {exc}")
+        return
 
 
 def run_insanely_fast_whisper(
@@ -271,6 +292,7 @@ def run_insanely_fast_whisper(
         error_file.write_text(json_text, encoding="utf-8")
         raise
     srt_file.write_text(srt_content, encoding="utf-8")
+    srt_wrap(srt_file)
     txt_file = output_dir / "out.txt"
     txt_file.write_text(txt_content, encoding="utf-8")
     convert_to_webvtt(srt_file, output_dir / "out.vtt")
