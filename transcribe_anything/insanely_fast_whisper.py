@@ -13,15 +13,13 @@ import json5 as json  # type: ignore
 from pathlib import Path
 import subprocess
 from typing import Optional, Any
-from filelock import FileLock
 
-from isolated_environment import IsolatedEnvironment  # type: ignore
+import webvtt  # type: ignore
+from isolated_environment import isolated_environment  # type: ignore
 from transcribe_anything.cuda_available import CudaInfo
 
 HERE = Path(__file__).parent
-ENV: Optional[IsolatedEnvironment] = None
 CUDA_INFO: Optional[CudaInfo] = None
-ENV_LOCK = FileLock(HERE / "insane_whisper_env.lock")
 
 # Set the versions
 TENSOR_VERSION = "2.1.2"
@@ -44,32 +42,29 @@ def has_nvidia_smi() -> bool:
     return shutil.which("nvidia-smi") is not None
 
 
-def get_environment() -> IsolatedEnvironment:
+def get_environment() -> dict[str, Any]:
     """Returns the environment."""
-    global ENV  # pylint: disable=global-statement
-    with ENV_LOCK:
-        if ENV is not None:
-            return ENV
-        venv_dir = HERE / "venv" / "insanely_fast_whisper"
-        env = IsolatedEnvironment(venv_dir)
-        if not venv_dir.exists():
-            env.install_environment()
-            if has_nvidia_smi():
-                env.pip_install(f"torch=={TENSOR_VERSION}", extra_index=EXTRA_INDEX_URL)
-            else:
-                env.pip_install(f"torch=={TENSOR_VERSION}")
-            env.pip_install("openai-whisper")
-            env.pip_install("insanely-fast-whisper")
-        ENV = env
-        return env
+    venv_dir = HERE / "venv" / "insanely_fast_whisper"
+    deps = [
+        "openai-whisper",
+        "insanely-fast-whisper",
+    ]
+    if has_nvidia_smi():
+        deps.append(f"torch=={TENSOR_CUDA_VERSION}")
+    else:
+        deps.append(f"torch=={TENSOR_VERSION}")
+    deps += [
+        "srtranslator==0.2.6",
+    ]
+    env = isolated_environment(venv_dir, deps)
+    return env
 
 
 def get_cuda_info() -> CudaInfo:
     """Get the computing device."""
     global CUDA_INFO  # pylint: disable=global-statement
     if CUDA_INFO is None:
-        iso_env = get_environment()
-        env = iso_env.environment()
+        env = get_environment()
         py_file = HERE / "cuda_available.py"
         cp: subprocess.CompletedProcess = subprocess.run(
             ["python", py_file],
@@ -109,6 +104,21 @@ def convert_time_to_srt_format(timestamp: float) -> str:
     milliseconds = int((seconds % 1) * 1000)
     seconds = int(seconds)
     return f"{int(hours):02}:{int(minutes):02}:{seconds:02},{milliseconds:03}"
+
+
+def convert_to_webvtt(srt_file: Path, out_webvtt_file: Path) -> None:
+    """Convert to webvtt format."""
+    STYLE_ELEMENT = """STYLE
+    ::::cue {
+    line: 80%;
+    }
+    """
+    assert srt_file.suffix == ".srt"
+    assert out_webvtt_file.suffix == ".vtt"
+    webvtt.from_srt(str(srt_file)).save(str(out_webvtt_file))
+    content = out_webvtt_file.read_text(encoding="utf-8")
+    content = content.replace("WEBVTT\n\n", f"WEBVTT\n\n{STYLE_ELEMENT}")
+    out_webvtt_file.write_text(content, encoding="utf-8")
 
 
 def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
@@ -170,16 +180,21 @@ def trim_text_chunks(json_data: dict[str, Any]) -> None:
     visit(json_data)
 
 
-def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
+def srt_wrap(srt_file: Path) -> None:
+    pass
+
+
+def run_insanely_fast_whisper(
     input_wav: Path,
     model: str,
     output_dir: Path,
     task: str,
     language: str,
-    other_args: Optional[list[str]],
+    hugging_face_token: str | None = None,
+    other_args: list[str] | None = None,
 ) -> None:
     """Runs insanely fast whisper."""
-    iso_env = get_environment()
+    env = get_environment()
     device_id = get_device_id()
     cmd_list = []
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -204,6 +219,8 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
         "--transcript-path",
         str(outfile),
     ]
+    if hugging_face_token:
+        cmd_list += ["--hf_token", hugging_face_token]
     if language:
         cmd_list += ["--language", language]
     batch_size = get_batch_size()
@@ -216,7 +233,11 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = subprocess.Popen(  # pylint: disable=consider-using-with
-        cmd, shell=True, universal_newlines=True, encoding="utf-8", env=iso_env.environment()
+        cmd,
+        shell=True,
+        universal_newlines=True,
+        encoding="utf-8",
+        env=env,
     )
     while True:
         rtn = proc.poll()
@@ -252,5 +273,6 @@ def run_insanely_fast_whisper(  # pylint: disable=too-many-arguments
     srt_file.write_text(srt_content, encoding="utf-8")
     txt_file = output_dir / "out.txt"
     txt_file.write_text(txt_content, encoding="utf-8")
+    convert_to_webvtt(srt_file, output_dir / "out.vtt")
     # print srt file
     print(srt_content)

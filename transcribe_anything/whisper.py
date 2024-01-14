@@ -1,4 +1,3 @@
-
 """
 Runs whisper api.
 """
@@ -9,12 +8,11 @@ import time
 from pathlib import Path
 import subprocess
 from typing import Optional
+from typing import Any
 from filelock import FileLock
-
-from isolated_environment import IsolatedEnvironment  # type: ignore
+from isolated_environment import isolated_environment  # type: ignore
 
 HERE = Path(__file__).parent
-ENV: Optional[IsolatedEnvironment] = None
 CUDA_AVAILABLE: Optional[bool] = None
 ENV_LOCK = FileLock(HERE / "whisper_env.lock")
 
@@ -27,43 +25,36 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 # for insanely fast whisper, use:
 #   pipx install insanely-fast-whisper --python python3.11
 
+
 def has_nvidia_smi() -> bool:
     """Returns True if nvidia-smi is installed."""
     return shutil.which("nvidia-smi") is not None
 
 
-def get_environment() -> IsolatedEnvironment:
+def get_environment() -> dict[str, Any]:
     """Returns the environment."""
-    global ENV  # pylint: disable=global-statement
-    if ENV is not None:
-        return ENV
     venv_dir = HERE / "venv" / "whisper"
-    env = IsolatedEnvironment(venv_dir)
-    if not venv_dir.exists():
-        env.install_environment()
-        if has_nvidia_smi():
-            env.pip_install(f"torch=={TENSOR_VERSION}", extra_index=EXTRA_INDEX_URL)
-        else:
-            env.pip_install(f"torch=={TENSOR_VERSION}")
-        env.pip_install("openai-whisper")
-    ENV = env
+    deps = [
+        "openai-whisper",
+    ]
+    if has_nvidia_smi():
+        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION}")
+    else:
+        deps.append(f"torch=={TENSOR_VERSION}")
+    env = isolated_environment(venv_dir, deps)
     return env
-
 
 
 def get_computing_device() -> str:
     """Get the computing device."""
-    with ENV_LOCK:
-        global CUDA_AVAILABLE  # pylint: disable=global-statement
-        if CUDA_AVAILABLE is None:
-            iso_env = get_environment()
-            env = iso_env.environment()
-            py_file = HERE / "cuda_available.py"
-            rtn = subprocess.run([
-                "python", py_file
-            ], check=False, env=env).returncode
-            CUDA_AVAILABLE = rtn == 0
-        return "cuda" if CUDA_AVAILABLE else "cpu"
+    global CUDA_AVAILABLE  # pylint: disable=global-statement
+    if CUDA_AVAILABLE is None:
+        env = get_environment()
+        py_file = HERE / "cuda_available.py"
+        rtn = subprocess.run(["python", py_file], check=False, env=env).returncode
+        CUDA_AVAILABLE = rtn == 0
+    return "cuda" if CUDA_AVAILABLE else "cpu"
+
 
 def run_whisper(  # pylint: disable=too-many-arguments
     input_wav: Path,
@@ -72,10 +63,10 @@ def run_whisper(  # pylint: disable=too-many-arguments
     output_dir: Path,
     task: str,
     language: str,
-    other_args: Optional[list[str]]
+    other_args: list[str] | None = None,
 ) -> None:
     """Runs whisper."""
-    iso_env = get_environment()
+    env = get_environment()
     cmd_list = []
     if sys.platform == "win32":
         # Set the text mode to UTF-8 on Windows.
@@ -99,9 +90,7 @@ def run_whisper(  # pylint: disable=too-many-arguments
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = subprocess.Popen(  # pylint: disable=consider-using-with
-        cmd, shell=True, universal_newlines=True,
-        env=iso_env.environment(),
-        encoding="utf-8"
+        cmd, shell=True, universal_newlines=True, env=env, encoding="utf-8"
     )
     while True:
         rtn = proc.poll()

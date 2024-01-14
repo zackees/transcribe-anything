@@ -25,10 +25,9 @@ def _parse_item(item: str) -> tuple[str, Any]:
 
 def parse_whisper_options() -> dict:
     """Parses the whisper options."""
-    env = get_environment().environment()
+    env = get_environment()
     stdout = subprocess.check_output(
-        "whisper --help", shell=True, universal_newlines=True,
-        encoding="utf-8", env=env
+        "whisper --help", shell=True, universal_newlines=True, encoding="utf-8", env=env
     )
     lines = stdout.splitlines()
     data = {}

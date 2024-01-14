@@ -20,6 +20,7 @@ from pathlib import Path
 from enum import Enum
 
 from appdirs import user_config_dir  # type: ignore
+
 # from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
 
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
@@ -37,17 +38,12 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 
 CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
 
-PERMS = (
-    stat.S_IRUSR
-    | stat.S_IRGRP
-    | stat.S_IROTH
-    | stat.S_IWOTH
-    | stat.S_IWUSR
-    | stat.S_IWGRP
-)
+PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
+
 
 class Device(Enum):
     """Device enum."""
+
     CPU = "cpu"
     CUDA = "cuda"
     INSANE = "insane"
@@ -90,6 +86,7 @@ def make_temp_wav() -> str:
     atexit.register(cleanup)
     return tmp.name
 
+
 def fix_subtitles_path(_path: str) -> str:
     """Fixes windows subtitles path, which is weird."""
     if sys.platform != "win32":
@@ -118,6 +115,7 @@ def transcribe(
     language: Optional[str] = None,
     device: Optional[str] = None,
     embed: bool = False,
+    hugging_face_token: Optional[str] = None,
     other_args: Optional[list[str]] = None,
 ) -> str:
     """
@@ -125,8 +123,7 @@ def transcribe(
     """
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError(
-            "Embedding is only supported for local files. "
-            "Please download the file first."
+            "Embedding is only supported for local files. " + "Please download the file first."
         )
     # cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
@@ -160,15 +157,13 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(
-        output_dir
-    ), f"Path {output_dir} is not found or not a directory."
+    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
     # tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_wav)
     assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
-    #filemd5 = md5(file.encode("utf-8")).hexdigest()
-    #key = f"{file}-{filemd5}-{model}"
-    #cached_data = cache.get_json(key)
+    # filemd5 = md5(file.encode("utf-8")).hexdigest()
+    # key = f"{file}-{filemd5}-{model}"
+    # cached_data = cache.get_json(key)
     # print(f"Todo: cached data: {cached_data}")
     device = device or get_computing_device()
     device_enum = Device.from_str(device)
@@ -193,22 +188,23 @@ def transcribe(
     with tempfile.TemporaryDirectory() as tmpdir:
         if device_enum == Device.INSANE:
             run_insanely_fast_whisper(
-                Path(tmp_wav),
-                model_str,
-                Path(tmpdir),
-                task_str,
-                language_str,
-                other_args or [],
+                input_wav=Path(tmp_wav),
+                model=model_str,
+                output_dir=Path(tmpdir),
+                task=task_str,
+                language=language_str,
+                hugging_face_token=hugging_face_token,
+                other_args=other_args,
             )
         else:
             run_whisper(
-                Path(tmp_wav),
-                str(device),
-                model_str,
-                Path(tmpdir),
-                task_str,
-                language_str,
-                other_args or [],
+                input_wav=Path(tmp_wav),
+                device=str(device),
+                model=model_str,
+                output_dir=Path(tmpdir),
+                task=task_str,
+                language=language_str,
+                other_args=other_args,
             )
         files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
         srt_file: Optional[str] = None
@@ -235,10 +231,13 @@ def transcribe(
             embed_ffmpeg_cmd_list = [
                 "ffmpeg",
                 "-y",
-                "-i", url_or_file,
-                "-i", srt_file,
-                "-vf", f"subtitles={fix_subtitles_path(srt_file)}",
-                out_mp4
+                "-i",
+                url_or_file,
+                "-i",
+                srt_file,
+                "-vf",
+                f"subtitles={fix_subtitles_path(srt_file)}",
+                out_mp4,
             ]
             embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
             print(f"Running:\n  {embed_ffmpeg_cmd}")

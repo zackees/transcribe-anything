@@ -75,6 +75,11 @@ def main() -> int:
         choices=[None, "cpu", "cuda", "insane"],
     )
     parser.add_argument(
+        "--hf_token",
+        help="huggingface token to use for downloading models",
+        default=None,
+    )
+    parser.add_argument(
         "--embed",
         help="whether to embed the translation file into the output file",
         action="store_true",
@@ -98,6 +103,7 @@ def main() -> int:
             language=args.language if args.language != "None" else None,
             device=args.device,
             embed=args.embed,
+            hugging_face_token=args.hf_token,
             other_args=unknown,
         )
     except KeyboardInterrupt:

@@ -11,13 +11,16 @@ import shutil
 from pathlib import Path
 
 from transcribe_anything.insanely_fast_whisper import (
-    run_insanely_fast_whisper, has_nvidia_smi, CudaInfo, get_cuda_info
+    run_insanely_fast_whisper,
+    has_nvidia_smi,
+    CudaInfo,
+    get_cuda_info,
 )
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
 TESTS_DATA_DIR = LOCALFILE_DIR / "text_video_insane" / "en"
-TEST_WAV = LOCALFILE_DIR  / "video.wav"
+TEST_WAV = LOCALFILE_DIR / "video.wav"
 
 
 class InsanelFastWhisperTester(unittest.TestCase):
@@ -33,7 +36,6 @@ class InsanelFastWhisperTester(unittest.TestCase):
             output_dir=TESTS_DATA_DIR,
             task="transcribe",
             language="en",
-            other_args=None,
         )
 
     @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")

@@ -34,7 +34,14 @@ class InsaneWhisperModeTester(unittest.TestCase):
             device="insane",
             output_dir=TESTS_DATA_DIR,
         )
-
+        # check that theres a vtt file
+        vtt_file = os.path.join(TESTS_DATA_DIR, "out.vtt")
+        self.assertTrue(os.path.isfile(vtt_file))
+        print(f"Found expected vtt file: {vtt_file}")
+        # srt file
+        srt_file = os.path.join(TESTS_DATA_DIR, "out.srt")
+        self.assertTrue(os.path.isfile(srt_file))
+        print(f"Found expected srt file: {srt_file}")
 
 
 if __name__ == "__main__":
