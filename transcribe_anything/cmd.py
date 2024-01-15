@@ -17,7 +17,7 @@ from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.whisper import get_computing_device
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
-CACHED_WHISPER_OPTIONS = HERE / "cached_whisper_options.json"
+WHISPER_OPTIONS = HERE / "WHISPER_OPTIONS.json"
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -39,17 +39,16 @@ WHISPER_MODEL_OPTIONS = [
 
 def get_whisper_options() -> dict:
     """Get whisper options.""" ""
-    file_age: float = 0
-    if CACHED_WHISPER_OPTIONS.exists():
-        file_age = os.path.getmtime(CACHED_WHISPER_OPTIONS)
-    if file_age < 60 * 60 * 24 * 7:  # 1 week
-        CACHED_WHISPER_OPTIONS.unlink()
-    if not CACHED_WHISPER_OPTIONS.exists():
+    if not WHISPER_OPTIONS.exists():
         whisper_options = parse_whisper_options()
         string = json.dumps(whisper_options, indent=4)
-        CACHED_WHISPER_OPTIONS.write_text(string)
-    else:
-        whisper_options = json.loads(CACHED_WHISPER_OPTIONS.read_text())
+        WHISPER_OPTIONS.write_text(string)
+        return whisper_options
+    file_age = os.path.getmtime(WHISPER_OPTIONS)
+    if file_age > 60 * 60 * 24 * 7:  # 1 week
+        whisper_options = parse_whisper_options()
+        string = json.dumps(whisper_options, indent=4)
+        WHISPER_OPTIONS.write_text(string)
     return whisper_options
 
 

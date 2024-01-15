@@ -5,6 +5,7 @@ Test the parse speaker module.
 
 from dataclasses import dataclass
 from warnings import warn
+from typing import Optional
 
 import json5 as json  # type: ignore
 
@@ -17,6 +18,7 @@ class Chunk:
     timestamp_start: float
     timestamp_end: float
     text: str
+    reason: Optional[str] = None
 
     def to_json(self):
         """Convert to json."""
@@ -25,6 +27,7 @@ class Chunk:
                 "speaker": self.speaker,
                 "timestamp": [self.timestamp_start, self.timestamp_end],
                 "text": self.text,
+                "reason": self.reason,
             },
         )
 
@@ -42,10 +45,12 @@ def reduce(dat: list[Chunk]) -> list[Chunk]:
     out: list[Chunk] = []
     for chunk in dat:
         if not out:
+            chunk.reason = "beginning"
             out.append(chunk)
             continue
         last_chunk = out[-1]
         if not can_combine(last_chunk, chunk):
+            chunk.reason = "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
             out.append(chunk)
             continue
         # combine
@@ -54,6 +59,7 @@ def reduce(dat: list[Chunk]) -> list[Chunk]:
             last_chunk.timestamp_start,
             chunk.timestamp_end,
             last_chunk.text + " " + chunk.text,
+            last_chunk.reason,
         )
 
     return out
