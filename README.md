@@ -146,6 +146,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.7.13: Default diarization model is now pyannote/speaker-diarization-3.1
   * 2.7.12: Adds srt_swap for line breaks and improved isolated_environment usage.
   * 2.7.11: `--device insane` now generates a *.vtt translation file
   * 2.7.10: Better support for namespaced models. Trims text output in output json. Output json is now formatted with indents. SRT file is now printed out for `--device insane`
