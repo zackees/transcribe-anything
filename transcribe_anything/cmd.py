@@ -15,7 +15,7 @@ from pathlib import Path
 # appdirs is used to get the cache directory
 from appdirs import user_cache_dir  # type: ignore
 
-from transcribe_anything.api import transcribe
+
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.whisper import get_computing_device
 
@@ -183,6 +183,8 @@ def main() -> int:
         print(f"Args passed to whisper backend: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
     try:
+        from transcribe_anything.api import transcribe  # pylint: disable=import-outside-toplevel
+
         transcribe(
             url_or_file=args.url_or_file,
             output_dir=args.output_dir,
