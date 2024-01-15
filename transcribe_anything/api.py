@@ -221,7 +221,10 @@ def transcribe(
             base_path = os.path.dirname(file)
             new_file = os.path.join(base_path, chop_double_extension(file_name))
             _, ext = os.path.splitext(new_file)
-            outfile = os.path.join(output_dir, f"out{ext}")
+            if "speaker.json" in new_file:  # pass through speaker.json
+                outfile = os.path.join(output_dir, "speaker.json")
+            else:
+                outfile = os.path.join(output_dir, f"out{ext}")
             if os.path.exists(outfile):
                 os.remove(outfile)
             assert os.path.isfile(file), f"Path {file} doesn't exist."
