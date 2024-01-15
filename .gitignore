@@ -134,3 +134,4 @@ tests/localfile/text_video_insane
 tests/localfile/text_video_api_insane
 tests/localfile/speaker-test.json
 .aider*
+transcribe_anything/WHISPER_OPTIONS.json
