@@ -17,10 +17,10 @@ LOCALFILE_DIR = HERE / "localfile"
 TEST_SRT = LOCALFILE_DIR / "speaker-test.json"
 
 
-class ParseSpeakerTest(unittest.TestCase):
+class SpeakerJsonTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
-    def test_srt_wrap(self) -> None:
+    def test_generate_speaker_json(self) -> None:
         """Check that the command works on a local file."""
         json_str = TEST_SRT.read_text()
         data = json.loads(json_str)

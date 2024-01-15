@@ -20,16 +20,15 @@ class Chunk:
     text: str
     reason: Optional[str] = None
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Convert to json."""
-        return (
-            {
-                "speaker": self.speaker,
-                "timestamp": [self.timestamp_start, self.timestamp_end],
-                "text": self.text,
-                "reason": self.reason,
-            },
-        )
+        out = {
+            "speaker": self.speaker,
+            "timestamp": [self.timestamp_start, self.timestamp_end],
+            "text": self.text,
+            "reason": self.reason,
+        }
+        return out
 
 
 def can_combine(chunk1: Chunk, chunk2: Chunk) -> bool:
@@ -50,9 +49,7 @@ def reduce(dat: list[Chunk]) -> list[Chunk]:
             continue
         last_chunk = out[-1]
         if not can_combine(last_chunk, chunk):
-            chunk.reason = (
-                "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
-            )
+            chunk.reason = "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
             out.append(chunk)
             continue
         # combine
