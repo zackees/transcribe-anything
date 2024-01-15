@@ -6,13 +6,18 @@
 # pylint: disable=too-many-branches
 
 import argparse
+import json
 import os
 import sys
 import traceback
+from pathlib import Path
 
 from transcribe_anything.api import transcribe
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.whisper import get_computing_device
+
+HERE = Path(os.path.abspath(os.path.dirname(__file__)))
+CACHED_WHISPER_OPTIONS = HERE / "cached_whisper_options.json"
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -32,9 +37,25 @@ WHISPER_MODEL_OPTIONS = [
 ]
 
 
+def get_whisper_options() -> dict:
+    """Get whisper options.""" ""
+    file_age: float = 0
+    if CACHED_WHISPER_OPTIONS.exists():
+        file_age = os.path.getmtime(CACHED_WHISPER_OPTIONS)
+    if file_age < 60 * 60 * 24 * 7:  # 1 week
+        CACHED_WHISPER_OPTIONS.unlink()
+    if not CACHED_WHISPER_OPTIONS.exists():
+        whisper_options = parse_whisper_options()
+        string = json.dumps(whisper_options, indent=4)
+        CACHED_WHISPER_OPTIONS.write_text(string)
+    else:
+        whisper_options = json.loads(CACHED_WHISPER_OPTIONS.read_text())
+    return whisper_options
+
+
 def main() -> int:
     """Main entry point for the command line tool."""
-    whisper_options = parse_whisper_options()
+    whisper_options = get_whisper_options()
     device = get_computing_device()
     help_str = (
         f'transcribe_anything is using a "{device}" device.'
