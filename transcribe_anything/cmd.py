@@ -3,6 +3,7 @@
 """
 
 # flake8: noqa E501
+# pylint: disable=too-many-branches
 
 import argparse
 import sys
@@ -80,6 +81,23 @@ def main() -> int:
         default=None,
     )
     parser.add_argument(
+        "--diarization_model",
+        help=(
+            "Name of the pretrained model/ checkpoint to perform diarization."
+            + " (default: pyannote/speaker-diarization). Only works for --device insane."
+        ),
+        default="pyannote/speaker-diarization-3.1",
+    )
+    parser.add_argument(
+        "--timestamp",
+        help=(
+            "Whisper supports both chunked as well as word level timestamps. (default: chunk)."
+            + " Only works for --device insane."
+        ),
+        choices=["chunk", "word"],
+        default=None,
+    )
+    parser.add_argument(
         "--embed",
         help="whether to embed the translation file into the output file",
         action="store_true",
@@ -89,7 +107,34 @@ def main() -> int:
     if args.model == "large-legacy":
         args.model = "large"
     elif args.model == "large":
+        print(
+            "Defaulting to large-v3 model for --model large,"
+            + " use --model large-legacy for the old model"
+        )
         args.model = "large-v3"
+    elif args.model is None and args.device == "insane":
+        print("Defaulting to large-v3 model for --device insane")
+        args.model = "large-v3"
+
+    if args.hf_token is None:
+        args.hf_token = os.environ.get("HF_TOKEN", None)
+        if args.hf_token is None:
+            args.diarization_model = None
+
+    # For now, just stuff --diarization_model and --timestamp into unknown
+    if args.diarization_model:
+        if args.device != "insane":
+            print(
+                "--diarization_model only works with --device insane. Ignoring --diarization_model"
+            )
+        else:
+            unknown.append(f"--diarization_model {args.diarization_model}")
+
+    if args.timestamp:
+        if args.device != "insane":
+            print("--timestamp only works with --device insane. Ignoring --timestamp")
+        else:
+            unknown.append(f"--timestamp {args.timestamp}")
 
     if unknown:
         print(f"Args passed to whisper backend: {unknown}")

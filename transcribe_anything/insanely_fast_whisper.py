@@ -199,7 +199,7 @@ def srt_wrap_to_string(srt_file: Path) -> str:
 def srt_wrap(srt_file: Path) -> None:
     try:
         out = srt_wrap_to_string(srt_file)
-        WRAP_SRT_PY.write_text(out, encoding="utf-8")
+        srt_file.write_text(out, encoding="utf-8")
     except subprocess.CalledProcessError as exc:
         warnings.warn(f"Failed to run srt_wrap: {exc}")
         return
@@ -291,8 +291,10 @@ def run_insanely_fast_whisper(
         error_file = Path("transcribe-anything-error.json")
         error_file.write_text(json_text, encoding="utf-8")
         raise
+    # Disable srt_wrapping because it breaks conversion to webvtt.
     srt_file.write_text(srt_content, encoding="utf-8")
-    srt_wrap(srt_file)
+    # srt_wrap(srt_file)
+    # srt_content = srt_file.read_text(encoding="utf-8")
     txt_file = output_dir / "out.txt"
     txt_file.write_text(txt_content, encoding="utf-8")
     convert_to_webvtt(srt_file, output_dir / "out.vtt")

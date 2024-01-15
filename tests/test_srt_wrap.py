@@ -7,9 +7,7 @@ Tests transcribe_anything
 
 import os
 import unittest
-import shutil
 from pathlib import Path
-import tempfile
 from transcribe_anything.insanely_fast_whisper import (
     srt_wrap_to_string,
     has_nvidia_smi,
@@ -27,13 +25,9 @@ class InsanelFastWhisperTester(unittest.TestCase):
     @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
     def test_srt_wrap(self) -> None:
         """Check that the command works on a local file."""
-        with tempfile.TemporaryDirectory() as tempdir:
-            td = Path(tempdir)
-            target = td / "long.srt"
-            shutil.copy(TEST_SRT, target)
-            wrapped_srt = srt_wrap_to_string(target)
-            print(wrapped_srt)
-            print()
+        wrapped_srt = srt_wrap_to_string(TEST_SRT)
+        print(wrapped_srt)
+        print()
 
 
 if __name__ == "__main__":
