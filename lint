@@ -1,19 +1,28 @@
 #! /bin/bash
 set -e
 
+echo running black...
+black transcribe_anything tests
+
+echo running isort...
+isort transcribe_anything tests
+
+echo re-running black now
+black transcribe_anything tests
+
 # does --clean exist
 if [[ $* == *--no-ruff* ]]; then
     echo skipping ruff...
 else
     echo running ruff...
-    ruff transcribe_anything tests install_cuda.py
+    ruff transcribe_anything tests
 fi
 
 # echo running flake8...
 # flake8 transcribe_anything tests install_cuda.py
 
 echo running pylint...
-pylint transcribe_anything tests install_cuda.py
+pylint transcribe_anything tests --disable=R0801
 
 echo running mypy...
-mypy transcribe_anything tests install_cuda.py
+mypy transcribe_anything tests

@@ -8,11 +8,8 @@ Tests transcribe_anything
 import os
 import unittest
 from pathlib import Path
-from transcribe_anything.insanely_fast_whisper import (
-    srt_wrap_to_string,
-    has_nvidia_smi,
-)
 
+from transcribe_anything.insanely_fast_whisper import has_nvidia_smi, srt_wrap_to_string
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"

@@ -6,13 +6,11 @@ Tests transcribe_anything
 # flake8: noqa E501
 
 import os
-import unittest
 import shutil
+import unittest
 
 from transcribe_anything.api import transcribe
-
 from transcribe_anything.insanely_fast_whisper import has_nvidia_smi
-
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LOCALFILE_DIR = os.path.join(HERE, "localfile")

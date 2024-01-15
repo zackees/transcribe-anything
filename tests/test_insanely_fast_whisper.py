@@ -6,15 +6,15 @@ Tests transcribe_anything
 # flake8: noqa E501
 
 import os
-import unittest
 import shutil
+import unittest
 from pathlib import Path
 
 from transcribe_anything.insanely_fast_whisper import (
-    run_insanely_fast_whisper,
-    has_nvidia_smi,
     CudaInfo,
     get_cuda_info,
+    has_nvidia_smi,
+    run_insanely_fast_whisper,
 )
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))

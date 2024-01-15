@@ -2,9 +2,8 @@
 Parses whisper options.
 """
 
-import subprocess
 import re
-
+import subprocess
 from typing import Any
 
 from transcribe_anything import logger

@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 """
 DEPRECATED: This script should no longer be necessary do to isolated environments,
 but I'm keeping it around for now just in case.
@@ -42,14 +44,7 @@ pip_list_stdout = subprocess.run(
 
 # Delete the torch package if it doesn't have the cuda version
 if args.force or True:  # always do this path now.  # pylint: disable=condition-evals-to-constant
-    uninstall = [
-        "torch",
-        "torchtext",
-        "torchdata",
-        "torchaudio",
-        "torchvision",
-        "torch-directml"
-    ]
+    uninstall = ["torch", "torchtext", "torchdata", "torchaudio", "torchvision", "torch-directml"]
     for package in uninstall:
         subprocess.run(["pip", "uninstall", "-y", package], check=True)
     subprocess.run(["pip", "cache", "purge"], check=True)

@@ -6,13 +6,13 @@
 # pylint: disable=too-many-branches
 
 import argparse
-import sys
 import os
+import sys
 import traceback
 
 from transcribe_anything.api import transcribe
-from transcribe_anything.whisper import get_computing_device
 from transcribe_anything.parse_whisper_options import parse_whisper_options
+from transcribe_anything.whisper import get_computing_device
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 

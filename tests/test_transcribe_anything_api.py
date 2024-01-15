@@ -6,8 +6,8 @@ Tests transcribe_anything
 # flake8: noqa E501
 
 import os
-import unittest
 import shutil
+import unittest
 
 from transcribe_anything.api import transcribe
 

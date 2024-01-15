@@ -6,17 +6,18 @@ Runs whisper api.
 """
 
 import shutil
+import subprocess
 import sys
 import time
-import wave
-import json5 as json  # type: ignore
-from pathlib import Path
-import subprocess
-from typing import Optional, Any
 import warnings
+import wave
+from pathlib import Path
+from typing import Any, Optional
 
+import json5 as json  # type: ignore
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
+
 from transcribe_anything.cuda_available import CudaInfo
 
 HERE = Path(__file__).parent

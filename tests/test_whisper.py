@@ -2,10 +2,10 @@
 Tests whisper ai cmd
 """
 
-# pylint: disable=bad-option-value,useless-option-value,no-self-use,protected-access
+# pylint: disable=bad-option-value,useless-option-value,no-self-use,protected-access,R0801
 
-import unittest
 import subprocess
+import unittest
 
 from transcribe_anything.whisper import get_environment
 

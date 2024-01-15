@@ -6,9 +6,9 @@ Tests transcribe_anything
 # flake8: noqa E501
 
 import os
+import shutil
 import subprocess
 import unittest
-import shutil
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TESTS_DATA_DIR = os.path.join(HERE, "test_data")

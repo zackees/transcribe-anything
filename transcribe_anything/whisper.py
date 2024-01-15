@@ -3,12 +3,12 @@ Runs whisper api.
 """
 
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
-import subprocess
-from typing import Optional
-from typing import Any
+from typing import Any, Optional
+
 from isolated_environment import isolated_environment  # type: ignore
 
 HERE = Path(__file__).parent
@@ -36,7 +36,9 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
     ]
     if has_nvidia_smi():
-        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
+        deps.append(
+            f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
+        )
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
     env = isolated_environment(venv_dir, deps)

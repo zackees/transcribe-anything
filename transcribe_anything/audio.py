@@ -3,11 +3,12 @@
 """
 
 
-import sys
-import tempfile
-import subprocess
 import os
 import shutil
+import subprocess
+import sys
+import tempfile
+
 import static_ffmpeg  # type: ignore
 
 from transcribe_anything.util import PROCESS_TIMEOUT

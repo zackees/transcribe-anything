@@ -6,11 +6,12 @@ Wraps the srt file.
 
 # designed to be run in an isolated environment.
 
-from argparse import ArgumentParser, Namespace
+import shutil
 import sys
 import tempfile
-import shutil
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
+
 from srtranslator import SrtFile  # type: ignore
 
 

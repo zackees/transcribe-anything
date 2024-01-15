@@ -5,11 +5,14 @@ Tests transcribe_anything
 # pylint: disable=bad-option-value,useless-option-value,no-self-use,protected-access,R0801
 # flake8: noqa E501
 
-from pathlib import Path
-import unittest
 import json
+import unittest
+from pathlib import Path
 
-from transcribe_anything.insanely_fast_whisper import convert_json_to_srt, convert_json_to_text
+from transcribe_anything.insanely_fast_whisper import (
+    convert_json_to_srt,
+    convert_json_to_text,
+)
 
 HERE = Path(__file__).parent
 LOCALFILE_DIR = HERE / "localfile"

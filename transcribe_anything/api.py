@@ -9,36 +9,40 @@
 
 import atexit
 import os
-import warnings
-import stat
-import sys
-import subprocess
-from typing import Optional
-import tempfile
 import shutil
-from pathlib import Path
+import stat
+import subprocess
+import sys
+import tempfile
+import warnings
 from enum import Enum
+from pathlib import Path
+from typing import Optional
 
 from appdirs import user_config_dir  # type: ignore
-
-# from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
-
 from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
-from transcribe_anything.util import (
-    sanitize_filename,
-    chop_double_extension,
-)
-from transcribe_anything.logger import log_error
-from transcribe_anything.whisper import run_whisper, get_computing_device
 from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
+from transcribe_anything.logger import log_error
+from transcribe_anything.util import chop_double_extension, sanitize_filename
+from transcribe_anything.whisper import get_computing_device, run_whisper
+
+# from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
+
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
 
-PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
+PERMS = (
+    stat.S_IRUSR
+    | stat.S_IRGRP
+    | stat.S_IROTH
+    | stat.S_IWOTH
+    | stat.S_IWUSR
+    | stat.S_IWGRP
+)
 
 
 class Device(Enum):
@@ -123,7 +127,8 @@ def transcribe(
     """
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError(
-            "Embedding is only supported for local files. " + "Please download the file first."
+            "Embedding is only supported for local files. "
+            + "Please download the file first."
         )
     # cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
@@ -157,7 +162,9 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
+    assert os.path.isdir(
+        output_dir
+    ), f"Path {output_dir} is not found or not a directory."
     # tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_wav)
     assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
@@ -253,7 +260,9 @@ if __name__ == "__main__":
     # transcribe(url_or_file="https://twitter.com/wlctv_ca/status/1598895698870951943")
     try:
         # transcribe(url_or_file="https://www.youtube.com/live/gBHFFM7-aCk?feature=share", output_dir="test")
-        transcribe(url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test")
+        transcribe(
+            url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test"
+        )
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         sys.exit(1)

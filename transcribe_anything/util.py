@@ -8,6 +8,7 @@ from urllib.parse import unquote
 
 PROCESS_TIMEOUT = 4 * 60 * 60
 
+
 def sanitize_filename(string: str) -> str:
     """
     Sanitize a string to be used as a filename.
