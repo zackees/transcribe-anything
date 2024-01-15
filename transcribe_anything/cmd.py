@@ -12,6 +12,9 @@ import sys
 import traceback
 from pathlib import Path
 
+# appdirs is used to get the cache directory
+from appdirs import user_cache_dir  # type: ignore
+
 from transcribe_anything.api import transcribe
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.whisper import get_computing_device
@@ -52,8 +55,8 @@ def get_whisper_options() -> dict:
     return whisper_options
 
 
-def main() -> int:
-    """Main entry point for the command line tool."""
+def parse_arguments() -> argparse.Namespace:
+    """Parse arguments."""
     whisper_options = get_whisper_options()
     device = get_computing_device()
     help_str = (
@@ -101,6 +104,11 @@ def main() -> int:
         default=None,
     )
     parser.add_argument(
+        "--save_hf_token",
+        help="save huggingface token to a file for future use",
+        action="store_true",
+    )
+    parser.add_argument(
         "--diarization_model",
         help=(
             "Name of the pretrained model/ checkpoint to perform diarization."
@@ -124,6 +132,14 @@ def main() -> int:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
+    args.unknown = unknown
+    return args
+
+
+def main() -> int:
+    """Main entry point for the command line tool."""
+    args = parse_arguments()
+    unknown = args.unknown
     if args.model == "large-legacy":
         args.model = "large"
     elif args.model == "large":
@@ -136,10 +152,17 @@ def main() -> int:
         print("Defaulting to large-v3 model for --device insane")
         args.model = "large-v3"
 
+    hf_token_path = Path(user_cache_dir(), "hf_token.txt")
     if args.hf_token is None:
         args.hf_token = os.environ.get("HF_TOKEN", None)
+        if args.hf_token is None and hf_token_path.exists():
+            # read from file
+            args.hf_token = hf_token_path.read_text(encoding="utf-8").strip() or None
         if args.hf_token is None:
             args.diarization_model = None
+    if args.save_hf_token:
+        hf_token_path.write_text(args.hf_token or "", encoding="utf-8")
+        print("Saved huggingface token to", hf_token_path)
 
     # For now, just stuff --diarization_model and --timestamp into unknown
     if args.diarization_model:
