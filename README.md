@@ -146,6 +146,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * All tests are run by `tox`, simply go to the project directory root and run it.
 
 # Versions
+  * 2.7.16: Adds `--save_hf_token`
   * 2.7.15: Fixes 2.7.14 breakage.
   * 2.7.14: (Broken) Now generates `speaker.json` when diarization is enabled.
   * 2.7.13: Default diarization model is now pyannote/speaker-diarization-3.1
