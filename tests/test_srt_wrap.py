@@ -9,7 +9,7 @@ import os
 import unittest
 from pathlib import Path
 
-from transcribe_anything.insanely_fast_whisper import has_nvidia_smi, srt_wrap_to_string
+from transcribe_anything.srt_translation import srt_wrap_to_string
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
@@ -19,7 +19,6 @@ TEST_SRT = LOCALFILE_DIR / "long.srt"
 class InsanelFastWhisperTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
-    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
     def test_srt_wrap(self) -> None:
         """Check that the command works on a local file."""
         wrapped_srt = srt_wrap_to_string(TEST_SRT)

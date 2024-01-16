@@ -200,3 +200,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
     * https://github.com/Vaibhavs10/insanely-fast-whisper
   * Fast Whisper for CPU
     * https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file
+  * A better whisper CLI that supports more options but has a manual install.
+    * https://github.com/ochen1/insanely-fast-whisper-cli/blob/main/requirements.txt
+  * Subtitles translator:
+    * https://github.com/TDHM/Subtitles-Translator

@@ -29,7 +29,6 @@ TENSOR_VERSION = "2.1.2"
 CUDA_VERSION = "cu121"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
-WRAP_SRT_PY = HERE / "srt_wrap.py"
 
 
 def get_current_python_version() -> str:
@@ -183,28 +182,6 @@ def trim_text_chunks(json_data: dict[str, Any]) -> None:
                 visit(item)
 
     visit(json_data)
-
-
-def srt_wrap_to_string(srt_file: Path) -> str:
-    env = get_environment()
-    process = subprocess.run(
-        ["python", str(WRAP_SRT_PY), str(srt_file)],
-        env=env,
-        capture_output=True,
-        text=True,
-        shell=True,
-    )
-    out = process.stdout
-    return out
-
-
-def srt_wrap(srt_file: Path) -> None:
-    try:
-        out = srt_wrap_to_string(srt_file)
-        srt_file.write_text(out, encoding="utf-8")
-    except subprocess.CalledProcessError as exc:
-        warnings.warn(f"Failed to run srt_wrap: {exc}")
-        return
 
 
 def run_insanely_fast_whisper(

@@ -28,8 +28,13 @@ from transcribe_anything.logger import log_error
 from transcribe_anything.util import chop_double_extension, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
 
-# from disklru import DiskLRUCache  # type: ignore  # pylint: disable=unused-import
+DISABLED_WARNINGS = [
+    ".*set_audio_backend has been deprecated.*",
+    ".*torchaudio._backend.set_audio_backend has been deprecated.*",
+]
 
+for warning in DISABLED_WARNINGS:
+    warnings.filterwarnings("ignore", category=UserWarning, message=warning)
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -152,6 +157,8 @@ def transcribe(
                 )
                 output_dir = "text_" + yt_dlp.stdout.strip()
                 output_dir = sanitize_filename(output_dir[:80].strip())
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 log_error("yt-dlp failed to get title, using basename instead.")
                 output_dir = "text_" + basename
