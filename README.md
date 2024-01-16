@@ -32,7 +32,7 @@ If you pass in `--device insane` on a cuda platform then this tool will use this
 
 #### Speaker.json
 
-When diarization is enabled via `--hf_token` (hugging face token) then the output json will contain speaker info labeled as `SPEAKER_00`, `SPEAKER_01` etc. For licensing agreement reasons, you must get your own hugging face token if you want to enable this feature. Also there is an additional step to agree to the user policies for the `pyannote.audio`, the links exist somewhere on the internet but aren't listed here yet. If you don't do this then you'll see runtime exceptions from `pyannote` when the `--hf_token` is used.
+When diarization is enabled via `--hf_token` (hugging face token) then the output json will contain speaker info labeled as `SPEAKER_00`, `SPEAKER_01` etc. For licensing agreement reasons, you must get your own hugging face token if you want to enable this feature. Also there is an additional step to agree to *two* user policies for the `pyannote.audio`, the links exist somewhere on the internet but aren't listed here yet. If you don't do this then you'll see runtime exceptions from `pyannote` when the `--hf_token` is used.
 
 What's special to this app is that we also generate a `speaker.json` which is a de-chunkified version of the output json speaker section.
 
