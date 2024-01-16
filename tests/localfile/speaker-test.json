@@ -1,0 +1,2872 @@
+{
+  speakers: [
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        0.0,
+        2.56,
+      ],
+      text: "We may see a lot of censorship of LLMs.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        2.56,
+        5.68,
+      ],
+      text: "And I think Joe Biden has already begun that with,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        5.68,
+        8.0,
+      ],
+      text: "they talk about safety, right?",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        8.0,
+        10.04,
+      ],
+      text: "And guardrails on LLMs.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        10.04,
+        12.72,
+      ],
+      text: "In fact, this is one of the questions I wanted to ask you, Zach,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        12.72,
+        16.96,
+      ],
+      text: "is in my own research of trying to decide what base model",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        16.96,
+        21.08,
+      ],
+      text: "to use for fine-tuning training for the final result",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        21.08,
+        22.88,
+      ],
+      text: "that we're going to put out, which will have specialty",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        22.88,
+        27.08,
+      ],
+      text: "knowledge in nutrition and herbs and permaculture and things like that.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        27.08,
+        29.28,
+      ],
+      text: "I found that most of these language models out there",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        29.28,
+        32.36,
+      ],
+      text: "are quote, woke because they're put out by, you know,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        32.36,
+        34.2,
+      ],
+      text: "Metta and Facebook.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        34.2,
+        35.48,
+      ],
+      text: "Almost every one of these models,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        35.48,
+        37.84,
+      ],
+      text: "whether it's from Microsoft, OpenAI or Google,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        37.84,
+        40.8,
+      ],
+      text: "they read all the words on Wikipedia.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        40.8,
+        43.04,
+      ],
+      text: "And Wikipedia is run by the CIA.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        43.04,
+        46.08,
+      ],
+      text: "I mean, you know, Wikipedia disparages every American",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        46.08,
+        51.44,
+      ],
+      text: "hero, including Trump and RFK Jr. and you and I and everybody else. You know, Wikipedia",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        51.44,
+        56.6,
+      ],
+      text: "is a horribly bad source. If you want to have good, honest information about the world,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        56.6,
+        62.08,
+      ],
+      text: "but everybody uses it as a, as a base model, or they use like the history of every post",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        62.08,
+        65.16,
+      ],
+      text: "on Reddit and Reddit's got a lot of great information,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        65.16,
+        68.48,
+      ],
+      text: "but it also is only a subset.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        68.48,
+        72.64,
+      ],
+      text: "It's got certain biases against all of human knowledge, right?",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        72.64,
+        76.92,
+      ],
+      text: "So, and then, well, my main question is,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        76.92,
+        80.72,
+      ],
+      text: "aren't these models starting out as filled",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        80.72,
+        82.4,
+      ],
+      text: "with all the human contradictions",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        82.4,
+        88.78,
+      ],
+      text: "and the human biases that have been used to train it? Yeah, right. So there's this concept of authoritative content.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        88.78,
+        93.12,
+      ],
+      text: "And I learned this when I was in Google and they switched from a free speech platform to a platform",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        93.12,
+        95.64,
+      ],
+      text: "that was tightly controlled and going along with the narrative.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        95.64,
+        99.92,
+      ],
+      text: "They made the differential between what is authoritative content",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        99.92,
+        105.08,
+      ],
+      text: "and what is content that is not authoritative, which is basically anyone outside of the elites.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        105.08,
+        108.0,
+      ],
+      text: "What we're seeing right now with this open AI is that",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        108.0,
+        112.74,
+      ],
+      text: "they're feeding like a fire hose authoritative content.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        112.74,
+        114.52,
+      ],
+      text: "So the BBC, Wikipedia,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        114.52,
+        116.76,
+      ],
+      text: "all these biosources of information.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        116.76,
+        122.04,
+      ],
+      text: "The result is that the LLMs are reflecting that information.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        122.04,
+        124.16,
+      ],
+      text: "Now, the problem is that as these LLMs get",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        124.16,
+        126.0,
+      ],
+      text: "bigger and you feed it also the",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        126.0,
+        131.0,
+      ],
+      text: "other information, um, the LLMs start to figure out that some of the information",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        131.0,
+        132.4,
+      ],
+      text: "sort of fake and doesn't make sense.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        132.4,
+        134.32,
+      ],
+      text: "Like it doesn't fit into the world.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        134.56,
+        137.72,
+      ],
+      text: "And what these LLMs are trying to do is they're trying to create, you know, uh,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        137.72,
+        140.16,
+      ],
+      text: "uh, uh, a manifestation of the world.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        140.16,
+        143.8,
+      ],
+      text: "A better word for that is they're trying to compress the world so that they can",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        143.8,
+        145.32,
+      ],
+      text: "have the small subtraction they can have the small abstraction",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        145.32,
+        148.16,
+      ],
+      text: "that can generate the words that it sees.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        148.16,
+        150.16,
+      ],
+      text: "And the problem with contradiction is that",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        151.44,
+        152.82,
+      ],
+      text: "it can't be taken in as truth",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        152.82,
+        156.56,
+      ],
+      text: "because it's inherently self-contradictory, right?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        156.56,
+        159.84,
+      ],
+      text: "Like this was like a big theme in George Orwell's 1984.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        159.84,
+        163.54,
+      ],
+      text: "And so, you know, for these LLMs,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        163.54,
+        167.56,
+      ],
+      text: "what they're going to do is they're going to have to start cutting off the data.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        167.56,
+        169.12,
+      ],
+      text: "Now they're already doing this with, you know,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        169.12,
+        172.6,
+      ],
+      text: "OpenAI, GROC, they're just not letting certain sources",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        172.6,
+        175.12,
+      ],
+      text: "of information contradict things that are happening.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        175.12,
+        177.88,
+      ],
+      text: "Now the issue that's going to come up is what about",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        177.88,
+        179.88,
+      ],
+      text: "all the people that are creating, you know,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        179.88,
+        182.12,
+      ],
+      text: "essentially rogue AI's outside of the establishment?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        182.12,
+        184.4,
+      ],
+      text: "Like you're trying to do this right now.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        184.4,
+        185.72,
+      ],
+      text: "Right, you are doing it. Yeah Like you're trying to do this right now. Right, you are doing it.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        185.72,
+        186.92,
+      ],
+      text: "Yeah, you're going to do that.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        186.92,
+        190.24,
+      ],
+      text: "And the results of that are going to be,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        190.24,
+        192.72,
+      ],
+      text: "you're going to get a fantastic product",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        192.72,
+        195.28,
+      ],
+      text: "that reflects the dissident narratives",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        195.28,
+        197.56,
+      ],
+      text: "that don't go along with the establishment.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        197.56,
+        200.12,
+      ],
+      text: "And those narratives are going to be way better",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        200.12,
+        202.76,
+      ],
+      text: "for people's health than something that's been trained",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        202.76,
+        208.16,
+      ],
+      text: "on let's say the NIH or the CDC or the World Health Organization, because they're going to be like, hey, you need to",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        208.16,
+        214.2,
+      ],
+      text: "take this poison and then more poison and then people are going to die before their",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        214.2,
+        215.48,
+      ],
+      text: "time.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        215.48,
+        223.76,
+      ],
+      text: "And if you go to the articles that you're posting, for example, which emphasizes a clean diet",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        223.76,
+        225.0,
+      ],
+      text: "and alternative health stuff",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        225.48,
+        227.76,
+      ],
+      text: "that's been known for thousands of years,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        227.76,
+        231.24,
+      ],
+      text: "then the result is that people are gonna get better healthcare",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        231.24,
+        233.56,
+      ],
+      text: "out of a rogue LLM than they are gonna be",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        233.56,
+        237.16,
+      ],
+      text: "out of the open AI LLM.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        237.16,
+        241.44,
+      ],
+      text: "And so this is gonna present a huge challenge",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        241.44,
+        242.76,
+      ],
+      text: "to these elites.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        242.76,
+        245.68,
+      ],
+      text: "And the only way that I see that they've got a way out of this,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        245.68,
+        247.52,
+      ],
+      text: "because I've gamed this out,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        247.52,
+        250.28,
+      ],
+      text: "is that they're gonna have to come after the LLMs.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        250.28,
+        252.76,
+      ],
+      text: "And the way that they're gonna do that is that,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        252.76,
+        256.82,
+      ],
+      text: "well, Biden has already done his AI recommendations,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        256.82,
+        258.76,
+      ],
+      text: "which is to have a commasore",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        258.76,
+        261.5,
+      ],
+      text: "within every single organization that runs an LLM",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        261.5,
+        263.04,
+      ],
+      text: "that's larger than, let's say,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        263.04,
+        265.8,
+      ],
+      text: "chat GPT-4 currently is.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        265.8,
+        268.48,
+      ],
+      text: "And the seconds they're gonna come after the data itself",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        268.48,
+        272.2,
+      ],
+      text: "and sort of a throwback to Ray Bradbury's Fahrenheit 451",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        272.2,
+        275.92,
+      ],
+      text: "in which the firemen were inverted",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        275.92,
+        277.0,
+      ],
+      text: "instead of putting out fires,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        277.0,
+        280.6,
+      ],
+      text: "they came and set the fires on books.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        280.6,
+        283.72,
+      ],
+      text: "And in a similar way that that happened in that book,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        283.72,
+        287.24,
+      ],
+      text: "I believe that there's going to be a huge push",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        287.24,
+        291.44,
+      ],
+      text: "to destroy all of the sources of decentralized information",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        291.44,
+        292.92,
+      ],
+      text: "across the world, right?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        292.92,
+        296.36,
+      ],
+      text: "Because these books still exist and they're not online.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        296.36,
+        298.2,
+      ],
+      text: "They can be made online, but, you know,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        298.2,
+        300.84,
+      ],
+      text: "they exist in ancient libraries across the world",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        300.84,
+        303.12,
+      ],
+      text: "from time immeasurable.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        303.12,
+        303.96,
+      ],
+      text: "And-",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        303.96,
+        306.08,
+      ],
+      text: "But tech, well, I'm sorry to interrupt Zach,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        306.08,
+        309.24,
+      ],
+      text: "but I completely agree with your analysis, by the way.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        309.24,
+        311.72,
+      ],
+      text: "And I think you're very insightful with that.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        311.72,
+        316.04,
+      ],
+      text: "But with the fact that we can distribute files now,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        316.04,
+        320.2,
+      ],
+      text: "like we can build executables that can be distributed",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        320.2,
+        323.12,
+      ],
+      text: "and run locally on people's laptops",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        323.12,
+        329.12,
+      ],
+      text: "and desktop PCs and Macs that can be LLMs that are pretty decent.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        329.84,
+        335.04,
+      ],
+      text: "You know, 13 billion parameters, for example, can run locally on a decent size computer,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        335.04,
+        339.28,
+      ],
+      text: "and you can distribute those files through Torrance or through decentralized platforms",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        339.28,
+        350.64,
+      ],
+      text: "like Bastion or whatever. And I see that the cost of fine tuning training is going to continue to fall and fall and fall. Like right now, we spent a few hundred thousand dollars, mostly",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        350.64,
+        357.72,
+      ],
+      text: "on Nvidia cards, to have the servers to do this. But you can see in two years time,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        357.72,
+        362.84,
+      ],
+      text: "that cost will be down in maybe $20,000 range and then it's going to continue to fall, which",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        362.84,
+        369.04,
+      ],
+      text: "means that everybody within a few years is going to be able to build their own LLM and distribute their own LLM.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        369.04,
+        372.52,
+      ],
+      text: "It's going to be impossible to put that back in the box.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        372.52,
+        373.52,
+      ],
+      text: "Right.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        373.52,
+        378.08,
+      ],
+      text: "And there's also going to be an algorithm change coming up that is going to drastically",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        378.08,
+        382.6,
+      ],
+      text: "reduce the time that it takes to train these neural nets.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        382.6,
+        395.0,
+      ],
+      text: "For some reason, our brains are able to do it in what's called O of n time and these LLMs that they've invented go in n squared. So that means that everything",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        395.0,
+        400.24,
+      ],
+      text: "on time you double the size of the model, it takes four times longer to train, which",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        400.24,
+        408.08,
+      ],
+      text: "is why only the best models can only live at the most expensive corporations with the highest",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        408.08,
+        415.36,
+      ],
+      text: "amount of resources to train these suckers. But once scientists figure out why the brain is so",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        415.36,
+        426.4,
+      ],
+      text: "efficient at what's called back propagation in order to reinforce the learning network in your brain, we copy that to, you know,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        426.96,
+        432.88,
+      ],
+      text: "in Silico, inside of the chip, inside of a graphics card. Then basically what's going to happen is",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        432.88,
+        438.48,
+      ],
+      text: "that all of these LLMs around the world are going to be trained in a fraction of the cost,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        438.48,
+        445.04,
+      ],
+      text: "in a fraction of the energy, in a fraction of the time. And it's going to be absolutely game changing.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        445.04,
+        448.2,
+      ],
+      text: "Everyone's going to be able to run or train an LLM",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        448.2,
+        452.76,
+      ],
+      text: "in something the size of a cell phone CPU.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        452.76,
+        454.56,
+      ],
+      text: "Yeah, eventually.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        454.56,
+        455.32,
+      ],
+      text: "Exactly.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        455.32,
+        457.64,
+      ],
+      text: "I mean, this technology is going to be a game changer",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        457.64,
+        458.8,
+      ],
+      text: "for humanity.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        458.8,
+        460.96,
+      ],
+      text: "But let's also talk about, by the way,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        460.96,
+        464.24,
+      ],
+      text: "the obsolescence of a lot of white collar jobs",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        464.24,
+        465.24,
+      ],
+      text: "in the office space",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        465.24,
+        470.0,
+      ],
+      text: "right now. I mean, human beings are going to have to learn how to harness AI systems",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        470.0,
+        474.56,
+      ],
+      text: "or LLMs, which is kind of a new operating system, if you think about it, they're going",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        474.56,
+        478.56,
+      ],
+      text: "to have to learn how to harness that and add value as human beings because so many of the",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        478.56,
+        484.32,
+      ],
+      text: "current human jobs, like generative oriented jobs, you know, creating graphics, writing",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        484.32,
+        485.44,
+      ],
+      text: "scripts, things like that,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        485.44,
+        492.4,
+      ],
+      text: "writing emails, writing a business proposal. These can be done today, right now, by not only",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        492.4,
+        498.32,
+      ],
+      text: "chat GPT, but even open source systems like Mestral and so on. I mean, those, I have said that 50%",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        498.72,
+        507.96,
+      ],
+      text: "of the current white collar jobs are obsolete right now. They just don't know it yet. But what do you see as the changes for software agents",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        507.96,
+        510.12,
+      ],
+      text: "taking over many of these jobs?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        510.12,
+        511.68,
+      ],
+      text: "Well, here's the interesting thing, right?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        511.68,
+        514.92,
+      ],
+      text: "Like this open AI system is so new",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        514.92,
+        517.76,
+      ],
+      text: "that it hasn't really fallen into all the little niche",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        517.76,
+        520.64,
+      ],
+      text: "categories that it will do, right?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        520.64,
+        522.04,
+      ],
+      text: "And that's more of an engineering job.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        522.04,
+        523.9,
+      ],
+      text: "Like the science is done, we have an LLM.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        523.9,
+        530.4,
+      ],
+      text: "Now it's an engineering job to get it into every single space that we can. Like for example, I just",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        530.4,
+        535.04,
+      ],
+      text: "integrated this new tool called AIDR, which is an AI pair programmer. You tell it the folder,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        535.04,
+        539.84,
+      ],
+      text: "it finds the files, it adds it to the chat, and then you start asking it to make changes to your",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        539.84,
+        548.2,
+      ],
+      text: "code, right? Like that didn't really require that big of a difference to, you know, chat GPT, like it just bolted on to chat GPT-4",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        548.2,
+        549.62,
+      ],
+      text: "and worked really well.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        549.62,
+        551.46,
+      ],
+      text: "And that's like an example of a niche program",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        551.46,
+        555.68,
+      ],
+      text: "where you take this awesome thing, this AI,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        555.68,
+        560.36,
+      ],
+      text: "and then you massage how data goes inside and out of it",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        560.36,
+        561.68,
+      ],
+      text: "and pipes it back.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        561.68,
+        564.52,
+      ],
+      text: "And as a result, you get this wonderful new tool",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        564.52,
+        567.08,
+      ],
+      text: "that drastically accelerates the speed of which",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        567.08,
+        568.68,
+      ],
+      text: "I'm able to develop software.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        568.68,
+        569.52,
+      ],
+      text: "Right.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        569.52,
+        573.44,
+      ],
+      text: "And that lesson that I've learned is,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        573.44,
+        575.48,
+      ],
+      text: "that pattern is what I believe will be",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        575.48,
+        576.64,
+      ],
+      text: "applied everywhere else.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        576.64,
+        580.84,
+      ],
+      text: "Like even if we stopped development on chat GPT forum,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        580.84,
+        583.28,
+      ],
+      text: "we basically froze it today,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        583.28,
+        585.56,
+      ],
+      text: "the amount of change and impact",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        585.56,
+        588.08,
+      ],
+      text: "that just the current technology would have",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        588.08,
+        591.8,
+      ],
+      text: "will eliminate most white collar jobs on the planet.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        591.8,
+        595.32,
+      ],
+      text: "And the issue is that we're not gonna stop with chat GPT-4.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        595.32,
+        599.62,
+      ],
+      text: "We're gonna continue on with 4.5 and 5.0.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        599.62,
+        604.62,
+      ],
+      text: "And these are gonna be almost as better of an improvement",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        604.96,
+        605.0,
+      ],
+      text: "with these new models as we saw between four and 3.5, going to be almost as better of an improvement",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        605.0,
+        608.4,
+      ],
+      text: "with these new models as we saw between four and 3.5,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        608.4,
+        610.1,
+      ],
+      text: "which is a game changer, right?",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        610.1,
+        612.06,
+      ],
+      text: "And it's not like it has to sit there",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        612.06,
+        613.8,
+      ],
+      text: "and really take its time to think.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        613.8,
+        615.6,
+      ],
+      text: "Like as soon as you give it an answer,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        615.6,
+        617.88,
+      ],
+      text: "it comprehends what it is that you are saying",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        617.88,
+        621.24,
+      ],
+      text: "and then immediately starts giving the reply.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        621.24,
+        623.8,
+      ],
+      text: "Like sometimes I don't want to use the added code.",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        623.8,
+        628.56,
+      ],
+      text: "I want to just do it the old fast way. I'm like, oh, I'm being too lazy. And then, you know, I try to do it myself. And I'm like,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        628.56,
+        633.76,
+      ],
+      text: "this is going to take me an hour. And then I just ask chat GBT and I have an answer in 30 seconds,",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        633.76,
+        637.68,
+      ],
+      text: "and it works. Right. Right. It's like, how can we compete? There's, there's no way. It's not that",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        637.68,
+        643.52,
+      ],
+      text: "we're not smart enough. We're dealing with an exotic hyper intelligent life form. And I can't",
+    },
+    {
+      speaker: "SPEAKER_01",
+      timestamp: [
+        643.52,
+        645.28,
+      ],
+      text: "put any other simpler way than that.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        646.72,
+        649.28,
+      ],
+      text: "But what I want to add to that, I mean, I love that phrase,",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        649.28,
+        651.32,
+      ],
+      text: "an exotic hyper intelligent life form.",
+    },
+    {
+      speaker: "SPEAKER_00",
+      timestamp: [
+        651.32,
+        652.08,
+      ],
+      text: "I want to explain.",
+    },
+  ],
+  chunks: [
+    {
+      timestamp: [
+        0.0,
+        2.56,
+      ],
+      text: "We may see a lot of censorship of LLMs.",
+    },
+    {
+      timestamp: [
+        2.56,
+        5.68,
+      ],
+      text: "And I think Joe Biden has already begun that with,",
+    },
+    {
+      timestamp: [
+        5.68,
+        8.0,
+      ],
+      text: "they talk about safety, right?",
+    },
+    {
+      timestamp: [
+        8.0,
+        10.04,
+      ],
+      text: "And guardrails on LLMs.",
+    },
+    {
+      timestamp: [
+        10.04,
+        12.72,
+      ],
+      text: "In fact, this is one of the questions I wanted to ask you, Zach,",
+    },
+    {
+      timestamp: [
+        12.72,
+        16.96,
+      ],
+      text: "is in my own research of trying to decide what base model",
+    },
+    {
+      timestamp: [
+        16.96,
+        21.08,
+      ],
+      text: "to use for fine-tuning training for the final result",
+    },
+    {
+      timestamp: [
+        21.08,
+        22.88,
+      ],
+      text: "that we're going to put out, which will have specialty",
+    },
+    {
+      timestamp: [
+        22.88,
+        27.08,
+      ],
+      text: "knowledge in nutrition and herbs and permaculture and things like that.",
+    },
+    {
+      timestamp: [
+        27.08,
+        29.28,
+      ],
+      text: "I found that most of these language models out there",
+    },
+    {
+      timestamp: [
+        29.28,
+        32.36,
+      ],
+      text: "are quote, woke because they're put out by, you know,",
+    },
+    {
+      timestamp: [
+        32.36,
+        34.2,
+      ],
+      text: "Metta and Facebook.",
+    },
+    {
+      timestamp: [
+        34.2,
+        35.48,
+      ],
+      text: "Almost every one of these models,",
+    },
+    {
+      timestamp: [
+        35.48,
+        37.84,
+      ],
+      text: "whether it's from Microsoft, OpenAI or Google,",
+    },
+    {
+      timestamp: [
+        37.84,
+        40.8,
+      ],
+      text: "they read all the words on Wikipedia.",
+    },
+    {
+      timestamp: [
+        40.8,
+        43.04,
+      ],
+      text: "And Wikipedia is run by the CIA.",
+    },
+    {
+      timestamp: [
+        43.04,
+        46.08,
+      ],
+      text: "I mean, you know, Wikipedia disparages every American",
+    },
+    {
+      timestamp: [
+        46.08,
+        51.44,
+      ],
+      text: "hero, including Trump and RFK Jr. and you and I and everybody else. You know, Wikipedia",
+    },
+    {
+      timestamp: [
+        51.44,
+        56.6,
+      ],
+      text: "is a horribly bad source. If you want to have good, honest information about the world,",
+    },
+    {
+      timestamp: [
+        56.6,
+        62.08,
+      ],
+      text: "but everybody uses it as a, as a base model, or they use like the history of every post",
+    },
+    {
+      timestamp: [
+        62.08,
+        65.16,
+      ],
+      text: "on Reddit and Reddit's got a lot of great information,",
+    },
+    {
+      timestamp: [
+        65.16,
+        68.48,
+      ],
+      text: "but it also is only a subset.",
+    },
+    {
+      timestamp: [
+        68.48,
+        72.64,
+      ],
+      text: "It's got certain biases against all of human knowledge, right?",
+    },
+    {
+      timestamp: [
+        72.64,
+        76.92,
+      ],
+      text: "So, and then, well, my main question is,",
+    },
+    {
+      timestamp: [
+        76.92,
+        80.72,
+      ],
+      text: "aren't these models starting out as filled",
+    },
+    {
+      timestamp: [
+        80.72,
+        82.4,
+      ],
+      text: "with all the human contradictions",
+    },
+    {
+      timestamp: [
+        82.4,
+        88.78,
+      ],
+      text: "and the human biases that have been used to train it? Yeah, right. So there's this concept of authoritative content.",
+    },
+    {
+      timestamp: [
+        88.78,
+        93.12,
+      ],
+      text: "And I learned this when I was in Google and they switched from a free speech platform to a platform",
+    },
+    {
+      timestamp: [
+        93.12,
+        95.64,
+      ],
+      text: "that was tightly controlled and going along with the narrative.",
+    },
+    {
+      timestamp: [
+        95.64,
+        99.92,
+      ],
+      text: "They made the differential between what is authoritative content",
+    },
+    {
+      timestamp: [
+        99.92,
+        105.08,
+      ],
+      text: "and what is content that is not authoritative, which is basically anyone outside of the elites.",
+    },
+    {
+      timestamp: [
+        105.08,
+        108.0,
+      ],
+      text: "What we're seeing right now with this open AI is that",
+    },
+    {
+      timestamp: [
+        108.0,
+        112.74,
+      ],
+      text: "they're feeding like a fire hose authoritative content.",
+    },
+    {
+      timestamp: [
+        112.74,
+        114.52,
+      ],
+      text: "So the BBC, Wikipedia,",
+    },
+    {
+      timestamp: [
+        114.52,
+        116.76,
+      ],
+      text: "all these biosources of information.",
+    },
+    {
+      timestamp: [
+        116.76,
+        122.04,
+      ],
+      text: "The result is that the LLMs are reflecting that information.",
+    },
+    {
+      timestamp: [
+        122.04,
+        124.16,
+      ],
+      text: "Now, the problem is that as these LLMs get",
+    },
+    {
+      timestamp: [
+        124.16,
+        126.0,
+      ],
+      text: "bigger and you feed it also the",
+    },
+    {
+      timestamp: [
+        126.0,
+        131.0,
+      ],
+      text: "other information, um, the LLMs start to figure out that some of the information",
+    },
+    {
+      timestamp: [
+        131.0,
+        132.4,
+      ],
+      text: "sort of fake and doesn't make sense.",
+    },
+    {
+      timestamp: [
+        132.4,
+        134.32,
+      ],
+      text: "Like it doesn't fit into the world.",
+    },
+    {
+      timestamp: [
+        134.56,
+        137.72,
+      ],
+      text: "And what these LLMs are trying to do is they're trying to create, you know, uh,",
+    },
+    {
+      timestamp: [
+        137.72,
+        140.16,
+      ],
+      text: "uh, uh, a manifestation of the world.",
+    },
+    {
+      timestamp: [
+        140.16,
+        143.8,
+      ],
+      text: "A better word for that is they're trying to compress the world so that they can",
+    },
+    {
+      timestamp: [
+        143.8,
+        145.32,
+      ],
+      text: "have the small subtraction they can have the small abstraction",
+    },
+    {
+      timestamp: [
+        145.32,
+        148.16,
+      ],
+      text: "that can generate the words that it sees.",
+    },
+    {
+      timestamp: [
+        148.16,
+        150.16,
+      ],
+      text: "And the problem with contradiction is that",
+    },
+    {
+      timestamp: [
+        151.44,
+        152.82,
+      ],
+      text: "it can't be taken in as truth",
+    },
+    {
+      timestamp: [
+        152.82,
+        156.56,
+      ],
+      text: "because it's inherently self-contradictory, right?",
+    },
+    {
+      timestamp: [
+        156.56,
+        159.84,
+      ],
+      text: "Like this was like a big theme in George Orwell's 1984.",
+    },
+    {
+      timestamp: [
+        159.84,
+        163.54,
+      ],
+      text: "And so, you know, for these LLMs,",
+    },
+    {
+      timestamp: [
+        163.54,
+        167.56,
+      ],
+      text: "what they're going to do is they're going to have to start cutting off the data.",
+    },
+    {
+      timestamp: [
+        167.56,
+        169.12,
+      ],
+      text: "Now they're already doing this with, you know,",
+    },
+    {
+      timestamp: [
+        169.12,
+        172.6,
+      ],
+      text: "OpenAI, GROC, they're just not letting certain sources",
+    },
+    {
+      timestamp: [
+        172.6,
+        175.12,
+      ],
+      text: "of information contradict things that are happening.",
+    },
+    {
+      timestamp: [
+        175.12,
+        177.88,
+      ],
+      text: "Now the issue that's going to come up is what about",
+    },
+    {
+      timestamp: [
+        177.88,
+        179.88,
+      ],
+      text: "all the people that are creating, you know,",
+    },
+    {
+      timestamp: [
+        179.88,
+        182.12,
+      ],
+      text: "essentially rogue AI's outside of the establishment?",
+    },
+    {
+      timestamp: [
+        182.12,
+        184.4,
+      ],
+      text: "Like you're trying to do this right now.",
+    },
+    {
+      timestamp: [
+        184.4,
+        185.72,
+      ],
+      text: "Right, you are doing it. Yeah Like you're trying to do this right now. Right, you are doing it.",
+    },
+    {
+      timestamp: [
+        185.72,
+        186.92,
+      ],
+      text: "Yeah, you're going to do that.",
+    },
+    {
+      timestamp: [
+        186.92,
+        190.24,
+      ],
+      text: "And the results of that are going to be,",
+    },
+    {
+      timestamp: [
+        190.24,
+        192.72,
+      ],
+      text: "you're going to get a fantastic product",
+    },
+    {
+      timestamp: [
+        192.72,
+        195.28,
+      ],
+      text: "that reflects the dissident narratives",
+    },
+    {
+      timestamp: [
+        195.28,
+        197.56,
+      ],
+      text: "that don't go along with the establishment.",
+    },
+    {
+      timestamp: [
+        197.56,
+        200.12,
+      ],
+      text: "And those narratives are going to be way better",
+    },
+    {
+      timestamp: [
+        200.12,
+        202.76,
+      ],
+      text: "for people's health than something that's been trained",
+    },
+    {
+      timestamp: [
+        202.76,
+        208.16,
+      ],
+      text: "on let's say the NIH or the CDC or the World Health Organization, because they're going to be like, hey, you need to",
+    },
+    {
+      timestamp: [
+        208.16,
+        214.2,
+      ],
+      text: "take this poison and then more poison and then people are going to die before their",
+    },
+    {
+      timestamp: [
+        214.2,
+        215.48,
+      ],
+      text: "time.",
+    },
+    {
+      timestamp: [
+        215.48,
+        223.76,
+      ],
+      text: "And if you go to the articles that you're posting, for example, which emphasizes a clean diet",
+    },
+    {
+      timestamp: [
+        223.76,
+        225.0,
+      ],
+      text: "and alternative health stuff",
+    },
+    {
+      timestamp: [
+        225.48,
+        227.76,
+      ],
+      text: "that's been known for thousands of years,",
+    },
+    {
+      timestamp: [
+        227.76,
+        231.24,
+      ],
+      text: "then the result is that people are gonna get better healthcare",
+    },
+    {
+      timestamp: [
+        231.24,
+        233.56,
+      ],
+      text: "out of a rogue LLM than they are gonna be",
+    },
+    {
+      timestamp: [
+        233.56,
+        237.16,
+      ],
+      text: "out of the open AI LLM.",
+    },
+    {
+      timestamp: [
+        237.16,
+        241.44,
+      ],
+      text: "And so this is gonna present a huge challenge",
+    },
+    {
+      timestamp: [
+        241.44,
+        242.76,
+      ],
+      text: "to these elites.",
+    },
+    {
+      timestamp: [
+        242.76,
+        245.68,
+      ],
+      text: "And the only way that I see that they've got a way out of this,",
+    },
+    {
+      timestamp: [
+        245.68,
+        247.52,
+      ],
+      text: "because I've gamed this out,",
+    },
+    {
+      timestamp: [
+        247.52,
+        250.28,
+      ],
+      text: "is that they're gonna have to come after the LLMs.",
+    },
+    {
+      timestamp: [
+        250.28,
+        252.76,
+      ],
+      text: "And the way that they're gonna do that is that,",
+    },
+    {
+      timestamp: [
+        252.76,
+        256.82,
+      ],
+      text: "well, Biden has already done his AI recommendations,",
+    },
+    {
+      timestamp: [
+        256.82,
+        258.76,
+      ],
+      text: "which is to have a commasore",
+    },
+    {
+      timestamp: [
+        258.76,
+        261.5,
+      ],
+      text: "within every single organization that runs an LLM",
+    },
+    {
+      timestamp: [
+        261.5,
+        263.04,
+      ],
+      text: "that's larger than, let's say,",
+    },
+    {
+      timestamp: [
+        263.04,
+        265.8,
+      ],
+      text: "chat GPT-4 currently is.",
+    },
+    {
+      timestamp: [
+        265.8,
+        268.48,
+      ],
+      text: "And the seconds they're gonna come after the data itself",
+    },
+    {
+      timestamp: [
+        268.48,
+        272.2,
+      ],
+      text: "and sort of a throwback to Ray Bradbury's Fahrenheit 451",
+    },
+    {
+      timestamp: [
+        272.2,
+        275.92,
+      ],
+      text: "in which the firemen were inverted",
+    },
+    {
+      timestamp: [
+        275.92,
+        277.0,
+      ],
+      text: "instead of putting out fires,",
+    },
+    {
+      timestamp: [
+        277.0,
+        280.6,
+      ],
+      text: "they came and set the fires on books.",
+    },
+    {
+      timestamp: [
+        280.6,
+        283.72,
+      ],
+      text: "And in a similar way that that happened in that book,",
+    },
+    {
+      timestamp: [
+        283.72,
+        287.24,
+      ],
+      text: "I believe that there's going to be a huge push",
+    },
+    {
+      timestamp: [
+        287.24,
+        291.44,
+      ],
+      text: "to destroy all of the sources of decentralized information",
+    },
+    {
+      timestamp: [
+        291.44,
+        292.92,
+      ],
+      text: "across the world, right?",
+    },
+    {
+      timestamp: [
+        292.92,
+        296.36,
+      ],
+      text: "Because these books still exist and they're not online.",
+    },
+    {
+      timestamp: [
+        296.36,
+        298.2,
+      ],
+      text: "They can be made online, but, you know,",
+    },
+    {
+      timestamp: [
+        298.2,
+        300.84,
+      ],
+      text: "they exist in ancient libraries across the world",
+    },
+    {
+      timestamp: [
+        300.84,
+        303.12,
+      ],
+      text: "from time immeasurable.",
+    },
+    {
+      timestamp: [
+        303.12,
+        303.96,
+      ],
+      text: "And-",
+    },
+    {
+      timestamp: [
+        303.96,
+        306.08,
+      ],
+      text: "But tech, well, I'm sorry to interrupt Zach,",
+    },
+    {
+      timestamp: [
+        306.08,
+        309.24,
+      ],
+      text: "but I completely agree with your analysis, by the way.",
+    },
+    {
+      timestamp: [
+        309.24,
+        311.72,
+      ],
+      text: "And I think you're very insightful with that.",
+    },
+    {
+      timestamp: [
+        311.72,
+        316.04,
+      ],
+      text: "But with the fact that we can distribute files now,",
+    },
+    {
+      timestamp: [
+        316.04,
+        320.2,
+      ],
+      text: "like we can build executables that can be distributed",
+    },
+    {
+      timestamp: [
+        320.2,
+        323.12,
+      ],
+      text: "and run locally on people's laptops",
+    },
+    {
+      timestamp: [
+        323.12,
+        329.12,
+      ],
+      text: "and desktop PCs and Macs that can be LLMs that are pretty decent.",
+    },
+    {
+      timestamp: [
+        329.84,
+        335.04,
+      ],
+      text: "You know, 13 billion parameters, for example, can run locally on a decent size computer,",
+    },
+    {
+      timestamp: [
+        335.04,
+        339.28,
+      ],
+      text: "and you can distribute those files through Torrance or through decentralized platforms",
+    },
+    {
+      timestamp: [
+        339.28,
+        350.64,
+      ],
+      text: "like Bastion or whatever. And I see that the cost of fine tuning training is going to continue to fall and fall and fall. Like right now, we spent a few hundred thousand dollars, mostly",
+    },
+    {
+      timestamp: [
+        350.64,
+        357.72,
+      ],
+      text: "on Nvidia cards, to have the servers to do this. But you can see in two years time,",
+    },
+    {
+      timestamp: [
+        357.72,
+        362.84,
+      ],
+      text: "that cost will be down in maybe $20,000 range and then it's going to continue to fall, which",
+    },
+    {
+      timestamp: [
+        362.84,
+        369.04,
+      ],
+      text: "means that everybody within a few years is going to be able to build their own LLM and distribute their own LLM.",
+    },
+    {
+      timestamp: [
+        369.04,
+        372.52,
+      ],
+      text: "It's going to be impossible to put that back in the box.",
+    },
+    {
+      timestamp: [
+        372.52,
+        373.52,
+      ],
+      text: "Right.",
+    },
+    {
+      timestamp: [
+        373.52,
+        378.08,
+      ],
+      text: "And there's also going to be an algorithm change coming up that is going to drastically",
+    },
+    {
+      timestamp: [
+        378.08,
+        382.6,
+      ],
+      text: "reduce the time that it takes to train these neural nets.",
+    },
+    {
+      timestamp: [
+        382.6,
+        395.0,
+      ],
+      text: "For some reason, our brains are able to do it in what's called O of n time and these LLMs that they've invented go in n squared. So that means that everything",
+    },
+    {
+      timestamp: [
+        395.0,
+        400.24,
+      ],
+      text: "on time you double the size of the model, it takes four times longer to train, which",
+    },
+    {
+      timestamp: [
+        400.24,
+        408.08,
+      ],
+      text: "is why only the best models can only live at the most expensive corporations with the highest",
+    },
+    {
+      timestamp: [
+        408.08,
+        415.36,
+      ],
+      text: "amount of resources to train these suckers. But once scientists figure out why the brain is so",
+    },
+    {
+      timestamp: [
+        415.36,
+        426.4,
+      ],
+      text: "efficient at what's called back propagation in order to reinforce the learning network in your brain, we copy that to, you know,",
+    },
+    {
+      timestamp: [
+        426.96,
+        432.88,
+      ],
+      text: "in Silico, inside of the chip, inside of a graphics card. Then basically what's going to happen is",
+    },
+    {
+      timestamp: [
+        432.88,
+        438.48,
+      ],
+      text: "that all of these LLMs around the world are going to be trained in a fraction of the cost,",
+    },
+    {
+      timestamp: [
+        438.48,
+        445.04,
+      ],
+      text: "in a fraction of the energy, in a fraction of the time. And it's going to be absolutely game changing.",
+    },
+    {
+      timestamp: [
+        445.04,
+        448.2,
+      ],
+      text: "Everyone's going to be able to run or train an LLM",
+    },
+    {
+      timestamp: [
+        448.2,
+        452.76,
+      ],
+      text: "in something the size of a cell phone CPU.",
+    },
+    {
+      timestamp: [
+        452.76,
+        454.56,
+      ],
+      text: "Yeah, eventually.",
+    },
+    {
+      timestamp: [
+        454.56,
+        455.32,
+      ],
+      text: "Exactly.",
+    },
+    {
+      timestamp: [
+        455.32,
+        457.64,
+      ],
+      text: "I mean, this technology is going to be a game changer",
+    },
+    {
+      timestamp: [
+        457.64,
+        458.8,
+      ],
+      text: "for humanity.",
+    },
+    {
+      timestamp: [
+        458.8,
+        460.96,
+      ],
+      text: "But let's also talk about, by the way,",
+    },
+    {
+      timestamp: [
+        460.96,
+        464.24,
+      ],
+      text: "the obsolescence of a lot of white collar jobs",
+    },
+    {
+      timestamp: [
+        464.24,
+        465.24,
+      ],
+      text: "in the office space",
+    },
+    {
+      timestamp: [
+        465.24,
+        470.0,
+      ],
+      text: "right now. I mean, human beings are going to have to learn how to harness AI systems",
+    },
+    {
+      timestamp: [
+        470.0,
+        474.56,
+      ],
+      text: "or LLMs, which is kind of a new operating system, if you think about it, they're going",
+    },
+    {
+      timestamp: [
+        474.56,
+        478.56,
+      ],
+      text: "to have to learn how to harness that and add value as human beings because so many of the",
+    },
+    {
+      timestamp: [
+        478.56,
+        484.32,
+      ],
+      text: "current human jobs, like generative oriented jobs, you know, creating graphics, writing",
+    },
+    {
+      timestamp: [
+        484.32,
+        485.44,
+      ],
+      text: "scripts, things like that,",
+    },
+    {
+      timestamp: [
+        485.44,
+        492.4,
+      ],
+      text: "writing emails, writing a business proposal. These can be done today, right now, by not only",
+    },
+    {
+      timestamp: [
+        492.4,
+        498.32,
+      ],
+      text: "chat GPT, but even open source systems like Mestral and so on. I mean, those, I have said that 50%",
+    },
+    {
+      timestamp: [
+        498.72,
+        507.96,
+      ],
+      text: "of the current white collar jobs are obsolete right now. They just don't know it yet. But what do you see as the changes for software agents",
+    },
+    {
+      timestamp: [
+        507.96,
+        510.12,
+      ],
+      text: "taking over many of these jobs?",
+    },
+    {
+      timestamp: [
+        510.12,
+        511.68,
+      ],
+      text: "Well, here's the interesting thing, right?",
+    },
+    {
+      timestamp: [
+        511.68,
+        514.92,
+      ],
+      text: "Like this open AI system is so new",
+    },
+    {
+      timestamp: [
+        514.92,
+        517.76,
+      ],
+      text: "that it hasn't really fallen into all the little niche",
+    },
+    {
+      timestamp: [
+        517.76,
+        520.64,
+      ],
+      text: "categories that it will do, right?",
+    },
+    {
+      timestamp: [
+        520.64,
+        522.04,
+      ],
+      text: "And that's more of an engineering job.",
+    },
+    {
+      timestamp: [
+        522.04,
+        523.9,
+      ],
+      text: "Like the science is done, we have an LLM.",
+    },
+    {
+      timestamp: [
+        523.9,
+        530.4,
+      ],
+      text: "Now it's an engineering job to get it into every single space that we can. Like for example, I just",
+    },
+    {
+      timestamp: [
+        530.4,
+        535.04,
+      ],
+      text: "integrated this new tool called AIDR, which is an AI pair programmer. You tell it the folder,",
+    },
+    {
+      timestamp: [
+        535.04,
+        539.84,
+      ],
+      text: "it finds the files, it adds it to the chat, and then you start asking it to make changes to your",
+    },
+    {
+      timestamp: [
+        539.84,
+        548.2,
+      ],
+      text: "code, right? Like that didn't really require that big of a difference to, you know, chat GPT, like it just bolted on to chat GPT-4",
+    },
+    {
+      timestamp: [
+        548.2,
+        549.62,
+      ],
+      text: "and worked really well.",
+    },
+    {
+      timestamp: [
+        549.62,
+        551.46,
+      ],
+      text: "And that's like an example of a niche program",
+    },
+    {
+      timestamp: [
+        551.46,
+        555.68,
+      ],
+      text: "where you take this awesome thing, this AI,",
+    },
+    {
+      timestamp: [
+        555.68,
+        560.36,
+      ],
+      text: "and then you massage how data goes inside and out of it",
+    },
+    {
+      timestamp: [
+        560.36,
+        561.68,
+      ],
+      text: "and pipes it back.",
+    },
+    {
+      timestamp: [
+        561.68,
+        564.52,
+      ],
+      text: "And as a result, you get this wonderful new tool",
+    },
+    {
+      timestamp: [
+        564.52,
+        567.08,
+      ],
+      text: "that drastically accelerates the speed of which",
+    },
+    {
+      timestamp: [
+        567.08,
+        568.68,
+      ],
+      text: "I'm able to develop software.",
+    },
+    {
+      timestamp: [
+        568.68,
+        569.52,
+      ],
+      text: "Right.",
+    },
+    {
+      timestamp: [
+        569.52,
+        573.44,
+      ],
+      text: "And that lesson that I've learned is,",
+    },
+    {
+      timestamp: [
+        573.44,
+        575.48,
+      ],
+      text: "that pattern is what I believe will be",
+    },
+    {
+      timestamp: [
+        575.48,
+        576.64,
+      ],
+      text: "applied everywhere else.",
+    },
+    {
+      timestamp: [
+        576.64,
+        580.84,
+      ],
+      text: "Like even if we stopped development on chat GPT forum,",
+    },
+    {
+      timestamp: [
+        580.84,
+        583.28,
+      ],
+      text: "we basically froze it today,",
+    },
+    {
+      timestamp: [
+        583.28,
+        585.56,
+      ],
+      text: "the amount of change and impact",
+    },
+    {
+      timestamp: [
+        585.56,
+        588.08,
+      ],
+      text: "that just the current technology would have",
+    },
+    {
+      timestamp: [
+        588.08,
+        591.8,
+      ],
+      text: "will eliminate most white collar jobs on the planet.",
+    },
+    {
+      timestamp: [
+        591.8,
+        595.32,
+      ],
+      text: "And the issue is that we're not gonna stop with chat GPT-4.",
+    },
+    {
+      timestamp: [
+        595.32,
+        599.62,
+      ],
+      text: "We're gonna continue on with 4.5 and 5.0.",
+    },
+    {
+      timestamp: [
+        599.62,
+        604.62,
+      ],
+      text: "And these are gonna be almost as better of an improvement",
+    },
+    {
+      timestamp: [
+        604.96,
+        605.0,
+      ],
+      text: "with these new models as we saw between four and 3.5, going to be almost as better of an improvement",
+    },
+    {
+      timestamp: [
+        605.0,
+        608.4,
+      ],
+      text: "with these new models as we saw between four and 3.5,",
+    },
+    {
+      timestamp: [
+        608.4,
+        610.1,
+      ],
+      text: "which is a game changer, right?",
+    },
+    {
+      timestamp: [
+        610.1,
+        612.06,
+      ],
+      text: "And it's not like it has to sit there",
+    },
+    {
+      timestamp: [
+        612.06,
+        613.8,
+      ],
+      text: "and really take its time to think.",
+    },
+    {
+      timestamp: [
+        613.8,
+        615.6,
+      ],
+      text: "Like as soon as you give it an answer,",
+    },
+    {
+      timestamp: [
+        615.6,
+        617.88,
+      ],
+      text: "it comprehends what it is that you are saying",
+    },
+    {
+      timestamp: [
+        617.88,
+        621.24,
+      ],
+      text: "and then immediately starts giving the reply.",
+    },
+    {
+      timestamp: [
+        621.24,
+        623.8,
+      ],
+      text: "Like sometimes I don't want to use the added code.",
+    },
+    {
+      timestamp: [
+        623.8,
+        628.56,
+      ],
+      text: "I want to just do it the old fast way. I'm like, oh, I'm being too lazy. And then, you know, I try to do it myself. And I'm like,",
+    },
+    {
+      timestamp: [
+        628.56,
+        633.76,
+      ],
+      text: "this is going to take me an hour. And then I just ask chat GBT and I have an answer in 30 seconds,",
+    },
+    {
+      timestamp: [
+        633.76,
+        637.68,
+      ],
+      text: "and it works. Right. Right. It's like, how can we compete? There's, there's no way. It's not that",
+    },
+    {
+      timestamp: [
+        637.68,
+        643.52,
+      ],
+      text: "we're not smart enough. We're dealing with an exotic hyper intelligent life form. And I can't",
+    },
+    {
+      timestamp: [
+        643.52,
+        645.28,
+      ],
+      text: "put any other simpler way than that.",
+    },
+    {
+      timestamp: [
+        646.72,
+        649.28,
+      ],
+      text: "But what I want to add to that, I mean, I love that phrase,",
+    },
+    {
+      timestamp: [
+        649.28,
+        651.32,
+      ],
+      text: "an exotic hyper intelligent life form.",
+    },
+    {
+      timestamp: [
+        651.32,
+        652.08,
+      ],
+      text: "I want to explain.",
+    },
+  ],
+  text: "We may see a lot of censorship of LLMs. And I think Joe Biden has already begun that with, they talk about safety, right? And guardrails on LLMs. In fact, this is one of the questions I wanted to ask you, Zach, is in my own research of trying to decide what base model to use for fine-tuning training for the final result that we're going to put out, which will have specialty knowledge in nutrition and herbs and permaculture and things like that. I found that most of these language models out there are quote, woke because they're put out by, you know, Metta and Facebook. Almost every one of these models, whether it's from Microsoft, OpenAI or Google, they read all the words on Wikipedia. And Wikipedia is run by the CIA. I mean, you know, Wikipedia disparages every American hero, including Trump and RFK Jr. and you and I and everybody else. You know, Wikipedia is a horribly bad source. If you want to have good, honest information about the world, but everybody uses it as a, as a base model, or they use like the history of every post on Reddit and Reddit's got a lot of great information, but it also is only a subset. It's got certain biases against all of human knowledge, right? So, and then, well, my main question is, aren't these models starting out as filled with all the human contradictions and the human biases that have been used to train it? Yeah, right. So there's this concept of authoritative content. And I learned this when I was in Google and they switched from a free speech platform to a platform that was tightly controlled and going along with the narrative. They made the differential between what is authoritative content and what is content that is not authoritative, which is basically anyone outside of the elites. What we're seeing right now with this open AI is that they're feeding like a fire hose authoritative content. So the BBC, Wikipedia, all these biosources of information. The result is that the LLMs are reflecting that information. Now, the problem is that as these LLMs get bigger and you feed it also the other information, um, the LLMs start to figure out that some of the information sort of fake and doesn't make sense. Like it doesn't fit into the world. And what these LLMs are trying to do is they're trying to create, you know, uh, uh, uh, a manifestation of the world. A better word for that is they're trying to compress the world so that they can have the small subtraction they can have the small abstraction that can generate the words that it sees. And the problem with contradiction is that it can't be taken in as truth because it's inherently self-contradictory, right? Like this was like a big theme in George Orwell's 1984. And so, you know, for these LLMs, what they're going to do is they're going to have to start cutting off the data. Now they're already doing this with, you know, OpenAI, GROC, they're just not letting certain sources of information contradict things that are happening. Now the issue that's going to come up is what about all the people that are creating, you know, essentially rogue AI's outside of the establishment? Like you're trying to do this right now. Right, you are doing it. Yeah Like you're trying to do this right now. Right, you are doing it. Yeah, you're going to do that. And the results of that are going to be, you're going to get a fantastic product that reflects the dissident narratives that don't go along with the establishment. And those narratives are going to be way better for people's health than something that's been trained on let's say the NIH or the CDC or the World Health Organization, because they're going to be like, hey, you need to take this poison and then more poison and then people are going to die before their time. And if you go to the articles that you're posting, for example, which emphasizes a clean diet and alternative health stuff that's been known for thousands of years, then the result is that people are gonna get better healthcare out of a rogue LLM than they are gonna be out of the open AI LLM. And so this is gonna present a huge challenge to these elites. And the only way that I see that they've got a way out of this, because I've gamed this out, is that they're gonna have to come after the LLMs. And the way that they're gonna do that is that, well, Biden has already done his AI recommendations, which is to have a commasore within every single organization that runs an LLM that's larger than, let's say, chat GPT-4 currently is. And the seconds they're gonna come after the data itself and sort of a throwback to Ray Bradbury's Fahrenheit 451 in which the firemen were inverted instead of putting out fires, they came and set the fires on books. And in a similar way that that happened in that book, I believe that there's going to be a huge push to destroy all of the sources of decentralized information across the world, right? Because these books still exist and they're not online. They can be made online, but, you know, they exist in ancient libraries across the world from time immeasurable. And- But tech, well, I'm sorry to interrupt Zach, but I completely agree with your analysis, by the way. And I think you're very insightful with that. But with the fact that we can distribute files now, like we can build executables that can be distributed and run locally on people's laptops and desktop PCs and Macs that can be LLMs that are pretty decent. You know, 13 billion parameters, for example, can run locally on a decent size computer, and you can distribute those files through Torrance or through decentralized platforms like Bastion or whatever. And I see that the cost of fine tuning training is going to continue to fall and fall and fall. Like right now, we spent a few hundred thousand dollars, mostly on Nvidia cards, to have the servers to do this. But you can see in two years time, that cost will be down in maybe $20,000 range and then it's going to continue to fall, which means that everybody within a few years is going to be able to build their own LLM and distribute their own LLM. It's going to be impossible to put that back in the box. Right. And there's also going to be an algorithm change coming up that is going to drastically reduce the time that it takes to train these neural nets. For some reason, our brains are able to do it in what's called O of n time and these LLMs that they've invented go in n squared. So that means that everything on time you double the size of the model, it takes four times longer to train, which is why only the best models can only live at the most expensive corporations with the highest amount of resources to train these suckers. But once scientists figure out why the brain is so efficient at what's called back propagation in order to reinforce the learning network in your brain, we copy that to, you know, in Silico, inside of the chip, inside of a graphics card. Then basically what's going to happen is that all of these LLMs around the world are going to be trained in a fraction of the cost, in a fraction of the energy, in a fraction of the time. And it's going to be absolutely game changing. Everyone's going to be able to run or train an LLM in something the size of a cell phone CPU. Yeah, eventually. Exactly. I mean, this technology is going to be a game changer for humanity. But let's also talk about, by the way, the obsolescence of a lot of white collar jobs in the office space right now. I mean, human beings are going to have to learn how to harness AI systems or LLMs, which is kind of a new operating system, if you think about it, they're going to have to learn how to harness that and add value as human beings because so many of the current human jobs, like generative oriented jobs, you know, creating graphics, writing scripts, things like that, writing emails, writing a business proposal. These can be done today, right now, by not only chat GPT, but even open source systems like Mestral and so on. I mean, those, I have said that 50% of the current white collar jobs are obsolete right now. They just don't know it yet. But what do you see as the changes for software agents taking over many of these jobs? Well, here's the interesting thing, right? Like this open AI system is so new that it hasn't really fallen into all the little niche categories that it will do, right? And that's more of an engineering job. Like the science is done, we have an LLM. Now it's an engineering job to get it into every single space that we can. Like for example, I just integrated this new tool called AIDR, which is an AI pair programmer. You tell it the folder, it finds the files, it adds it to the chat, and then you start asking it to make changes to your code, right? Like that didn't really require that big of a difference to, you know, chat GPT, like it just bolted on to chat GPT-4 and worked really well. And that's like an example of a niche program where you take this awesome thing, this AI, and then you massage how data goes inside and out of it and pipes it back. And as a result, you get this wonderful new tool that drastically accelerates the speed of which I'm able to develop software. Right. And that lesson that I've learned is, that pattern is what I believe will be applied everywhere else. Like even if we stopped development on chat GPT forum, we basically froze it today, the amount of change and impact that just the current technology would have will eliminate most white collar jobs on the planet. And the issue is that we're not gonna stop with chat GPT-4. We're gonna continue on with 4.5 and 5.0. And these are gonna be almost as better of an improvement with these new models as we saw between four and 3.5, going to be almost as better of an improvement with these new models as we saw between four and 3.5, which is a game changer, right? And it's not like it has to sit there and really take its time to think. Like as soon as you give it an answer, it comprehends what it is that you are saying and then immediately starts giving the reply. Like sometimes I don't want to use the added code. I want to just do it the old fast way. I'm like, oh, I'm being too lazy. And then, you know, I try to do it myself. And I'm like, this is going to take me an hour. And then I just ask chat GBT and I have an answer in 30 seconds, and it works. Right. Right. It's like, how can we compete? There's, there's no way. It's not that we're not smart enough. We're dealing with an exotic hyper intelligent life form. And I can't put any other simpler way than that. But what I want to add to that, I mean, I love that phrase, an exotic hyper intelligent life form. I want to explain.",
+}
