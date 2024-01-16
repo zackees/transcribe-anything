@@ -159,9 +159,7 @@ def transcribe(
                 )
                 output_dir = "text_" + yt_dlp.stdout.strip()
                 output_dir = sanitize_filename(output_dir[:80].strip())
-            except KeyboardInterrupt:
-                raise
-            except Exception:
+            except subprocess.CalledProcessError:
                 log_error("yt-dlp failed to get title, using basename instead.")
                 output_dir = "text_" + basename
         else:
