@@ -33,6 +33,8 @@ DISABLED_WARNINGS = [
     ".*torchaudio._backend.set_audio_backend has been deprecated.*",
 ]
 
+IS_GITHUB = os.environ.get("GITHUB_ACTIONS", "false") == "true"
+
 for warning in DISABLED_WARNINGS:
     warnings.filterwarnings("ignore", category=UserWarning, message=warning)
 
