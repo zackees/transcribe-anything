@@ -6,7 +6,7 @@
 
 ### USES WHISPER AI
 
-Over 200+⭐'s because this program just works!!
+Over 260+⭐'s because this program this app just works.
 
 Input a local file or url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
@@ -14,11 +14,41 @@ Uses whisper AI so this is state of the art translation service - completely fre
 
 Your data stays private and is not uploaded to any service.
 
+The new version now has state of the art speed in transcriptions, thanks to the new backend `--device insane`, as well as producing a `speaker.json` file.
+
+```bash
+pip install transcribe-anything
+# slow cpu mode, works everywhere
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+# insanely fast using the insanely-fast-whisper backend.
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
+# translate from any language to english
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
+```
+
 #### Insanely fast on `cuda` platforms
 
-If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper
+If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hg_token` option.
+
+#### Speaker.json
+
+When diarization is enabled via `--hf_token` (hugging face token) then the output json will contain speaker info labeled as `SPEAKER_00`, `SPEAKER_01` etc. For licensing agreement reasons, you must get your own hugging face token if you want to enable this feature. Also there is an additional step to agree to the user policies for the `pyannote.audio`, the links exist somewhere on the internet but aren't listed here yet. If you don't do this then you'll see runtime exceptions from `pyannote` when the `--hf_token` is used.
+
+What's special to this app is that we also generate a `speaker.json` which is a de-chunkified version of the output json speaker section.
+
+Note that `speaker.json `is only generated when using `--device insane` and not for `--device cuda` nor `--device cpu`.
+
+#### `cuda` vs `insane`
+
+Insane mode eats up a lot of memory and it's common to get out of memory errors while transcribing. For example a 3060 12GB nividia card produced out of memory errors are common for big content. If you are transcribing english then you may pass in `--model distil-whisper/distil-large-v2` which, because of magic, uses much less memory and is about 33% faster, but won't do foreign languages so is disable by default.
+
+`cuda` is the original AI model supplied by openai. It's more stable but MUCH slower. It also won't produce a `speaker.json` file.
+
+`--embed`. This app will optionally embed subtitles directly "burned" into an output video.
 
 # Install
+
+This front end app for whisper boasts the easiest install in the whisper ecosystem thanks to [isolated-environment](https://pypi.org/project/isolated-environment/). You can simply install it with pip, like this:
 
 ```bash
 pip install transcribe-anything
@@ -26,11 +56,7 @@ pip install transcribe-anything
 
 # GPU Acceleration
 
-Unlike other whisper implementations, this one should automatically bind to the GPU if `nvidia-smi` drivers
-are installed. This is due to the use of `isolated-environment` which will lazily install the GPU-accelerated
-version of Torch on first use.
-
-Because of this isolation, this tool should not interfere with torch and other AI dependencies.
+GPU acceleration will be automatically enabled for windows and linux. Mac users are stuck with `--device cpu` mode. But it's possible that `--device insane` and `--model mps` on Mac M1+ will work, but this has been completely untested.
 
 # Usage
 
@@ -137,13 +163,15 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 
 # Tech Stack
   * OpenAI whisper
+  * insanely-fast-whisper
   * yt-dlp: https://github.com/yt-dlp/yt-dlp
   * static-ffmpeg
     * github: https://github.com/zackees/static_ffmpeg
     * pypi: https://pypi.org/project/static-ffmpeg/
 
 # Testing
-  * All tests are run by `tox`, simply go to the project directory root and run it.
+
+  * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
   * 2.7.18: Fixes tests
