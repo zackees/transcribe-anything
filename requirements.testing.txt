@@ -4,3 +4,4 @@ pylint
 black
 ruff
 isort
+pytest
