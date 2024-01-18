@@ -42,7 +42,38 @@ Note that `speaker.json `is only generated when using `--device insane` and not 
 
 Insane mode eats up a lot of memory and it's common to get out of memory errors while transcribing. For example a 3060 12GB nividia card produced out of memory errors are common for big content. If you are transcribing english then you may pass in `--model distil-whisper/distil-large-v2` which, because of magic, uses much less memory and is about 33% faster, but won't do foreign languages so is disable by default.
 
-`cuda` is the original AI model supplied by openai. It's more stable but MUCH slower. It also won't produce a `speaker.json` file.
+`cuda` is the original AI model supplied by openai. It's more stable but MUCH slower. It also won't produce a `speaker.json` file which looks like this:
+```json
+[
+  {
+    speaker: "SPEAKER_00",
+    timestamp: [
+      0.0,
+      7.44,
+    ],
+    text: "for that. But welcome, Zach Vorhees. Great to have you back on. Thank you, Matt. Craving me back onto your show. Man, we got a lot to talk about.",
+    reason: "beginning",
+  },
+  {
+    speaker: "SPEAKER_01",
+    timestamp: [
+      7.44,
+      33.52,
+    ],
+    text: "Oh, we do. 2023 was the year that OpenAI released, you know, chat GPT-4, which I think most people would say has surpassed average human intelligence, at least in test taking, perhaps not in, you know, reasoning and things like that. But it was a major year for AI. I think that most people are behind the curve on this. What's your take of what just happened in the last 12 months and what it means for the future of human cognition versus machine cognition?",
+    reason: "speaker-switch",
+  },
+  {
+    speaker: "SPEAKER_00",
+    timestamp: [
+      33.52,
+      44.08,
+    ],
+    text: "Yeah. Well, you know, at the beginning of 2023, we had a pretty weak AI system, which was a chat GPT 3.5 turbo was the best that we had. And then between the beginning of last",
+    reason: "speaker-switch",
+  },
+]
+```
 
 `--embed`. This app will optionally embed subtitles directly "burned" into an output video.
 
