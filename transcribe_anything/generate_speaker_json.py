@@ -3,11 +3,10 @@ Test the parse speaker module.
 """
 
 
+import json  # type: ignore
 from dataclasses import dataclass
 from typing import Optional
 from warnings import warn
-
-import json  # type: ignore
 
 
 @dataclass
@@ -69,7 +68,7 @@ def generate_speaker_json(json_data: dict) -> list[dict]:
     speaker_chunks = json_data.get("speakers", {})
     if not speaker_chunks:
         warn("No speaker data found.")
-        return json.dumps({})
+        return []
     # convert to a list of chunks
     chunks: list[Chunk] = []
     for chunk in speaker_chunks:

@@ -3,12 +3,11 @@ Test the parse speaker module.
 """
 
 
+import json  # type: ignore
 import os
 import unittest
 from pathlib import Path
 from pprint import pprint
-
-import json  # type: ignore
 
 from transcribe_anything.generate_speaker_json import generate_speaker_json
 

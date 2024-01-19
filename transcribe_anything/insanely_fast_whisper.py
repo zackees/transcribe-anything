@@ -5,6 +5,7 @@
 Runs whisper api.
 """
 
+import json  # type: ignore
 import shutil
 import subprocess
 import sys
@@ -14,7 +15,6 @@ import wave
 from pathlib import Path
 from typing import Any, Optional
 
-import json  # type: ignore
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
 
@@ -76,9 +76,13 @@ def get_cuda_info() -> CudaInfo:
             env=env,
             universal_newlines=True,
             stdout=subprocess.PIPE,
+            text=True,
         )
         stdout = cp.stdout
         CUDA_INFO = CudaInfo.from_json_str(stdout)
+        assert (
+            CUDA_INFO is not None
+        ), f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
     return CUDA_INFO
 
 

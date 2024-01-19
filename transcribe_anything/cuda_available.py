@@ -63,6 +63,7 @@ class CudaInfo:
     @staticmethod
     def from_json_str(json_str: str) -> "CudaInfo":
         """Loads from json str and returns a CudaInfo object."""
+        assert json_str is not None, "Expected json_str to be set, but was instead None"
         data = json.loads(json_str)
         cuda_devices_data = data.get("cuda_devices", [])
         cuda_devices = [CudaDevice(**device) for device in cuda_devices_data]
@@ -100,7 +101,9 @@ def cuda_cards_available() -> CudaInfo:
 def main() -> int:
     """Returns 0 if cuda is available, 1 otherwise."""
     cuda_info = cuda_cards_available()
-    print(cuda_info.to_json_str())
+    json_str = cuda_info.to_json_str()
+    assert json_str is not None, "Expected json_str to be set, but was instead None"
+    print(json_str)
     if cuda_info.cuda_available:
         return 0
     return 1
