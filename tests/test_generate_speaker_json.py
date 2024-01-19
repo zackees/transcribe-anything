@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from pprint import pprint
 
-import json5 as json  # type: ignore
+import json  # type: ignore
 
 from transcribe_anything.generate_speaker_json import generate_speaker_json
 

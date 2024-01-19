@@ -14,7 +14,7 @@ import wave
 from pathlib import Path
 from typing import Any, Optional
 
-import json5 as json  # type: ignore
+import json  # type: ignore
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
 

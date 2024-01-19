@@ -208,6 +208,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.19: speaker.json is now in plain json format instead of json5 format
   * 2.7.18: Fixes tests
   * 2.7.17: Fixes speaker.json nesting.
   * 2.7.16: Adds `--save_hf_token`
