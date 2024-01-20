@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.10.5]
-        os: [macos-latest]
+        os: [macos-latest, macos-13-large]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
