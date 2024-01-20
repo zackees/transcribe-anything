@@ -8,7 +8,7 @@
 
 Over 260+⭐'s because this program this app just works.
 
-Easiest whisper implementaiton to install... AND use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*. Uses *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend.
+Easiest whisper implementaiton to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend.
 
 Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +).
 
