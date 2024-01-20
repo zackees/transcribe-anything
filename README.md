@@ -8,7 +8,11 @@
 
 Over 260+⭐'s because this program this app just works.
 
-Input a local file or url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
+Easiest whisper implementaiton to install... AND use. Uses *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend.
+
+Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +).
+
+Input a local file or youtube/rumble url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
 Uses whisper AI so this is state of the art translation service - completely free. 🤯🤯🤯
 
