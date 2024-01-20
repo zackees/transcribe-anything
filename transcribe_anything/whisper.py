@@ -36,9 +36,7 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
     ]
     if has_nvidia_smi():
-        deps.append(
-            f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
-        )
+        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
     env = isolated_environment(venv_dir, deps)
@@ -51,7 +49,7 @@ def get_computing_device() -> str:
     if CUDA_AVAILABLE is None:
         env = get_environment()
         py_file = HERE / "cuda_available.py"
-        rtn = subprocess.run(["python", py_file], check=False, env=env).returncode
+        rtn = subprocess.run(["python", py_file], shell=False, check=False, env=env).returncode
         CUDA_AVAILABLE = rtn == 0
     return "cuda" if CUDA_AVAILABLE else "cpu"
 

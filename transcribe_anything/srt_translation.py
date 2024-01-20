@@ -28,7 +28,7 @@ def srt_wrap_to_string(srt_file: Path) -> str:
         env=env,
         capture_output=True,
         text=True,
-        shell=True,
+        shell=False,
         check=True,
     )
     out = process.stdout

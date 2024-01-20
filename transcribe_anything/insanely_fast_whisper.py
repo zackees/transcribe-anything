@@ -71,7 +71,7 @@ def get_cuda_info() -> CudaInfo:
         py_file = HERE / "cuda_available.py"
         cp: subprocess.CompletedProcess = subprocess.run(
             ["python", py_file],
-            shell=True,
+            shell=False,
             check=False,
             env=env,
             universal_newlines=True,
@@ -80,9 +80,7 @@ def get_cuda_info() -> CudaInfo:
         )
         stdout = cp.stdout
         CUDA_INFO = CudaInfo.from_json_str(stdout)
-        assert (
-            CUDA_INFO is not None
-        ), f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
+        assert CUDA_INFO is not None, f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
     return CUDA_INFO
 
 
