@@ -16,17 +16,20 @@ from transcribe_anything.insanely_fast_whisper import (
     has_nvidia_smi,
     run_insanely_fast_whisper,
 )
+from transcribe_anything.util import is_mac_arm
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
 TESTS_DATA_DIR = LOCALFILE_DIR / "text_video_insane" / "en"
 TEST_WAV = LOCALFILE_DIR / "video.wav"
 
+CAN_RUN_TEST = has_nvidia_smi() or is_mac_arm()
+
 
 class InsanelFastWhisperTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
-    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
+    @unittest.skipUnless(CAN_RUN_TEST, "No GPU detected")
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
@@ -38,7 +41,7 @@ class InsanelFastWhisperTester(unittest.TestCase):
             language="en",
         )
 
-    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
+    @unittest.skipUnless(CAN_RUN_TEST, "No GPU detected")
     def test_cuda_info(self) -> None:
         """Check that the command works on a local file."""
         cuda_info0 = get_cuda_info()

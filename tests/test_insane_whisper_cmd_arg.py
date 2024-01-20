@@ -11,16 +11,19 @@ import unittest
 
 from transcribe_anything.api import transcribe
 from transcribe_anything.insanely_fast_whisper import has_nvidia_smi
+from transcribe_anything.util import is_mac_arm
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LOCALFILE_DIR = os.path.join(HERE, "localfile")
 TESTS_DATA_DIR = os.path.join(LOCALFILE_DIR, "text_video_api_insane", "en")
 
+CAN_RUN_TEST = has_nvidia_smi() or is_mac_arm()
+
 
 class InsaneWhisperModeTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
-    @unittest.skipUnless(has_nvidia_smi(), "No GPU detected")
+    @unittest.skipUnless(CAN_RUN_TEST, "No compatible GPU detected")
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)

@@ -208,6 +208,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.21: Tested that Mac Arm can run `--device insane`. Added tests to ensure this.
   * 2.7.20: Fixes wrong type being returned when speaker.json happens to be empty.
   * 2.7.19: speaker.json is now in plain json format instead of json5 format
   * 2.7.18: Fixes tests

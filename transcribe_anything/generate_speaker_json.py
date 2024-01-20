@@ -3,7 +3,6 @@ Test the parse speaker module.
 """
 
 
-import json  # type: ignore
 from dataclasses import dataclass
 from typing import Optional
 from warnings import warn
@@ -48,7 +47,9 @@ def reduce(dat: list[Chunk]) -> list[Chunk]:
             continue
         last_chunk = out[-1]
         if not can_combine(last_chunk, chunk):
-            chunk.reason = "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
+            chunk.reason = (
+                "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
+            )
             out.append(chunk)
             continue
         # combine
