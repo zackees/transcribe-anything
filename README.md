@@ -36,7 +36,7 @@ When diarization is enabled via `--hf_token` (hugging face token) then the outpu
 
 What's special to this app is that we also generate a `speaker.json` which is a de-chunkified version of the output json speaker section.
 
-Example:
+### speaker.json example:
 ```json
 [
   {
