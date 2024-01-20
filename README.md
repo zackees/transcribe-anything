@@ -271,3 +271,5 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
     * https://github.com/ochen1/insanely-fast-whisper-cli/blob/main/requirements.txt
   * Subtitles translator:
     * https://github.com/TDHM/Subtitles-Translator
+  * Forum post on how to avoid stuttering
+    * https://community.openai.com/t/how-to-avoid-hallucinations-in-whisper-transcriptions/125300/23
