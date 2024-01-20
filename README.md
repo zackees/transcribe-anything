@@ -10,7 +10,7 @@ Over 260+⭐'s because this program this app just works.
 
 Easiest whisper implementaiton to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend.
 
-Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +).
+Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +) via `--device insane`
 
 Input a local file or youtube/rumble url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
