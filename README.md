@@ -212,7 +212,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
-  * 2.7.24: Windows (Linux/MacOS) bug with `--device insane` and python 3.11 installing wrong `insanely-fast-whisper` version.
+  * 2.7.25: Windows (Linux/MacOS) bug with `--device insane` and python 3.11 installing wrong `insanely-fast-whisper` version.
   * 2.7.22: Fixes `transcribe-anything` on Linux.
   * 2.7.21: Tested that Mac Arm can run `--device insane`. Added tests to ensure this.
   * 2.7.20: Fixes wrong type being returned when speaker.json happens to be empty.

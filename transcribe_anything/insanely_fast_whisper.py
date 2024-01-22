@@ -50,7 +50,7 @@ def get_environment() -> dict[str, Any]:
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     deps = [
         "openai-whisper",
-        "insanely-fast-whisper==0.0.13",
+        "insanely-fast-whisper==0.0.13 --ignore-requires-python",
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
