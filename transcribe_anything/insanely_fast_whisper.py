@@ -49,7 +49,7 @@ def get_environment() -> dict[str, Any]:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     deps = [
-        "openai-whisper==20231117",
+        "openai-whisper",
         "insanely-fast-whisper==0.0.13",
     ]
     if has_nvidia_smi():
