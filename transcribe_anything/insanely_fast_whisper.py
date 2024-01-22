@@ -49,8 +49,8 @@ def get_environment() -> dict[str, Any]:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     deps = [
-        "openai-whisper",
-        "insanely-fast-whisper",
+        "openai-whisper==20231117",
+        "insanely-fast-whisper==0.0.13",
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
@@ -80,9 +80,7 @@ def get_cuda_info() -> CudaInfo:
         )
         stdout = cp.stdout
         CUDA_INFO = CudaInfo.from_json_str(stdout)
-        assert (
-            CUDA_INFO is not None
-        ), f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
+        assert CUDA_INFO is not None, f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
     return CUDA_INFO
 
 
