@@ -32,7 +32,7 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane 
 
 #### Insanely fast on `cuda` platforms
 
-If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hg_token` option.
+If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hf_token` option.
 
 Also note, `insanely-fast-whisper` (`--device insane`) included in this project has been fixed to work with python 3.11. The upstream version is still broken on python 3.11 as of 1/22/2024.
 
