@@ -79,7 +79,9 @@ Note that `speaker.json `is only generated when using `--device insane` and not 
 
 #### `cuda` vs `insane`
 
-Insane mode eats up a lot of memory and it's common to get out of memory errors while transcribing. For example a 3060 12GB nividia card produced out of memory errors are common for big content. If you are transcribing english then you may pass in `--model distil-whisper/distil-large-v2` which, because of magic, uses much less memory and is about 33% faster, but won't do foreign languages so is disable by default.
+Insane mode eats up a lot of memory and it's common to get out of memory errors while transcribing. For example a 3060 12GB nividia card produced out of memory errors are common for big content. If you experience this then pass in `--batch-size 8` or smaller. Note that any arguments not recognized by `transcribe-anything` are passed onto the backend transcriber.
+
+Also, please don't use `distil-whisper/distil-large-v2`, it produces extremely bad stuttering and it's not entirely clear why this is. I've had to switch it out of production environments because it's so bad. It's also non-deterministic so I think that somehow a fallback non-zero temperature is being used, which produces these stutterings.
 
 `cuda` is the original AI model supplied by openai. It's more stable but MUCH slower. It also won't produce a `speaker.json` file which looks like this:
 
