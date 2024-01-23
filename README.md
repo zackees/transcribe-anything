@@ -34,6 +34,8 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane 
 
 If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hg_token` option.
 
+Also note, `insanely-fast-whisper` (`--device insane`) included in this project has been fixed to work with python 3.11. The upstream version is still broken on python 3.11 as of 1/22/2024.
+
 #### Speaker.json
 
 When diarization is enabled via `--hf_token` (hugging face token) then the output json will contain speaker info labeled as `SPEAKER_00`, `SPEAKER_01` etc. For licensing agreement reasons, you must get your own hugging face token if you want to enable this feature. Also there is an additional step to agree to the user policies for the `pyannote.audio` located here: https://huggingface.co/pyannote/segmentation-3.0. If you don't do this then you'll see runtime exceptions from `pyannote` when the `--hf_token` is used.
