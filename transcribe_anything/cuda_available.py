@@ -5,6 +5,7 @@ Queries the system for CUDA devices and returns a json string with the informati
 This is meant to be run under a "isolated-environment".
 """
 
+import argparse
 import json
 import shutil
 import sys
@@ -81,29 +82,57 @@ def cuda_cards_available() -> CudaInfo:
     import torch  # type: ignore
 
     if torch.cuda.is_available():
-        devices = [
-            CudaDevice(
-                name=torch.cuda.get_device_name(i),
-                vram=torch.cuda.get_device_properties(i).total_memory,
-                multiprocessors=torch.cuda.get_device_properties(
-                    i
-                ).multi_processor_count,
-                device_id=i,
-            )
-            for i in range(torch.cuda.device_count())
-        ]
+        devices: list[CudaDevice] = []
+        try:
+            count = torch.cuda.device_count()
+        except Exception as e:
+            # print(f"Error getting device count: {e}")
+            sys.stderr.write(f"Error getting device count: {e}\n")
+            return CudaInfo(False, 0, [])
+        for i in range(count):
+            try:
+                device = torch.cuda.get_device_properties(i)
+                devices.append(
+                    CudaDevice(
+                        name=torch.cuda.get_device_name(i),
+                        vram=device.total_memory,
+                        multiprocessors=device.multi_processor_count,
+                        device_id=i,
+                    )
+                )
+            except Exception as e:
+                # print(f"Error getting device {i}: {e}")
+                sys.stderr.write(f"Error getting device {i}: {e}\n")
         # Sort devices by VRAM and then by number of multiprocessors in descending order
         devices.sort(key=lambda x: (x.vram, x.multiprocessors), reverse=True)
         return CudaInfo(True, len(devices), devices)
     return CudaInfo(False, 0, [])
 
+def parse_args() -> argparse.Namespace:
+    """Parse the arguments."""
+    parser = argparse.ArgumentParser(description="Check if CUDA is available.")
+    # positional argument is the output file
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="The output file",
+        type=str,
+    )
+    return parser.parse_args()
 
 def main() -> int:
     """Returns 0 if cuda is available, 1 otherwise."""
+    args = parse_args()
     cuda_info = cuda_cards_available()
     json_str = cuda_info.to_json_str()
     assert json_str is not None, "Expected json_str to be set, but was instead None"
-    print(json_str)
+    # print(json_str)
+    #args.output.write(json_str)
+    if args.output:
+        with open(args.output, encoding="utf-8", mode="w") as fd:
+            fd.write(json_str)
+    else:
+        print(json_str)
     if cuda_info.cuda_available:
         return 0
     return 1

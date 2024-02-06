@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import warnings
+import tempfile
 import wave
 from pathlib import Path
 from typing import Any, Optional
@@ -51,6 +52,8 @@ def get_environment() -> dict[str, Any]:
     deps = [
         "openai-whisper",
         "insanely-fast-whisper==0.0.13 --ignore-requires-python",
+        "intel-openmp==2024.0.2",
+        "torchaudio==2.1.2"
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
@@ -69,18 +72,25 @@ def get_cuda_info() -> CudaInfo:
     if CUDA_INFO is None:
         env = get_environment()
         py_file = HERE / "cuda_available.py"
-        cp: subprocess.CompletedProcess = subprocess.run(
-            ["python", py_file],
-            shell=False,
-            check=False,
-            env=env,
-            universal_newlines=True,
-            stdout=subprocess.PIPE,
-            text=True,
-        )
-        stdout = cp.stdout
-        CUDA_INFO = CudaInfo.from_json_str(stdout)
-        assert CUDA_INFO is not None, f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
+        # tempfile
+        with tempfile.TemporaryDirectory() as dir_name:
+            temp = Path(dir_name) / "stdout.txt"
+            abs_name = temp.absolute()
+            cp: subprocess.CompletedProcess = subprocess.run(
+                ["python", py_file, "-o", abs_name],
+                shell=False,
+                check=False,
+                env=env,
+                universal_newlines=True,
+                text=True,
+            )
+            # stdout = cp.stdout
+            stdout = temp.read_text(encoding="utf-8")
+            try:
+                CUDA_INFO = CudaInfo.from_json_str(stdout)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"Failed to decode json: {exc}") from exc
+            assert CUDA_INFO is not None, f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
     return CUDA_INFO
 
 
