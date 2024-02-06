@@ -2,7 +2,6 @@
 Test the parse speaker module.
 """
 
-
 from dataclasses import dataclass
 from typing import Optional
 from warnings import warn

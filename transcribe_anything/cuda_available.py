@@ -108,6 +108,7 @@ def cuda_cards_available() -> CudaInfo:
         return CudaInfo(True, len(devices), devices)
     return CudaInfo(False, 0, [])
 
+
 def parse_args() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="Check if CUDA is available.")
@@ -120,6 +121,7 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
 def main() -> int:
     """Returns 0 if cuda is available, 1 otherwise."""
     args = parse_args()
@@ -127,7 +129,7 @@ def main() -> int:
     json_str = cuda_info.to_json_str()
     assert json_str is not None, "Expected json_str to be set, but was instead None"
     # print(json_str)
-    #args.output.write(json_str)
+    # args.output.write(json_str)
     if args.output:
         with open(args.output, encoding="utf-8", mode="w") as fd:
             fd.write(json_str)

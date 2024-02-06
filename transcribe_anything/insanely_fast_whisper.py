@@ -9,9 +9,9 @@ import json  # type: ignore
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import warnings
-import tempfile
 import wave
 from pathlib import Path
 from typing import Any, Optional
@@ -92,7 +92,9 @@ def get_cuda_info() -> CudaInfo:
                 CUDA_INFO = CudaInfo.from_json_str(stdout)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"Failed to decode json: {exc}") from exc
-            assert CUDA_INFO is not None, f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
+            assert (
+                CUDA_INFO is not None
+            ), f"Expected CUDA_INFO to be set, but the stdout was {stdout}"
     return CUDA_INFO
 
 

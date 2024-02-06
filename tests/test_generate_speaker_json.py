@@ -2,7 +2,6 @@
 Test the parse speaker module.
 """
 
-
 import json  # type: ignore
 import os
 import unittest

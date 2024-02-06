@@ -16,11 +16,9 @@ WRAP_SRT_PY = HERE / "srt_wrap.py"
 def get_environment() -> dict[str, Any]:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "srttranslator"
-    env = isolated_environment(venv_dir, [
-        "srtranslator==0.2.6",
-        "requests==2.28.1",
-        "urllib3==1.26.13"
-    ])
+    env = isolated_environment(
+        venv_dir, ["srtranslator==0.2.6", "requests==2.28.1", "urllib3==1.26.13"]
+    )
     return env
 
 

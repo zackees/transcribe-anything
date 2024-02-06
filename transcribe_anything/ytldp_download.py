@@ -2,7 +2,6 @@
 Download utility for yt-dlp.
 """
 
-
 import os
 import subprocess
 

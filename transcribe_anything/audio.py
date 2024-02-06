@@ -2,7 +2,6 @@
     Fetches audio and handles transcoding it for it.
 """
 
-
 import os
 import shutil
 import subprocess
