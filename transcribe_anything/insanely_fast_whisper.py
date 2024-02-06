@@ -53,7 +53,9 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
         "insanely-fast-whisper==0.0.13 --ignore-requires-python",
         "intel-openmp==2024.0.2",
-        "torchaudio==2.1.2"
+        "torchaudio==2.1.2",
+        "pytorch-lightning==2.1.4",
+        "torchmetrics~=1.3.0",
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
