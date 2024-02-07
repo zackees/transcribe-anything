@@ -118,6 +118,46 @@ def fix_subtitles_path(_path: str) -> str:
     return out_path
 
 
+def get_video_name_from_url(url: str) -> str:
+    """
+    Returns the video name.
+    """
+    assert url.startswith("http"), f"Invalid url {url}"
+
+    # Try and the title of the video using yt-dlp
+    # If that fails, use the basename of the url
+    cmd_list: list[str] = []
+    cmd_list.extend(["yt-dlp", "--get-title", f"{url}"])
+
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cmd_str = subprocess.list2cmdline(cmd_list)
+            print(f"Running:\n  {cmd_str}")
+            cp = subprocess.run(
+                cmd_list,
+                check=True,
+                capture_output=True,
+                universal_newlines=True,
+                cwd=temp_dir,
+            )
+            stdout = cp.stdout
+            lines = stdout.split("\n")
+            lines = [line.strip() for line in lines]
+            for line in lines:
+                if "OSError" in line:
+                    continue
+                line = line[:80]
+                return sanitize_filename(line)
+            log_error("yt-dlp failed to get title, using basename instead.")
+            return os.path.basename(url)
+    except subprocess.CalledProcessError:
+        log_error("yt-dlp failed to get title, using basename instead.")
+        return os.path.basename(url)
+    except Exception as exc:
+        log_error(f"yt-dlp failed with {exc}, using basename instead.")
+        return os.path.basename(url)
+
+
 def transcribe(
     url_or_file: str,
     output_dir: Optional[str] = None,
@@ -148,20 +188,8 @@ def transcribe(
     if output_dir is None:
         output_dir_was_generated = True
         if url_or_file.startswith("http"):
-            # Try and the title of the video using yt-dlp
-            # If that fails, use the basename of the url
-            try:
-                yt_dlp = subprocess.run(
-                    ["yt-dlp", "--get-title", url_or_file],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                output_dir = "text_" + yt_dlp.stdout.strip()
-                output_dir = sanitize_filename(output_dir[:80].strip())
-            except subprocess.CalledProcessError:
-                log_error("yt-dlp failed to get title, using basename instead.")
-                output_dir = "text_" + basename
+            outname = get_video_name_from_url(url_or_file)
+            output_dir = "text_" + sanitize_filename(outname)
         else:
             output_dir = "text_" + os.path.splitext(basename)[0]
     if output_dir_was_generated and language is not None:
