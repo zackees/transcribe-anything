@@ -11,11 +11,11 @@ import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import warnings
 import wave
 from pathlib import Path
 from typing import Any, Optional
-import traceback
 
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
@@ -153,14 +153,18 @@ def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
         end_time = time_pair[1]
         try:
             if start_time is None and end_time is None:
-                print(f"Skipping chunk {index} because both start and end time are None.")
+                print(
+                    f"Skipping chunk {index} because both start and end time are None."
+                )
                 stack_trace = traceback.format_stack()
                 print("Stack trace: ", stack_trace)
                 continue
             if end_time is None:
                 # assert index == num_chunks
                 if index != num_chunks:
-                    print(f"Setting end time to duration because it's None for chunk {index}.")
+                    print(
+                        f"Setting end time to duration because it's None for chunk {index}."
+                    )
                 end_time = duration  # Sometimes happens at the end
             try:
                 start_time_str = convert_time_to_srt_format(start_time)

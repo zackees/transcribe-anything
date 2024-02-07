@@ -42,7 +42,14 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 
 CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
 
-PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
+PERMS = (
+    stat.S_IRUSR
+    | stat.S_IRGRP
+    | stat.S_IROTH
+    | stat.S_IWOTH
+    | stat.S_IWUSR
+    | stat.S_IWGRP
+)
 
 
 class Device(Enum):
@@ -171,7 +178,8 @@ def transcribe(
     """
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError(
-            "Embedding is only supported for local files. " + "Please download the file first."
+            "Embedding is only supported for local files. "
+            + "Please download the file first."
         )
     # cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
@@ -193,7 +201,9 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
+    assert os.path.isdir(
+        output_dir
+    ), f"Path {output_dir} is not found or not a directory."
     # tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_wav)
     assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
@@ -292,7 +302,9 @@ if __name__ == "__main__":
     # transcribe(url_or_file="https://twitter.com/wlctv_ca/status/1598895698870951943")
     try:
         # transcribe(url_or_file="https://www.youtube.com/live/gBHFFM7-aCk?feature=share", output_dir="test")
-        transcribe(url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test")
+        transcribe(
+            url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test"
+        )
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         sys.exit(1)
