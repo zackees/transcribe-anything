@@ -216,6 +216,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.28: Fixes bad title fetching with weird characters.
   * 2.7.27: `pytorch-audio` upgrades broke this package. Upgrade to latest version to resolve.
   * 2.7.26: Add model option `distil-whisper/distil-large-v2`
   * 2.7.25: Windows (Linux/MacOS) bug with `--device insane` and python 3.11 installing wrong `insanely-fast-whisper` version.
