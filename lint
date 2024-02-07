@@ -2,13 +2,13 @@
 set -e
 
 echo running black...
-black transcribe_anything tests
+black transcribe_anything tests --exclude 'transcribe_anything/venv'
 
 echo running isort...
 isort transcribe_anything tests
 
 echo re-running black now
-black transcribe_anything tests
+black transcribe_anything tests  --exclude 'transcribe_anything/venv'
 
 # does --clean exist
 if [[ $* == *--no-ruff* ]]; then
@@ -25,4 +25,4 @@ echo running pylint...
 pylint transcribe_anything tests --disable=R0801
 
 echo running mypy...
-mypy transcribe_anything tests
+mypy transcribe_anything tests --exclude 'transcribe_anything/venv'
