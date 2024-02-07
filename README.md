@@ -4,6 +4,9 @@
 [![Ubuntu_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml)
 [![Lint](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml)
 
+![image](https://github.com/zackees/transcribe-anything/assets/6856673/94bdd1fe-3225-438a-ac1b-09c81f1d4108)
+
+
 ### USES WHISPER AI
 
 Over 270+⭐'s because this program this app just works.
