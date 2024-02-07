@@ -15,6 +15,7 @@ import warnings
 import wave
 from pathlib import Path
 from typing import Any, Optional
+import traceback
 
 import webvtt  # type: ignore
 from isolated_environment import isolated_environment  # type: ignore
@@ -150,21 +151,44 @@ def convert_json_to_srt(json_data: dict[str, Any], duration: float) -> str:
         time_pair = chunk["timestamp"]
         start_time = time_pair[0]
         end_time = time_pair[1]
-        if end_time is None:
-            assert index == num_chunks
-            end_time = duration  # Sometimes happens at the end
         try:
-            start_time_str = convert_time_to_srt_format(start_time)
+            if start_time is None and end_time is None:
+                print(f"Skipping chunk {index} because both start and end time are None.")
+                stack_trace = traceback.format_stack()
+                print("Stack trace: ", stack_trace)
+                continue
+            if end_time is None:
+                # assert index == num_chunks
+                if index != num_chunks:
+                    print(f"Setting end time to duration because it's None for chunk {index}.")
+                end_time = duration  # Sometimes happens at the end
+            try:
+                start_time_str = convert_time_to_srt_format(start_time)
+            except Exception as exc:
+                print(f"Failed to convert start time {start_time} to srt format: {exc}")
+                stack_trace = traceback.format_stack()
+                print("Stack trace: ", stack_trace)
+                continue
+            try:
+                end_time_str = convert_time_to_srt_format(end_time)
+            except Exception as exc:
+                print(f"Failed to convert end time {end_time} to srt format: {exc}")
+                stack_trace = traceback.format_stack()
+                print("Stack trace: ", stack_trace)
+                continue
         except Exception as exc:
-            print(f"Failed to convert start time {start_time} to srt format: {exc}")
-            raise
+            print(f"Failed to convert times for chunk {index}: {exc}")
+            stack_trace = traceback.format_stack()
+            print("Stack trace: ", stack_trace)
+            continue
         try:
-            end_time_str = convert_time_to_srt_format(end_time)
+            text = str(chunk["text"]).strip()
+            srt_content += f"{index}\n{start_time_str} --> {end_time_str}\n{text}\n\n"
         except Exception as exc:
-            print(f"Failed to convert end time {end_time} to srt format: {exc}")
-            raise
-        text = str(chunk["text"]).strip()
-        srt_content += f"{index}\n{start_time_str} --> {end_time_str}\n{text}\n\n"
+            print(f"Failed to add chunk {index} to srt content: {exc}")
+            stack_trace = traceback.format_stack()
+            print("Stack trace: ", stack_trace)
+            continue
     return srt_content
 
 
