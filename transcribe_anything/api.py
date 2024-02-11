@@ -162,6 +162,20 @@ def get_video_name_from_url(url: str) -> str:
         return os.path.basename(url)
 
 
+def check_python_in_range() -> None:
+    """
+    Returns whether the python version is in range.
+    """
+    # valid ranges are (3, 10, 0) to (3, 11, X)
+    in_range = sys.version_info >= (3, 10, 0) and sys.version_info < (3, 12, 0)
+    if not in_range:
+        msg = f"# WARNING: Python version {sys.version_info} is not in the range (3, 10, 0) to (3, 11, X)."
+        header = "\n\n#" + "#" * len(msg)
+        footer = "#" + "#" * len(msg) + "\n\n"
+        msg += "\n# transcribe-anything may not work correctly. Please use a supported version of Python."
+        warnings.warn(f"{header}\n{msg}\n{footer}\n")
+
+
 def transcribe(
     url_or_file: str,
     output_dir: Optional[str] = None,
@@ -176,6 +190,7 @@ def transcribe(
     """
     Runs the program.
     """
+    check_python_in_range()
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError(
             "Embedding is only supported for local files. "
