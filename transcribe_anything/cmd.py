@@ -72,7 +72,10 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--query-gpu-json-path",
-        help="Query the GPU and store it in the given path, warning takes a long time on first load!",
+        help=(
+            "Query the GPU and store it in the given path,"
+            " warning takes a long time on first load!"
+        ),
         type=Path,
     )
     parser.add_argument(
