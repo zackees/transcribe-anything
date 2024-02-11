@@ -68,6 +68,12 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "url_or_file",
         help="Provide file path or url (includes youtube/facebook/twitter/etc)",
+        nargs="?",
+    )
+    parser.add_argument(
+        "--query-gpu-json-path",
+        help="Query the GPU and store it in the given path, warning takes a long time on first load!",
+        type=Path,
     )
     parser.add_argument(
         "--output_dir",
@@ -132,6 +138,10 @@ def parse_arguments() -> argparse.Namespace:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
+    if args.url_or_file is None and args.query_gpu_json_path is None:
+        print("No file or url provided")
+        parser.print_help()
+        sys.exit(1)
     args.unknown = unknown
     return args
 
@@ -140,6 +150,13 @@ def main() -> int:
     """Main entry point for the command line tool."""
     args = parse_arguments()
     unknown = args.unknown
+    if args.query_gpu_json_path is not None:
+        from transcribe_anything.insanely_fast_whisper import get_cuda_info
+
+        json_str = get_cuda_info().to_json_str()
+        path: Path = args.query_gpu_json_path
+        path.write_text(json_str, encoding="utf-8")
+        return 0
     if args.model == "large-legacy":
         args.model = "large"
     elif args.model == "large":

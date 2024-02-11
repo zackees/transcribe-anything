@@ -70,6 +70,10 @@ class CudaInfo:
         cuda_devices = [CudaDevice(**device) for device in cuda_devices_data]
         return CudaInfo(data["cuda_available"], data["num_cuda_devices"], cuda_devices)
 
+    def __repr__(self) -> str:
+        """Write out as json."""
+        return self.to_json_str()
+
 
 def cuda_cards_available() -> CudaInfo:
     """
