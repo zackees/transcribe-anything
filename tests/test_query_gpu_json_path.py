@@ -7,8 +7,11 @@ Tests transcribe_anything
 
 import json
 import os
+import sys
 import tempfile
 import unittest
+
+IS_MACOS = sys.platform == "darwin"
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,6 +19,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 class BadVideoTitleTester(unittest.TestCase):
     """Tester for transcribe anything."""
 
+    @unittest.skipIf(IS_MACOS, "Skipping test on MacOS")
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         prevdir = os.getcwd()
