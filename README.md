@@ -11,6 +11,8 @@
 
 Over 270+⭐'s because this program this app just works.
 
+[![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
+
 Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
 Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +) via `--device insane`
@@ -23,6 +25,8 @@ Your data stays private and is not uploaded to any service.
 
 The new version now has state of the art speed in transcriptions, thanks to the new backend `--device insane`, as well as producing a `speaker.json` file.
 
+
+
 ```bash
 pip install transcribe-anything
 # slow cpu mode, works everywhere
@@ -32,6 +36,8 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 # translate from any language to english
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
 ```
+
+
 
 #### Insanely fast on `cuda` platforms
 
