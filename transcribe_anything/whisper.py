@@ -16,9 +16,11 @@ HERE = Path(__file__).parent
 CUDA_AVAILABLE: Optional[bool] = None
 
 # Set the versions
-TENSOR_VERSION = "2.1.2"
+TENSOR_VERSION = "2.2.1"
 CUDA_VERSION = "cu121"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+
+IS_MAC = sys.platform == "darwin"
 
 
 def get_environment() -> dict[str, Any]:
@@ -27,7 +29,7 @@ def get_environment() -> dict[str, Any]:
     deps = [
         "openai-whisper",
     ]
-    if has_nvidia_smi():
+    if not IS_MAC and has_nvidia_smi():
         deps.append(
             f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
         )
