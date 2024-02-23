@@ -53,18 +53,18 @@ def get_environment() -> dict[str, Any]:
     deps = [
         "openai-whisper",
         "insanely-fast-whisper==0.0.13 --ignore-requires-python",
-        "intel-openmp==2024.0.2",
         "torchaudio==2.1.2",
         "pytorch-lightning==2.1.4",
         "torchmetrics~=1.3.0",
+        "srtranslator==0.2.6",
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
-    deps += [
-        "srtranslator==0.2.6",
-    ]
+    if sys.platform == "win32":
+        # Add the windows specific dependencies.
+        deps.append("intel-openmp==2024.0.2")
     env = isolated_environment(venv_dir, deps)
     return env
 
