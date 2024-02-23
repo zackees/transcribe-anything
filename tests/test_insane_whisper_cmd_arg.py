@@ -10,8 +10,7 @@ import shutil
 import unittest
 
 from transcribe_anything.api import transcribe
-from transcribe_anything.insanely_fast_whisper import has_nvidia_smi
-from transcribe_anything.util import is_mac_arm
+from transcribe_anything.util import has_nvidia_smi, is_mac_arm
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LOCALFILE_DIR = os.path.join(HERE, "localfile")

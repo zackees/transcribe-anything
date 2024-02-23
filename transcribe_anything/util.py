@@ -5,6 +5,7 @@ Determines whether this device is cpu or gpu.
 import os
 import platform
 import re
+import shutil
 from html import unescape
 from urllib.parse import unquote
 
@@ -53,3 +54,8 @@ def chop_double_extension(path_name) -> str:
         parts = parts[:-1]
     # Otherwise, return the second-to-last part followed by the last part
     return ".".join(parts + [ext])
+
+
+def has_nvidia_smi() -> bool:
+    """Returns True if nvidia-smi is installed."""
+    return shutil.which("nvidia-smi") is not None

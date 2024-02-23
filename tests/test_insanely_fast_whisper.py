@@ -13,10 +13,9 @@ from pathlib import Path
 from transcribe_anything.insanely_fast_whisper import (
     CudaInfo,
     get_cuda_info,
-    has_nvidia_smi,
     run_insanely_fast_whisper,
 )
-from transcribe_anything.util import is_mac_arm
+from transcribe_anything.util import has_nvidia_smi, is_mac_arm
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"

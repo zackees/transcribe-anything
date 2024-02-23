@@ -2,7 +2,6 @@
 Runs whisper api.
 """
 
-import shutil
 import subprocess
 import sys
 import time
@@ -10,6 +9,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 from isolated_environment import isolated_environment  # type: ignore
+
+from transcribe_anything.util import has_nvidia_smi
 
 HERE = Path(__file__).parent
 CUDA_AVAILABLE: Optional[bool] = None
@@ -20,15 +21,6 @@ CUDA_VERSION = "cu121"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 
-# for insanely fast whisper, use:
-#   pipx install insanely-fast-whisper --python python3.11
-
-
-def has_nvidia_smi() -> bool:
-    """Returns True if nvidia-smi is installed."""
-    return shutil.which("nvidia-smi") is not None
-
-
 def get_environment() -> dict[str, Any]:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "whisper"
@@ -36,7 +28,9 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
     ]
     if has_nvidia_smi():
-        deps.append(f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")
+        deps.append(
+            f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
+        )
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
     env = isolated_environment(venv_dir, deps)
