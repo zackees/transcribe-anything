@@ -301,3 +301,4 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
     * https://community.openai.com/t/how-to-avoid-hallucinations-in-whisper-transcriptions/125300/23
   * More stable transcriptions:
     * https://github.com/jianfch/stable-ts?tab=readme-ov-file
+
