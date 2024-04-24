@@ -225,6 +225,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.34: Various fixes.
   * 2.7.33: Fixes linux
   * 2.7.32: Fixes mac m1 and m2.
   * 2.7.31: Adds a warning if using python 3.12, which isn't supported yet in the backend.
