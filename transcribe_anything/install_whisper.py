@@ -23,8 +23,14 @@ def unit_test() -> None:
         print(f"Using temporary directory {tmpdir}")
         iso_env = IsolatedEnvironment(HERE / "transcribe_anything_env")
         iso_env.install_environment()
-        iso_env.pip_install(package="torch==2.1.2", build_options=EXTRA_INDEX_URL)
-        iso_env.pip_install(package="openai-whisper")
+        iso_env.pip_install(
+            package=f"torch=={TENSOR_VERSION}",
+            build_options=EXTRA_INDEX_URL,
+            full_isolation=False,
+        )
+        iso_env.pip_install(
+            package="openai-whisper", build_options=None, full_isolation=False
+        )
         iso_env.run(["whisper", "--help"])
 
 

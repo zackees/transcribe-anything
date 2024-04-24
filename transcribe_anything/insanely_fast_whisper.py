@@ -213,8 +213,13 @@ def run_insanely_fast_whisper(
         str(input_wav),
         "--device-id",
         f"{device_id}",
-        "--model-name",
-        model,
+    ]
+    if model:
+        cmd_list += [
+            "--model-name",
+            model,
+        ]
+    cmd_list += [
         "--task",
         task,
         "--transcript-path",

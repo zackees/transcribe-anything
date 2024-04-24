@@ -318,7 +318,8 @@ if __name__ == "__main__":
     try:
         # transcribe(url_or_file="https://www.youtube.com/live/gBHFFM7-aCk?feature=share", output_dir="test")
         transcribe(
-            url_or_file="https://www.youtube.com/watch?v=DWtpNPZ4tb4", output_dir="test"
+            url_or_file=r"E:\james_o_keefe_struggle_sessions.mp4",
+            output_dir=r"E:\test2",
         )
     except KeyboardInterrupt:
         print("Keyboard interrupt")

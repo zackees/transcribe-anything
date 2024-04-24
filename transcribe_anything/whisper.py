@@ -71,8 +71,9 @@ def run_whisper(  # pylint: disable=too-many-arguments
     cmd_list.append(f'"{input_wav}"')
     cmd_list.append("--device")
     cmd_list.append(device)
-    cmd_list.append("--model")
-    cmd_list.append(model)
+    if model:
+        cmd_list.append("--model")
+        cmd_list.append(model)
     cmd_list.append(f'--output_dir "{output_dir}"')
     cmd_list.append("--task")
     cmd_list.append(task)
