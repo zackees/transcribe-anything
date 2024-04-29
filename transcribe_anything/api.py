@@ -19,6 +19,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+import static_ffmpeg  # type: ignore
 from appdirs import user_config_dir  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
@@ -186,6 +187,8 @@ def transcribe(
     """
     Runs the program.
     """
+    # add the paths for any dependent tools that may rely on ffmpeg
+    static_ffmpeg.add_paths()
     check_python_in_range()
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError(

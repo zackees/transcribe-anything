@@ -16,6 +16,7 @@ import wave
 from pathlib import Path
 from typing import Any, Optional
 
+import static_ffmpeg  # type: ignore
 import webvtt  # type: ignore
 
 from transcribe_anything.cuda_available import CudaInfo
@@ -195,6 +196,8 @@ def run_insanely_fast_whisper(
     other_args: list[str] | None = None,
 ) -> None:
     """Runs insanely fast whisper."""
+    # ffmpeg paths have to be installed or else the backend tool will fail.
+    static_ffmpeg.add_paths()
     env = get_environment()
     device_id = get_device_id()
     cmd_list = []
