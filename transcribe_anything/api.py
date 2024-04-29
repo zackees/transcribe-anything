@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Optional
 
 from appdirs import user_config_dir  # type: ignore
-from static_ffmpeg import add_paths as ffmpeg_add_paths  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
@@ -75,9 +74,6 @@ class Device(Enum):
         if device == "insane":
             return Device.INSANE
         raise ValueError(f"Unknown device {device}")
-
-
-ffmpeg_add_paths()
 
 
 def make_temp_wav() -> str:
@@ -293,7 +289,7 @@ def transcribe(
             assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
             out_mp4 = os.path.join(output_dir, "out.mp4")
             embed_ffmpeg_cmd_list = [
-                "ffmpeg",
+                "static_ffmpeg",
                 "-y",
                 "-i",
                 url_or_file,

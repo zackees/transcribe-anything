@@ -8,8 +8,6 @@ import subprocess
 import sys
 import tempfile
 
-import static_ffmpeg  # type: ignore
-
 from transcribe_anything.util import PROCESS_TIMEOUT
 from transcribe_anything.ytldp_download import ytdlp_download
 
@@ -27,7 +25,7 @@ def _convert_to_wav(
     tmpwav.close()
     tmpwavepath = tmpwav.name
     audio_encoder = "-acodec pcm_s16le -ar 44100 -ac 1"
-    cmd = f'ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
+    cmd = f'static_ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(
@@ -48,7 +46,6 @@ def _convert_to_wav(
 def fetch_audio(url_or_file: str, out_wav: str) -> None:
     """Fetches from the internet or from a local file and outputs a wav file."""
     assert out_wav.endswith(".wav")
-    static_ffmpeg.add_paths()  # pylint: disable=no-member
     if url_or_file.startswith("http") or url_or_file.startswith("ftp"):
         with tempfile.TemporaryDirectory() as tmpdir:
             print(f"Using temporary directory {tmpdir}")
@@ -62,7 +59,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
         abspath = os.path.abspath(url_or_file)
         out_wav_abs = os.path.abspath(out_wav)
         with tempfile.TemporaryDirectory() as tmpdir:
-            cmd = f'ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
+            cmd = f'static_ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
             sys.stderr.write(f"Running:\n  {cmd}\n")
             subprocess.run(
                 cmd,

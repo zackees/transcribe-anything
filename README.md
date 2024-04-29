@@ -225,6 +225,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.35: All `ffmpeg` commands are now `static_ffmpeg` commands. Fixes issue.
   * 2.7.34: Various fixes.
   * 2.7.33: Fixes linux
   * 2.7.32: Fixes mac m1 and m2.
