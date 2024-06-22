@@ -72,7 +72,7 @@ def get_device_id() -> str:
 def get_batch_size() -> int | None:
     """Returns the batch size."""
     if sys.platform == "darwin":
-        return 4
+        return 1
     return None
 
 
