@@ -198,7 +198,7 @@ This will create a virtual environment
 
 ```bash
 > cd transcribe_anything
-> ./install_dev.sh
+> ./install.sh
 # Enter the environment:
 > source activate.sh
 ```

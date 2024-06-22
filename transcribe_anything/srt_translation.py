@@ -45,4 +45,3 @@ def srt_wrap(srt_file: Path) -> None:
         srt_file.write_text(out, encoding="utf-8")
     except subprocess.CalledProcessError as exc:
         warnings.warn(f"Failed to run srt_wrap: {exc}")
-        return

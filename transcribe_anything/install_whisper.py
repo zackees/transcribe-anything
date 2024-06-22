@@ -26,12 +26,14 @@ def unit_test() -> None:
         iso_env.pip_install(
             package=f"torch=={TENSOR_VERSION}",
             build_options=EXTRA_INDEX_URL,
-            full_isolation=False,
+            full_isolation=True,
         )
         iso_env.pip_install(
-            package="openai-whisper==1.26.4", build_options=None, full_isolation=False
+            package="openai-whisper", build_options=None, full_isolation=True
         )
-        iso_env.pip_install(package="numpy", build_options=None, full_isolation=False)
+        iso_env.pip_install(
+            package="numpy==1.26.4", build_options=None, full_isolation=True
+        )
         iso_env.run(["whisper", "--help"])
 
 

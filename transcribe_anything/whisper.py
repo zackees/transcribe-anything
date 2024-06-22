@@ -26,9 +26,7 @@ IS_MAC = sys.platform == "darwin"
 def get_environment() -> dict[str, Any]:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "whisper"
-    deps = [
-        "openai-whisper",
-    ]
+    deps = ["openai-whisper", "numpy==1.26.4"]
     if not IS_MAC and has_nvidia_smi():
         deps.append(
             f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
