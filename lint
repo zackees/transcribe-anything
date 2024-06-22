@@ -4,6 +4,9 @@ set -e
 echo activating venv...
 . ./activate.sh
 
+echo installing pip dependencies
+pip install -r requirements.txt
+
 echo running black...
 black transcribe_anything tests --exclude 'transcribe_anything/venv'
 
