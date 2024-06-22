@@ -199,6 +199,10 @@ def run_insanely_fast_whisper(
     # ffmpeg paths have to be installed or else the backend tool will fail.
     static_ffmpeg.add_paths()
     env = get_environment()
+    if sys.platform == "darwin":
+        # Attempts fixed recommended for the mps machines. This seems
+        # to be necessary since a recent update.
+        env["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.7"
     device_id = get_device_id()
     cmd_list = []
     output_dir.mkdir(parents=True, exist_ok=True)
