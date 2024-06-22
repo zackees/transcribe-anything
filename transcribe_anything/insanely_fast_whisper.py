@@ -203,6 +203,7 @@ def run_insanely_fast_whisper(
         # Attempts fixed recommended for the mps machines. This seems
         # to be necessary since a recent update.
         env["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
+        env["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
     device_id = get_device_id()
     cmd_list = []
     output_dir.mkdir(parents=True, exist_ok=True)
