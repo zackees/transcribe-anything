@@ -1,6 +1,9 @@
 #! /bin/bash
 set -e
 
+echo activating venv...
+. ./activate.sh
+
 echo running black...
 black transcribe_anything tests --exclude 'transcribe_anything/venv'
 

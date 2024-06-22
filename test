@@ -1,1 +1,4 @@
+#!/bin/bash
+. ./activate.sh
+
 python -m unittest discover tests

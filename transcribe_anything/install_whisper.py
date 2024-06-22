@@ -29,8 +29,9 @@ def unit_test() -> None:
             full_isolation=False,
         )
         iso_env.pip_install(
-            package="openai-whisper", build_options=None, full_isolation=False
+            package="openai-whisper==1.26.4", build_options=None, full_isolation=False
         )
+        iso_env.pip_install(package="numpy", build_options=None, full_isolation=False)
         iso_env.run(["whisper", "--help"])
 
 

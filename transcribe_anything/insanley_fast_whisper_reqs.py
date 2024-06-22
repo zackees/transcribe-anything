@@ -38,6 +38,7 @@ def get_environment() -> dict[str, Any]:
         "pytorch-lightning==2.1.4",
         "torchmetrics~=1.3.0",
         "srtranslator==0.2.6",
+        "numpy==1.26.4",
     ]
     if has_nvidia_smi():
         deps.append(f"torch=={TENSOR_CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}")

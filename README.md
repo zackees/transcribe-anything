@@ -225,6 +225,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.7.37: Fixed breakage due to numpy 2.0 being released.
   * 2.7.36: Fixed some ffmpeg dependencies.
   * 2.7.35: All `ffmpeg` commands are now `static_ffmpeg` commands. Fixes issue.
   * 2.7.34: Various fixes.
