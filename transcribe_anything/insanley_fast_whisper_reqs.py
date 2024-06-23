@@ -35,6 +35,7 @@ def get_environment() -> dict[str, Any]:
         "openai-whisper",
         "insanely-fast-whisper==0.0.13 --ignore-requires-python",
         "torchaudio==2.1.2",
+        "datasets==2.17.1",
         "pytorch-lightning==2.1.4",
         "torchmetrics~=1.3.0",
         "srtranslator==0.2.6",
@@ -47,5 +48,5 @@ def get_environment() -> dict[str, Any]:
     if sys.platform != "darwin":
         # Add the windows specific dependencies.
         deps.append("intel-openmp==2024.0.2")
-    env = isolated_environment(venv_dir, deps)
+    env = isolated_environment(venv_dir, deps, full_isolation=True)
     return env

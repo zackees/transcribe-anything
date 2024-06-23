@@ -1,5 +1,7 @@
 """
 Installs whisper in an isolated environment.
+
+This is a just a test. It is not used in code.
 """
 
 import os
@@ -22,11 +24,13 @@ def unit_test() -> None:
     with TemporaryDirectory() as tmpdir:
         print(f"Using temporary directory {tmpdir}")
         iso_env = IsolatedEnvironment(HERE / "transcribe_anything_env")
-        iso_env.install_environment()
         iso_env.pip_install(
             package=f"torch=={TENSOR_VERSION}",
-            build_options=EXTRA_INDEX_URL,
+            build_options=f"--extra-index-url {EXTRA_INDEX_URL}",
             full_isolation=True,
+        )
+        iso_env.pip_install(
+            "torchaudio==2.1.2", build_options=None, full_isolation=True
         )
         iso_env.pip_install(
             package="openai-whisper", build_options=None, full_isolation=True
