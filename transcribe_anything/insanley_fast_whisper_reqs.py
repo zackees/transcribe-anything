@@ -33,8 +33,8 @@ def get_environment() -> dict[str, Any]:
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     deps = [
         "openai-whisper",
-        "insanely-fast-whisper==0.0.13 --ignore-requires-python",
-        "torchaudio==2.1.2",
+        "insanely-fast-whisper==0.0.15 --ignore-requires-python",
+        "torchaudio==2.2.0",
         "datasets==2.17.1",
         "pytorch-lightning==2.1.4",
         "torchmetrics~=1.3.0",

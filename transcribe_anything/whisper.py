@@ -33,7 +33,7 @@ def get_environment() -> dict[str, Any]:
         )
     else:
         deps.append(f"torch=={TENSOR_VERSION}")
-    env = isolated_environment(venv_dir, deps)
+    env = isolated_environment(venv_dir, deps, full_isolation=True)
     return env
 
 
