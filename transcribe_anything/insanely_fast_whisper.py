@@ -234,7 +234,7 @@ def run_insanely_fast_whisper(
         str(outfile),
     ]
     if hugging_face_token:
-        cmd_list += ["--hf_token", hugging_face_token]
+        cmd_list += ["--hf-token", hugging_face_token]
     if language:
         cmd_list += ["--language", language]
     batch_size = get_batch_size()
