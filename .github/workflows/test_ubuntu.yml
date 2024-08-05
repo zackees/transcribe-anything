@@ -26,5 +26,11 @@ jobs:
       run: pip install -e .
     - name: Install testing dependencies
       run: pip install -r requirements.testing.txt
+    - name: Free space
+      run:
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
     - name: Run tests
       run: pytest
