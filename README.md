@@ -112,7 +112,7 @@ GPU acceleration will be automatically enabled for windows and linux. Mac users 
 # Usage
 
 ```bash
- transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+ transcribe_anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
 Will output:
@@ -197,7 +197,7 @@ Works for Ubuntu/MacOS/Win32(in git-bash)
 This will create a virtual environment
 
 ```bash
-> cd transcribe_anything
+> cd transcribe-anything
 > ./install.sh
 # Enter the environment:
 > source activate.sh
