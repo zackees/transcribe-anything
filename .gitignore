@@ -137,3 +137,4 @@ tests/localfile/speaker-test.json
 transcribe_anything/WHISPER_OPTIONS.json
 !.aider.conf.yml
 !.aiderignore
+activate

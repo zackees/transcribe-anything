@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+uv venv --python 3.11
+uv pip install -r requirements.testing.txt
+uv pip install .
+# This is needed to force the installation to finalize.
+uv run python -c "import os; _ = os.getcwd()"
+set +e
+
+# if ./activate exists, remove it
+if [ -f activate ]; then
+    rm activate
+fi
+# symlink activate to .venv/bin/activate on linux/mac and .venv/Scripts/activate on windows
+if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
+    ln -s .venv/bin/activate activate
+else
+    ln -s .venv/Scripts/activate activate
+fi
+
+# if on windows symlink .venv/bin -> .venv/Scripts
+if [[ "$OSTYPE" == "msys" ]]; then
+    if [ -d .venv/bin ]; then
+        rm -rf .venv/Scripts
+        ln -s bin .venv/Scripts
+    fi
+fi

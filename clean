@@ -1,0 +1,20 @@
+#!/bin/bash
+set -x
+rm -rf venv
+rm -rf .venv
+rm -rf .env_*
+rm -rf transcribe_anything/venv
+# remove all *.pyc files
+find . -name "*.pyc" -exec rm -rf {} \;
+# remove all *.egg files
+find . -name "*.egg" -exec rm -rf {} \;
+rm -rf build
+rm -rf dist
+rm -rf *.egg-info
+rm -rf .eggs
+rm -rf .tox
+rm -rf .cache
+rm -rf .pytest_cache
+rm -rf .mypy_cache
+rm -rf .coverage
+rm -rf .iso_env

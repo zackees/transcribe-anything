@@ -5,7 +5,9 @@
     "python.analysis.extraPaths": [
         "."
     ],
-    "python.pythonPath": "venv/bin/python",
+    "terminal.integrated.env.windows": {
+        "VIRTUAL_ENV": "${workspaceFolder}/.venv"
+    },
     "python.defaultInterpreterPath": "venv/bin/python",
     "terminal.integrated.defaultProfile.windows": "Git Bash",
     "terminal.integrated.profiles.windows": {
