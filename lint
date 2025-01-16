@@ -2,7 +2,7 @@
 
 
 echo activating venv...
-. ./activate.sh
+. ./activate
 
 set -e
 
