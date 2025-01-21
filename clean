@@ -3,7 +3,7 @@ set -x
 rm -rf venv
 rm -rf .venv
 rm -rf .env_*
-rm -rf transcribe_anything/venv
+rm -rf src/transcribe_anything/venv
 # remove all *.pyc files
 find . -name "*.pyc" -exec rm -rf {} \;
 # remove all *.egg files

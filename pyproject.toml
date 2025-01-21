@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=65.5.1", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transcribe-anything"
+readme = "README.md"
+maintainers = [
+  {name = "Zachary Vorhies", email = "dont@email.me"}
+]
+
+description = "Uses whisper AI to transcribe speach from video and audio files. Also accepts urls for youtube, rumble, bitchute, clear file, etc."
+requires-python = ">=3.10"
+keywords = ["template-python-cmd"]
+license = { text = "BSD 3-Clause License" }
+classifiers = ["Programming Language :: Python :: 3"]
+dependencies = [
+    "static-ffmpeg>=2.7",
+    "yt-dlp>=2025.1.15",
+    "appdirs==1.4.4",
+    "disklru>=1.0.7",
+    "FileLock",
+    "webvtt-py==0.4.6",
+    # "srtranslator==0.2.6",
+    "uv-iso-env==1.0.8",
+    "uv",
+]
+# Change this with the version number bump.
+version = "2.7.40"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.ruff]
+line-length = 200
+
+[tool.pylint."MESSAGES CONTROL"]
+good-names = [
+    "c",
+    "i",
+    "ok",
+    "id",
+    "e",
+    "f"
+]
+disable = [
+    "missing-function-docstring",
+    "missing-module-docstring"
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
+[project.scripts]
+transcribe_anything = "transcribe_anything._cmd:main"
+transcribe-anything = "transcribe_anything._cmd:main"

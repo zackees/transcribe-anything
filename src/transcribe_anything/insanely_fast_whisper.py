@@ -37,14 +37,26 @@ def get_cuda_info() -> CudaInfo:
         with tempfile.TemporaryDirectory() as dir_name:
             temp = Path(dir_name) / "stdout.txt"
             abs_name = temp.absolute()
-            cp: subprocess.CompletedProcess = subprocess.run(
-                ["python", py_file, "-o", abs_name],
-                shell=False,
-                check=False,
-                env=env,
-                universal_newlines=True,
-                text=True,
-            )
+            # cp: subprocess.CompletedProcess = subprocess.run(
+            #     ["python", py_file, "-o", abs_name],
+            #     shell=False,
+            #     check=False,
+            #     env=env,
+            #     universal_newlines=True,
+            #     text=True,
+            # )
+            try:
+                env.run(
+                    ["python", py_file, "-o", abs_name],
+                    shell=False,
+                    check=True,
+                    universal_newlines=True,
+                    text=True,
+                    verbose=True,
+                )
+            except subprocess.CalledProcessError as exc:
+                print(f"Failed to run python {py_file} -o {abs_name}: {exc}")
+                raise
             # stdout = cp.stdout
             stdout = temp.read_text(encoding="utf-8")
             try:
@@ -186,6 +198,9 @@ def trim_text_chunks(json_data: dict[str, Any]) -> None:
     visit(json_data)
 
 
+import os
+
+
 def run_insanely_fast_whisper(
     input_wav: Path,
     model: str,
@@ -198,7 +213,8 @@ def run_insanely_fast_whisper(
     """Runs insanely fast whisper."""
     # ffmpeg paths have to be installed or else the backend tool will fail.
     static_ffmpeg.add_paths()
-    env = get_environment()
+    iso_env = get_environment()
+    env = dict(os.environ.copy())
     if sys.platform == "darwin":
         # Attempts fixed recommended for the mps machines. This seems
         # to be necessary since a recent update.
@@ -246,7 +262,7 @@ def run_insanely_fast_whisper(
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = " ".join(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = subprocess.Popen(  # pylint: disable=consider-using-with
+    proc = iso_env.open_proc(  # pylint: disable=consider-using-with
         cmd,
         shell=True,
         universal_newlines=True,

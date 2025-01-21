@@ -10,22 +10,22 @@ echo installing pip dependencies
 pip install -r requirements.txt
 
 echo running black...
-black transcribe_anything tests --exclude 'transcribe_anything/venv'
+black src tests --exclude 'src/transcribe_anything/venv'
 
 echo running isort...
-isort transcribe_anything tests
+isort src tests
 
 echo re-running black now
-black transcribe_anything tests  --exclude 'transcribe_anything/venv'
+black src tests  --exclude 'src/transcribe_anything/venv'
 
 # does --clean exist
 if [[ $* == *--no-ruff* ]]; then
     echo skipping ruff...
 else
     echo running ruff...
-    ruff check transcribe_anything tests
+    ruff check --fix src tests
 fi
 
 
 echo running mypy...
-mypy transcribe_anything tests --exclude 'transcribe_anything/venv'
+mypy src tests --exclude 'src/transcribe_anything/venv'

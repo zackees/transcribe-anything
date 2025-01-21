@@ -3,7 +3,6 @@ Parses whisper options.
 """
 
 import re
-import subprocess
 from typing import Any
 
 from transcribe_anything import logger
@@ -25,9 +24,14 @@ def _parse_item(item: str) -> tuple[str, Any]:
 def parse_whisper_options() -> dict:
     """Parses the whisper options."""
     env = get_environment()
-    stdout = subprocess.check_output(
-        "whisper --help", shell=True, universal_newlines=True, encoding="utf-8", env=env
-    )
+    stdout = env.run(
+        "whisper --help",
+        shell=True,
+        universal_newlines=True,
+        encoding="utf-8",
+        check=True,
+        capture_output=True,
+    ).stdout
     lines = stdout.splitlines()
     data = {}
     for line in lines:

@@ -2,7 +2,7 @@
 set -e
 uv venv --python 3.11
 uv pip install -r requirements.testing.txt
-uv pip install .
+uv pip install -e . --refresh-package uv-iso-env
 # This is needed to force the installation to finalize.
 uv run python -c "import os; _ = os.getcwd()"
 set +e

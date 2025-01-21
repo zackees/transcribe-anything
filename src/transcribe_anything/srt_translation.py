@@ -5,35 +5,51 @@ Utilities for srt translation, including srt wrap.
 import subprocess
 import warnings
 from pathlib import Path
-from typing import Any
 
-from isolated_environment import isolated_environment  # type: ignore
+from iso_env import IsoEnv, IsoEnvArgs, Requirements  # type: ignore
+
+# from isolated_environment import isolated_environment  # type: ignore
+
 
 HERE = Path(__file__).parent
 WRAP_SRT_PY = HERE / "srt_wrap.py"
 
 
-def get_environment() -> dict[str, Any]:
+def get_environment() -> IsoEnv:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "srttranslator"
-    env = isolated_environment(
-        venv_dir, ["srtranslator==0.2.6", "requests==2.28.1", "urllib3==1.26.13"]
+    reqs = Requirements(
+        "\n".join(["srtranslator==0.2.6", "requests==2.28.1", "urllib3==1.26.13"])
     )
+    args = IsoEnvArgs(
+        venv_dir=venv_dir,
+        requirements=reqs,
+    )
+    env = IsoEnv(args)
     return env
 
 
 def srt_wrap_to_string(srt_file: Path) -> str:
     """Wrap lines in a srt file."""
     env = get_environment()
-    process = subprocess.run(
-        ["python", str(WRAP_SRT_PY), str(srt_file)],
-        env=env,
+    cp: subprocess.CompletedProcess = env.run(
+        "python",
+        str(WRAP_SRT_PY),
+        str(srt_file),
+        check=True,
         capture_output=True,
         text=True,
         shell=False,
-        check=True,
     )
-    out = process.stdout
+    # process = subprocess.run(
+    #     ["python", str(WRAP_SRT_PY), str(srt_file)],
+    #     env=env,
+    #     capture_output=True,
+    #     text=True,
+    #     shell=False,
+    #     check=True,
+    # )
+    out = cp.stdout
     return out
 
 
