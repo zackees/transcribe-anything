@@ -102,20 +102,15 @@ def fix_subtitles_path(_path: str) -> str:
     # On Windows, ffmpeg 5 requires the path to be escaped.
     # For example, "C:\Users\user\file.srt" should be "C\\:/\Users/\user/\file.srt".
     # See https://stackoverflow.com/questions/60440793/how-can-i-use-windows-absolute-paths-with-the-movie-filter-on-ffmpeg
-    path = Path(_path)
-    # get the C:\ part
-    drive = path.drive
-    # get the \Users\user\file.srt part
-    try:
-        path = path.relative_to(drive)
-    except ValueError:
-        pass
-    drive_fixed = str(drive).replace(":", "\\\\:")
-    new_token = "/\\"
-    old_token = "\\"
-    path_fixed = str(path).replace(old_token, new_token)
-    out_path = drive_fixed + path_fixed
-    return out_path
+    # Replace backslashes with '/\' and add an extra backslash at the start of the drive letter
+    p = Path(_path).absolute()
+    # Handle drive letter specially
+    drive = p.drive
+    parts = p.parts
+    out: str = drive.replace(":", "") + "\\\\:"
+    for part in parts[1:]:
+        out += "/\\" + part
+    return out
 
 
 def get_video_name_from_url(url: str) -> str:
