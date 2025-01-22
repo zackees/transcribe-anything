@@ -138,3 +138,4 @@ transcribe_anything/WHISPER_OPTIONS.json
 !.aider.conf.yml
 !.aiderignore
 activate
+uv.lock
