@@ -5,4 +5,4 @@ disklru>=1.0.7
 FileLock
 webvtt-py==0.4.6
 # srtranslator==0.2.6
-uv-iso-env>=1.0.27
+uv-iso-env>=1.0.28
