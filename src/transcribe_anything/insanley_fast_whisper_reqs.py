@@ -76,7 +76,6 @@ def get_environment() -> IsoEnv:
     #     deps.append("intel-openmp==2024.0.3")
 
     if needs_extra_index:
-
         # [tool.uv.sources]
         #   torch = [
         #   { index = "pytorch-cu121", marker = "platform_system == 'Windows'" },
