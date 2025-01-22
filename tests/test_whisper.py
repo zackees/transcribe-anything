@@ -17,7 +17,7 @@ class WhisperTester(unittest.TestCase):
         """Check that the command is installed by the setup process."""
         env = get_environment()
         try:
-            env.run("whisper --help")
+            env.run(["whisper", "--help"])
         except subprocess.CalledProcessError as e:
             print(e.output)
             raise e

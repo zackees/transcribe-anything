@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from iso_env.api import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
+from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 from transcribe_anything.util import has_nvidia_smi
 

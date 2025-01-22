@@ -5,7 +5,7 @@ Requirements for the insanely fast whisper.
 import sys
 from pathlib import Path
 
-from iso_env.api import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
+from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 from transcribe_anything.util import has_nvidia_smi
 
