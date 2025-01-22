@@ -491,11 +491,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "appdirs", specifier = "==1.4.4" },
+    { name = "appdirs", specifier = ">=1.4.4" },
     { name = "disklru", specifier = ">=1.0.7" },
     { name = "filelock" },
     { name = "static-ffmpeg", specifier = ">=2.7" },
-    { name = "uv-iso-env", specifier = "==1.0.10" },
+    { name = "uv-iso-env", specifier = ">=1.0.18" },
     { name = "webvtt-py", specifier = "==0.4.6" },
     { name = "yt-dlp", specifier = ">=2025.1.15" },
 ]
@@ -564,15 +564,15 @@ wheels = [
 
 [[package]]
 name = "uv-iso-env"
-version = "1.0.10"
+version = "1.0.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "twine" },
     { name = "uv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/6a/84a2eed7e2f6147b49497b79d48bb9339a51cea8d69dac2b2a73b925f75e/uv_iso_env-1.0.10.tar.gz", hash = "sha256:000391fbbb64202cd3d763ade593ab4884db0e0ba56503f6cc58186b32d9e91b", size = 33718 }
+sdist = { url = "https://files.pythonhosted.org/packages/2b/58/2131cd60f74716a2b1ad4c23603e7fb9f37e614ce0173c9f7f0d2deb2bb2/uv_iso_env-1.0.18.tar.gz", hash = "sha256:3533c8a4b467c71633e1de99043ebc50c88557a9e4dcb2f3e16507ea5cfcf51c", size = 33928 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/f8/636c24bb80255e4507eaed4e5db303f64a87bd2bcf58a3bffaf9e456c218/uv_iso_env-1.0.10-py3-none-any.whl", hash = "sha256:d2216e3675f66f4e0ece23bbb78dd43ab9eb6d2aec9f2a71a29ad2202fbedaf4", size = 6268 },
+    { url = "https://files.pythonhosted.org/packages/83/4d/7f277e391295b6283ac3466adb93a639e2f757b962a0b48c57eb6170287a/uv_iso_env-1.0.18-py3-none-any.whl", hash = "sha256:eb20c2100d3eda9b21cbfb00b7630502fb8ac423bfb67c08695519cdf3b074a7", size = 6436 },
 ]
 
 [[package]]
