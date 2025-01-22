@@ -11,7 +11,7 @@ maintainers = [
 
 description = "Uses whisper AI to transcribe speach from video and audio files. Also accepts urls for youtube, rumble, bitchute, clear file, etc."
 requires-python = ">=3.10"
-keywords = ["template-python-cmd"]
+keywords = ["transcribe", "open ai", "whisper"]
 license = { text = "BSD 3-Clause License" }
 classifiers = ["Programming Language :: Python :: 3"]
 dynamic = ["dependencies"]
