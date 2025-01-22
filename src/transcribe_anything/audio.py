@@ -29,7 +29,7 @@ def _convert_to_wav(
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(
-            cmd, shell=True, check=True, capture_output=True, timeout=PROCESS_TIMEOUT
+            cmd, shell=False, check=True, capture_output=True, timeout=PROCESS_TIMEOUT
         )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
@@ -65,7 +65,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                 subprocess.run(
                     cmd,
                     cwd=tmpdir,
-                    shell=True,
+                    shell=False,
                     check=True,
                     capture_output=True,
                     timeout=PROCESS_TIMEOUT,

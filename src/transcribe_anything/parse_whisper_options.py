@@ -26,7 +26,7 @@ def parse_whisper_options() -> dict:
     env = get_environment()
     stdout = env.run(
         ["whisper", "--help"],
-        shell=True,
+        shell=False,
         universal_newlines=True,
         encoding="utf-8",
         check=True,

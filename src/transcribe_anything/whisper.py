@@ -125,10 +125,7 @@ def run_whisper(  # pylint: disable=too-many-arguments
     # cmd = " ".join(cmd_list)
     cmd = subprocess.list2cmdline(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    # proc = subprocess.Popen(  # pylint: disable=consider-using-with
-    #     cmd, shell=True, universal_newlines=True, env=env, encoding="utf-8"
-    # )
-    proc = env.open_proc(cmd_list, shell=True)
+    proc = env.open_proc(cmd_list, shell=False)
     while True:
         rtn = proc.poll()
         if rtn is None:

@@ -46,7 +46,7 @@ def srt_wrap_to_string(srt_file: Path) -> str:
             check=True,
             capture_output=True,
             text=True,
-            shell=True,
+            shell=False,
         )
     except subprocess.CalledProcessError as exc:
         stderr = exc.stderr

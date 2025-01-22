@@ -262,7 +262,7 @@ def run_insanely_fast_whisper(
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = iso_env.open_proc(  # pylint: disable=consider-using-with
         cmd_list,
-        shell=True,
+        shell=False,
         universal_newlines=True,
         encoding="utf-8",
         env=env,
