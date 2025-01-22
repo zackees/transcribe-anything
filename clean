@@ -18,3 +18,4 @@ rm -rf .pytest_cache
 rm -rf .mypy_cache
 rm -rf .coverage
 rm -rf .iso_env
+rm uv.lock
