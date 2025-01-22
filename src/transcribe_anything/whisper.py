@@ -2,6 +2,7 @@
 Runs whisper api.
 """
 
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -41,7 +42,7 @@ def get_environment() -> IsoEnv:
     content_lines.append('version = "0.1.0"')
     content_lines.append('requires-python = "==3.10.*"')
     content_lines.append("dependencies = [")
-    content_lines.append('  "openai-whisper",')
+    content_lines.append('  "openai-whisper==20240930",')
     content_lines.append('  "numpy==1.26.4",')
     # f"torch=={TENSOR_VERSION}"
     if needs_extra_index:
@@ -102,28 +103,32 @@ def run_whisper(  # pylint: disable=too-many-arguments
     #     # Set the text mode to UTF-8 on Windows.
     #     cmd_list.extend(["C:\Windows\System32\chcp.com", "65001", "&&"])
     cmd_list.append("whisper")
-    cmd_list.append(f'"{input_wav}"')
+    cmd_list.append(str(input_wav))
     cmd_list.append("--device")
     cmd_list.append(device)
     if model:
         cmd_list.append("--model")
         cmd_list.append(model)
-    cmd_list.append(f'--output_dir "{output_dir}"')
+    cmd_list.append("--output_dir")
+    cmd_list.append(str(output_dir))
     cmd_list.append("--task")
     cmd_list.append(task)
     if language:
-        cmd_list.append(f'--language "{language}"')
+        # cmd_list.append(f'--language "{language}"')
+        cmd_list.append("--language")
+        cmd_list.append(language)
 
     if other_args:
         cmd_list.extend(other_args)
     # Remove the empty strings.
-    cmd_list = [x.strip() for x in cmd_list if x.strip()]
-    cmd = " ".join(cmd_list)
+    cmd_list = [str(x).strip() for x in cmd_list if str(x).strip()]
+    # cmd = " ".join(cmd_list)
+    cmd = subprocess.list2cmdline(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     # proc = subprocess.Popen(  # pylint: disable=consider-using-with
     #     cmd, shell=True, universal_newlines=True, env=env, encoding="utf-8"
     # )
-    proc = env.open_proc(cmd, shell=True, verbose=True)
+    proc = env.open_proc(cmd_list, shell=True)
     while True:
         rtn = proc.poll()
         if rtn is None:

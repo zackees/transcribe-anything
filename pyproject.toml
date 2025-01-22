@@ -14,17 +14,7 @@ requires-python = ">=3.10"
 keywords = ["template-python-cmd"]
 license = { text = "BSD 3-Clause License" }
 classifiers = ["Programming Language :: Python :: 3"]
-dependencies = [
-    "static-ffmpeg>=2.7",
-    "yt-dlp>=2025.1.15",
-    "appdirs==1.4.4",
-    "disklru>=1.0.7",
-    "FileLock",
-    "webvtt-py==0.4.6",
-    # "srtranslator==0.2.6",
-    "uv-iso-env==1.0.8",
-    "uv",
-]
+dynamic = ["dependencies"]
 # Change this with the version number bump.
 version = "2.7.40"
 
@@ -54,6 +44,9 @@ profile = "black"
 [tool.mypy]
 ignore_missing_imports = true
 disable_error_code = ["import-untyped"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.scripts]
 transcribe_anything = "transcribe_anything._cmd:main"

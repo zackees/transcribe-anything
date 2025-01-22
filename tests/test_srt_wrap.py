@@ -15,6 +15,8 @@ HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
 TEST_SRT = LOCALFILE_DIR / "long.srt"
 
+os.environ["ISO_ENV_VERBOSE"] = "1"
+
 
 class InsanelFastWhisperTester(unittest.TestCase):
     """Tester for transcribe anything."""

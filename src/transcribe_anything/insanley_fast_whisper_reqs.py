@@ -31,9 +31,9 @@ def get_environment() -> IsoEnv:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     deps = [
-        "openai-whisper",
+        "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
-        "torchaudio==2.2.0",
+        "torchaudio==2.1.2",
         "datasets==2.17.1",
         "pytorch-lightning==2.1.4",
         "torchmetrics~=1.3.0",

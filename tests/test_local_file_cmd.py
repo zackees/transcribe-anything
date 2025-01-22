@@ -20,18 +20,18 @@ class TranscribeAnythingTester(unittest.TestCase):
     def test_local_file(self) -> None:
         """Check that the command works on a local file."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
+        cmd_list: list[str] = [
+            "transcribe_anything",
+            "video.mp4",
+            "--language",
+            "en",
+            "--model",
+            "tiny",
+        ]
         try:
-            subprocess.check_output(
-                [
-                    "transcribe_anything",
-                    "video.mp4",
-                    "--language",
-                    "en",
-                    "--model",
-                    "tiny",
-                ],
-                cwd=LOCALFILE_DIR,
-            )
+            cmd_str = subprocess.list2cmdline(cmd_list)
+            print(f"Running in {LOCALFILE_DIR}: {cmd_str}")
+            subprocess.run(cmd_list, cwd=LOCALFILE_DIR, check=True)
         except subprocess.CalledProcessError as e:  # pylint: disable=R0801
             print(e.output)
             raise e

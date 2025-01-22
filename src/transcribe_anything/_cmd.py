@@ -42,7 +42,7 @@ WHISPER_MODEL_OPTIONS = [
 
 def get_whisper_options() -> dict:
     """Get whisper options.""" ""
-    if not WHISPER_OPTIONS.exists():
+    if WHISPER_OPTIONS.exists():
         whisper_options = parse_whisper_options()
         string = json.dumps(whisper_options, indent=4)
         WHISPER_OPTIONS.write_text(string)
@@ -228,8 +228,17 @@ def main() -> int:
 
 if __name__ == "__main__":
     # push sys argv prior to call
-    sys.argv.append("test.wav")
+    here = Path(os.path.abspath(os.path.dirname(__file__)))
+    project_root = here.parent.parent
+    localfile_dir = project_root / "tests" / "localfile"
+    os.chdir(localfile_dir)
+    # sys.argv.append("test.wav")
+    # sys.argv.append("--model")
+    # sys.argv.append("large")
+    # sys.argv.append('--initial_prompt "What is your name?"')
+    sys.argv.append("video.mp4")
+    sys.argv.append("--language")
+    sys.argv.append("en")
     sys.argv.append("--model")
-    sys.argv.append("large")
-    sys.argv.append('--initial_prompt "What is your name?"')
+    sys.argv.append("tiny")
     sys.exit(main())

@@ -17,13 +17,17 @@ WRAP_SRT_PY = HERE / "srt_wrap.py"
 
 def get_environment() -> IsoEnv:
     """Returns the environment."""
-    venv_dir = HERE / "venv" / "srttranslator"
+    venv_path = HERE / "venv" / "srttranslator"
+    reqs_text = "\n".join(
+        ["srtranslator==0.3.9", "requests==2.28.1", "urllib3==1.26.13"]
+    )
     reqs = Requirements(
-        "\n".join(["srtranslator==0.2.6", "requests==2.28.1", "urllib3==1.26.13"])
+        reqs_text,
+        python_version="==3.11.*",
     )
     args = IsoEnvArgs(
-        venv_dir=venv_dir,
-        requirements=reqs,
+        venv_path=venv_path,
+        build_info=reqs,
     )
     env = IsoEnv(args)
     return env
@@ -32,15 +36,24 @@ def get_environment() -> IsoEnv:
 def srt_wrap_to_string(srt_file: Path) -> str:
     """Wrap lines in a srt file."""
     env = get_environment()
-    cp: subprocess.CompletedProcess = env.run(
-        "python",
+    cmd_list = [
         str(WRAP_SRT_PY),
         str(srt_file),
-        check=True,
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
+    ]
+    try:
+        cp: subprocess.CompletedProcess = env.run(
+            cmd_list,
+            check=True,
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        stderr = exc.stderr
+        error_msg = f"Failed to run srt_wrap: {exc}"
+        error_msg += f"\n{stderr}"
+        warnings.warn(error_msg)
+        raise
     # process = subprocess.run(
     #     ["python", str(WRAP_SRT_PY), str(srt_file)],
     #     env=env,

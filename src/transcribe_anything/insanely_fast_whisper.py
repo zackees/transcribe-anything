@@ -6,6 +6,7 @@ Runs whisper api.
 """
 
 import json  # type: ignore
+import os
 import subprocess
 import sys
 import tempfile
@@ -52,7 +53,6 @@ def get_cuda_info() -> CudaInfo:
                     check=True,
                     universal_newlines=True,
                     text=True,
-                    verbose=True,
                 )
             except subprocess.CalledProcessError as exc:
                 print(f"Failed to run python {py_file} -o {abs_name}: {exc}")
@@ -198,9 +198,6 @@ def trim_text_chunks(json_data: dict[str, Any]) -> None:
     visit(json_data)
 
 
-import os
-
-
 def run_insanely_fast_whisper(
     input_wav: Path,
     model: str,
@@ -228,9 +225,10 @@ def run_insanely_fast_whisper(
         # Assume it's not a namespace model, so add the namespace.
         model = f"openai/whisper-{model}"
     wave_duration = get_wave_duration(input_wav)
-    if sys.platform == "win32":
-        # Set the text mode to UTF-8 on Windows.
-        cmd_list.extend(["chcp", "65001", "&&"])
+    # if sys.platform == "win32":
+    # Set the text mode to UTF-8 on Windows.
+    # cmd_list.extend(["cmd.exe", "/c"])
+    # cmd_list.extend(["chcp", "65001", "&&"])
     cmd_list += [
         "insanely-fast-whisper",
         "--file-name",
@@ -260,10 +258,10 @@ def run_insanely_fast_whisper(
         cmd_list.extend(other_args)
     # Remove the empty strings.
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
-    cmd = " ".join(cmd_list)
+    cmd = subprocess.list2cmdline(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
     proc = iso_env.open_proc(  # pylint: disable=consider-using-with
-        cmd,
+        cmd_list,
         shell=True,
         universal_newlines=True,
         encoding="utf-8",
@@ -278,6 +276,7 @@ def run_insanely_fast_whisper(
             msg = f"Failed to execute {cmd}\n "
             raise OSError(msg)
         break
+    proc.wait()
     assert outfile.exists(), f"Expected {outfile} to exist."
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
