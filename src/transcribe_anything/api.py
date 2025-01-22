@@ -106,7 +106,10 @@ def fix_subtitles_path(_path: str) -> str:
     # get the C:\ part
     drive = path.drive
     # get the \Users\user\file.srt part
-    path = path.relative_to(drive)
+    try:
+        path = path.relative_to(drive)
+    except ValueError:
+        pass
     drive_fixed = str(drive).replace(":", "\\\\:")
     new_token = "/\\"
     old_token = "\\"

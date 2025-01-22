@@ -13,6 +13,7 @@ import unittest
 HERE = os.path.abspath(os.path.dirname(__file__))
 TESTS_DATA_DIR = os.path.join(HERE, "test_data")
 LOCALFILE_DIR = os.path.join(HERE, "localfile")
+_IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 class TranscribeAnythingTester(unittest.TestCase):
@@ -54,6 +55,7 @@ class TranscribeAnythingTester(unittest.TestCase):
             f"Path {expected_output} doesn't exist, instead it was {os.listdir(LOCALFILE_DIR)}",  # pylint: disable=line-too-long
         )
 
+    @unittest.skipIf(_IS_GITHUB_ACTIONS, "Skipping test on GitHub Actions")
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
