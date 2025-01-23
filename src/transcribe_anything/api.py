@@ -138,6 +138,7 @@ def get_video_name_from_url(url: str) -> str:
                 universal_newlines=True,
                 cwd=temp_dir,
                 env=env,
+                shell=True,
             )
             stdout = cp.stdout
             lines = stdout.split("\n")
