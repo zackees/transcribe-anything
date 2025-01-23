@@ -289,6 +289,9 @@ def transcribe(
         if embed:
             assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
             out_mp4 = os.path.join(output_dir, "out.mp4")
+            static_ffmpeg_path = shutil.which("static_ffmpeg")
+            if static_ffmpeg_path is None:
+                raise FileNotFoundError("static_ffmpeg not found")
             embed_ffmpeg_cmd_list = [
                 "static_ffmpeg",
                 "-y",
@@ -302,9 +305,21 @@ def transcribe(
             ]
             embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
             print(f"Running:\n  {embed_ffmpeg_cmd}")
-            rtn = subprocess.call(embed_ffmpeg_cmd_list, universal_newlines=True)
-            if rtn != 0:
-                warnings.warn(f"ffmpeg failed with return code {rtn}")
+            try:
+                _ = subprocess.run(
+                    embed_ffmpeg_cmd,
+                    universal_newlines=True,
+                    check=True,
+                    capture_output=True,
+                    shell=True,
+                )
+            except subprocess.CalledProcessError as exc:
+                stdout = exc.stdout
+                stderr = exc.stderr
+                warnings.warn(
+                    f"ffmpeg failed with return code {exc.returncode}\n{stdout}\n{stderr}"
+                )
+                raise
     print(f"Done! Files were saved to {output_dir}")
     return output_dir
 

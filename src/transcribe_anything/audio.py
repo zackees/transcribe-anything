@@ -16,30 +16,30 @@ def _convert_to_wav(
     inpath: str, outpath: str, speech_normalization: bool = False
 ) -> None:
     """Converts a file to wav."""
-    cmd_audio_filter = ""
-    if speech_normalization:
-        cmd_audio_filter = "-filter:a speechnorm=e=12.5:r=0.00001:l=1"
+    # static_ffmpeg -y -i C:\Users\niteris\AppData\Local\Temp\tmp3xhzm1sn\out.webm -filter:a "speechnorm=e=12.5:r=0.00001:l=1" -acodec pcm_s16le -ar 44100 -ac 1 C:\Users\niteris\AppData\Local\Temp\tmpu32zsjov.wav
+
     tmpwav = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
         suffix=".wav", delete=False
     )
     tmpwav.close()
     tmpwavepath = tmpwav.name
-    audio_encoder = "-acodec pcm_s16le -ar 44100 -ac 1"
-    # cmd = f'static_ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
-    cmd_list = [
-        "static_ffmpeg",
-        "-y",
-        "-i",
-        str(inpath),
-        cmd_audio_filter,
-        audio_encoder,
-        str(tmpwavepath),
-    ]
+
+    cmd_list = ["static_ffmpeg", "-y", "-i", str(inpath)]
+    if speech_normalization:
+        cmd_list += [
+            "-filter:a",
+            "speechnorm=e=12.5:r=0.00001:l=1",
+        ]
+    cmd_list += ["-acodec", "pcm_s16le", "-ar", "44100", "-ac", "1", str(tmpwavepath)]
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(
-            cmd_list, shell=False, check=False, capture_output=True, timeout=PROCESS_TIMEOUT
+            cmd,
+            shell=True,
+            check=False,
+            capture_output=True,
+            timeout=PROCESS_TIMEOUT,
         )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
@@ -69,9 +69,11 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
         abspath = os.path.abspath(url_or_file)
         out_wav_abs = os.path.abspath(out_wav)
         with tempfile.TemporaryDirectory() as tmpdir:
-            #cmd = f'static_ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
+            static_ffmpeg_path = shutil.which("static_ffmpeg")
+            if static_ffmpeg_path is None:
+                raise FileNotFoundError("No path for static_ffmpeg")
             cmd_list = [
-                "static_ffmpeg",
+                static_ffmpeg_path,
                 "-y",
                 "-i",
                 str(abspath),
