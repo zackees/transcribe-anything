@@ -38,7 +38,11 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
 ```
 
+## Updated version 2.3.0
 
+`transcribe-anything` now works much better across different configurations and is now much faster. Why? I switched the environment-isolation that I was using from my own homespun version built on top of `venv` to the AMAZING `uv` system. The biggest improvement is the runtime sppeds and re-installs. UV is just insane at how fast it is for checking the environment. Also it turns out that `uv` has  strict package dependency checking which found a minor bug where a certain version of one of the `pytorch` dependencies was being constantly re-installed because of a dependency conflict that pip was apparently perfectly happy to never warn about. This manifested as certain packages being constantly re-installed with the previous version. `uv` identified this as an error immediately and was fixed and now this doesn't happen anymore.
+
+The real reason behind `transcribe-anything`'s surprising popularity comes from the fact that it just works. And the reason for this is that I can isolate environments for different configurations and install them lazily. If you have the same problem then consider my other repo: https://github.com/zackees/iso-env
 
 #### Insanely fast on `cuda` platforms
 
