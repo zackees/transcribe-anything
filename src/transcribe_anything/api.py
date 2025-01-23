@@ -151,7 +151,9 @@ def get_video_name_from_url(url: str) -> str:
             log_error("yt-dlp failed to get title, using basename instead.")
             return os.path.basename(url)
     except subprocess.CalledProcessError as exc:
-        log_error(f"yt-dlp failed with {exc}, using basename instead\n{exc.stdout}\n{exc.stderr}")
+        log_error(
+            f"yt-dlp failed with {exc}, using basename instead\n{exc.stdout}\n{exc.stderr}"
+        )
         return os.path.basename(url)
     except Exception as exc:
         log_error(f"yt-dlp failed with {exc}, using basename instead.")
