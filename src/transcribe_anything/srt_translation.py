@@ -54,14 +54,6 @@ def srt_wrap_to_string(srt_file: Path) -> str:
         error_msg += f"\n{stderr}"
         warnings.warn(error_msg)
         raise
-    # process = subprocess.run(
-    #     ["python", str(WRAP_SRT_PY), str(srt_file)],
-    #     env=env,
-    #     capture_output=True,
-    #     text=True,
-    #     shell=False,
-    #     check=True,
-    # )
     out = cp.stdout
     return out
 

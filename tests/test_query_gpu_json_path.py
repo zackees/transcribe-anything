@@ -27,7 +27,8 @@ class BadVideoTitleTester(unittest.TestCase):
             try:
                 print(f"Using temporary directory {tmpdir}")
                 os.chdir(tmpdir)
-                os.system("transcribe_anything --query-gpu-json-path info.json")
+                rtn = os.system("transcribe_anything --query-gpu-json-path info.json")
+                self.assertEqual(rtn, 0)
                 self.assertTrue(os.path.exists("info.json"))
                 # parsing test
                 with open("info.json", encoding="utf-8", mode="rt") as fd:

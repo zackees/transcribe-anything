@@ -38,17 +38,9 @@ def get_cuda_info() -> CudaInfo:
         with tempfile.TemporaryDirectory() as dir_name:
             temp = Path(dir_name) / "stdout.txt"
             abs_name = temp.absolute()
-            # cp: subprocess.CompletedProcess = subprocess.run(
-            #     ["python", py_file, "-o", abs_name],
-            #     shell=False,
-            #     check=False,
-            #     env=env,
-            #     universal_newlines=True,
-            #     text=True,
-            # )
             try:
                 env.run(
-                    ["python", py_file, "-o", abs_name],
+                    [str(py_file), "-o", str(abs_name)],
                     shell=False,
                     check=True,
                     universal_newlines=True,
@@ -56,6 +48,8 @@ def get_cuda_info() -> CudaInfo:
                 )
             except subprocess.CalledProcessError as exc:
                 print(f"Failed to run python {py_file} -o {abs_name}: {exc}")
+                print(f"stdout: {exc.stdout}")
+                print(f"stderr: {exc.stderr}")
                 raise
             # stdout = cp.stdout
             stdout = temp.read_text(encoding="utf-8")

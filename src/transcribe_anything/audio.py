@@ -25,11 +25,21 @@ def _convert_to_wav(
     tmpwav.close()
     tmpwavepath = tmpwav.name
     audio_encoder = "-acodec pcm_s16le -ar 44100 -ac 1"
-    cmd = f'static_ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
+    # cmd = f'static_ffmpeg -y -i "{inpath}" {cmd_audio_filter} {audio_encoder} "{tmpwavepath}"'
+    cmd_list = [
+        "static_ffmpeg",
+        "-y",
+        "-i",
+        str(inpath),
+        cmd_audio_filter,
+        audio_encoder,
+        str(tmpwavepath),
+    ]
+    cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(
-            cmd, shell=False, check=True, capture_output=True, timeout=PROCESS_TIMEOUT
+            cmd_list, shell=False, check=False, capture_output=True, timeout=PROCESS_TIMEOUT
         )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
@@ -59,20 +69,34 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
         abspath = os.path.abspath(url_or_file)
         out_wav_abs = os.path.abspath(out_wav)
         with tempfile.TemporaryDirectory() as tmpdir:
-            cmd = f'static_ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
-            sys.stderr.write(f"Running:\n  {cmd}\n")
+            #cmd = f'static_ffmpeg -y -i "{abspath}" -acodec pcm_s16le -ar 44100 -ac 1 out.wav'
+            cmd_list = [
+                "static_ffmpeg",
+                "-y",
+                "-i",
+                str(abspath),
+                "-acodec",
+                "pcm_s16le",
+                "-ar",
+                "44100",
+                "-ac",
+                "1",
+                "out.wav",
+            ]
+            cmd_str = subprocess.list2cmdline(cmd_list)
+            sys.stderr.write(f"Running:\n  {cmd_str}\n")
             try:
                 subprocess.run(
-                    cmd,
+                    cmd_list,
                     cwd=tmpdir,
                     shell=False,
-                    check=True,
+                    check=False,
                     capture_output=True,
                     timeout=PROCESS_TIMEOUT,
                 )
                 shutil.copyfile(os.path.join(tmpdir, "out.wav"), out_wav_abs)
             except subprocess.CalledProcessError as exc:
-                print(f"Failed to run {cmd} with error {exc}")
+                print(f"Failed to run {cmd_str} with error {exc}")
                 print(f"stdout: {exc.stdout.decode()}")
                 print(f"stderr: {exc.stderr.decode()}")
                 raise

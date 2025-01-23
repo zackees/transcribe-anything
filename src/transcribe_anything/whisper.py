@@ -79,10 +79,7 @@ def get_computing_device() -> str:
     if CUDA_AVAILABLE is None:
         env = get_environment()
         py_file = HERE / "cuda_available.py"
-        cp = env.run(["python", py_file], shell=False, check=False)
-        # rtn = subprocess.run(
-        #     ["python", py_file], shell=False, check=False, env=env, capture_output=True
-        # ).returncode
+        cp = env.run([py_file], shell=False, check=False)
         CUDA_AVAILABLE = cp.returncode == 0
     return "cuda" if CUDA_AVAILABLE else "cpu"
 
@@ -125,7 +122,7 @@ def run_whisper(  # pylint: disable=too-many-arguments
     # cmd = " ".join(cmd_list)
     cmd = subprocess.list2cmdline(cmd_list)
     sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = env.open_proc(cmd_list, shell=False)
+    proc = env.open_proc(cmd_list, shell=True)
     while True:
         rtn = proc.poll()
         if rtn is None:
