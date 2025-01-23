@@ -47,10 +47,12 @@ def get_cuda_info() -> CudaInfo:
                     text=True,
                 )
             except subprocess.CalledProcessError as exc:
-                print(f"Failed to run python {py_file} -o {abs_name}: {exc}")
-                print(f"stdout: {exc.stdout}")
-                print(f"stderr: {exc.stderr}")
-                raise
+                if exc.returncode != 1:  # 1 is the expected return code
+                    raise
+                pass
+                #print(f"Failed to run python {py_file} -o {abs_name}: {exc}")
+                #print(f"stdout: {exc.stdout}")
+                #print(f"stderr: {exc.stderr}")
             # stdout = cp.stdout
             stdout = temp.read_text(encoding="utf-8")
             try:
