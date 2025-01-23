@@ -132,7 +132,7 @@ def get_video_name_from_url(url: str) -> str:
             # env["set PYTHONIOENCODING=utf-8"]
             env["PYTHONIOENCODING"] = "utf-8"
             cp = subprocess.run(
-                cmd_list,
+                cmd_str,
                 check=True,
                 capture_output=True,
                 universal_newlines=True,
@@ -150,8 +150,8 @@ def get_video_name_from_url(url: str) -> str:
                 return sanitize_filename(line)
             log_error("yt-dlp failed to get title, using basename instead.")
             return os.path.basename(url)
-    except subprocess.CalledProcessError:
-        log_error("yt-dlp failed to get title, using basename instead.")
+    except subprocess.CalledProcessError as exc:
+        log_error(f"yt-dlp failed with {exc}, using basename instead\n{exc.stdout}\n{exc.stderr}")
         return os.path.basename(url)
     except Exception as exc:
         log_error(f"yt-dlp failed with {exc}, using basename instead.")
