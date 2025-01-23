@@ -225,6 +225,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
   * Every commit is tested for standard linters and a batch of unit tests.
 
 # Versions
+  * 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
   * 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
   * 2.7.37: Fixed breakage due to numpy 2.0 being released.
   * 2.7.36: Fixed some ffmpeg dependencies.
