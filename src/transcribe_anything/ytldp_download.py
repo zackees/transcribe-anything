@@ -18,7 +18,7 @@ def ytdlp_download(url: str, outdir: str) -> str:
     print(f"Running:\n  {cmd}")
     subprocess.run(
         cmd,
-        shell=False,
+        shell=True,
         cwd=outdir,
         check=True,
         timeout=PROCESS_TIMEOUT,
