@@ -1,5 +1,5 @@
 # transcribe-anything
-[![MacOS_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml)
+[![MacOS_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml) *cpu mode works - hardware acceleration does not*
 [![Win_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml)
 [![Ubuntu_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml)
 [![Lint](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml)
