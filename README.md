@@ -10,7 +10,7 @@
 
 ### USES WHISPER AI
 
-Over 300+⭐'s because this program this app just works! This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
+Over 600+⭐'s because this program this app just works! This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
 
