@@ -42,6 +42,7 @@ class TranscribeAnythingApiTester(unittest.TestCase):
                 f"expected path {expected_path} not found",
             )
 
+    @unittest.skipIf(_IS_GITHUB_ACTIONS, "Skipping test on GitHub Actions")
     def test_fetch_command_installed(self) -> None:
         """Check that the command works on a live short video."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)

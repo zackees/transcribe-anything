@@ -1,4 +1,5 @@
 #!/bin/bash
 . ./activate
 set -e
-uv run python -m unittest discover tests
+# uv run python -m unittest discover tests
+pytest
