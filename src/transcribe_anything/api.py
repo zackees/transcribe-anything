@@ -1,5 +1,5 @@
 """
-    Api for using transcribe_anything from python. Allows bulk processing.
+Api for using transcribe_anything from python. Allows bulk processing.
 """
 
 # pylint: disable=too-many-arguments,broad-except,too-many-locals,unsupported-binary-operation,too-many-branches,too-many-statements,disable=notimplemented-raised,unused-variable,line-too-long
@@ -42,14 +42,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 
 CACHE_FILE = os.path.join(user_config_dir("transcript-anything", "cache", roaming=True))
 
-PERMS = (
-    stat.S_IRUSR
-    | stat.S_IRGRP
-    | stat.S_IROTH
-    | stat.S_IWOTH
-    | stat.S_IWUSR
-    | stat.S_IWGRP
-)
+PERMS = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IWUSR | stat.S_IWGRP
 
 
 class Device(Enum):
@@ -81,9 +74,7 @@ def make_temp_wav() -> str:
     """
     Makes a temporary mp3 file and returns the path to it.
     """
-    tmp = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
-        suffix=".wav", delete=False
-    )
+    tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)  # pylint: disable=consider-using-with
 
     tmp.close()
 
@@ -151,9 +142,7 @@ def get_video_name_from_url(url: str) -> str:
             log_error("yt-dlp failed to get title, using basename instead.")
             return os.path.basename(url)
     except subprocess.CalledProcessError as exc:
-        log_error(
-            f"yt-dlp failed with {exc}, using basename instead\n{exc.stdout}\n{exc.stderr}"
-        )
+        log_error(f"yt-dlp failed with {exc}, using basename instead\n{exc.stdout}\n{exc.stderr}")
         return os.path.basename(url)
     except Exception as exc:
         log_error(f"yt-dlp failed with {exc}, using basename instead.")
@@ -192,10 +181,7 @@ def transcribe(
     static_ffmpeg.add_paths()
     check_python_in_range()
     if not os.path.isfile(url_or_file) and embed:
-        raise NotImplementedError(
-            "Embedding is only supported for local files. "
-            + "Please download the file first."
-        )
+        raise NotImplementedError("Embedding is only supported for local files. " + "Please download the file first.")
     # cache = DiskLRUCache(CACHE_FILE, 16)
     basename = os.path.basename(url_or_file)
     if not basename or basename == ".":  # if url_or_file is a directory
@@ -216,9 +202,7 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(
-        output_dir
-    ), f"Path {output_dir} is not found or not a directory."
+    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
     # tmp_mp3 = os.path.join(output_dir, "out.mp3")
     fetch_audio(url_or_file, tmp_wav)
     assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
@@ -319,9 +303,7 @@ def transcribe(
             except subprocess.CalledProcessError as exc:
                 stdout = exc.stdout
                 stderr = exc.stderr
-                warnings.warn(
-                    f"ffmpeg failed with return code {exc.returncode}\n{stdout}\n{stderr}"
-                )
+                warnings.warn(f"ffmpeg failed with return code {exc.returncode}\n{stdout}\n{stderr}")
                 raise
     print(f"Done! Files were saved to {output_dir}")
     return output_dir

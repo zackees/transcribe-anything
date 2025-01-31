@@ -1,5 +1,5 @@
 """
-    Fetches audio and handles transcoding it for it.
+Fetches audio and handles transcoding it for it.
 """
 
 import os
@@ -12,15 +12,11 @@ from transcribe_anything.util import PROCESS_TIMEOUT
 from transcribe_anything.ytldp_download import ytdlp_download
 
 
-def _convert_to_wav(
-    inpath: str, outpath: str, speech_normalization: bool = False
-) -> None:
+def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = False) -> None:
     """Converts a file to wav."""
     # static_ffmpeg -y -i C:\Users\niteris\AppData\Local\Temp\tmp3xhzm1sn\out.webm -filter:a "speechnorm=e=12.5:r=0.00001:l=1" -acodec pcm_s16le -ar 44100 -ac 1 C:\Users\niteris\AppData\Local\Temp\tmpu32zsjov.wav
 
-    tmpwav = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
-        suffix=".wav", delete=False
-    )
+    tmpwav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)  # pylint: disable=consider-using-with
     tmpwav.close()
     tmpwavepath = tmpwav.name
 

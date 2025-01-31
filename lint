@@ -7,25 +7,25 @@ echo activating venv...
 set -e
 
 echo installing pip dependencies
-pip install -r requirements.txt
+
 
 echo running black...
-black src tests --exclude 'src/transcribe_anything/venv'
+uv run black src tests --exclude 'src/transcribe_anything/venv'
 
 echo running isort...
-isort src tests
+uv run isort src tests
 
 echo re-running black now
-black src tests  --exclude 'src/transcribe_anything/venv'
+uv run black src tests  --exclude 'src/transcribe_anything/venv'
 
 # does --clean exist
 if [[ $* == *--no-ruff* ]]; then
     echo skipping ruff...
 else
     echo running ruff...
-    ruff check --fix src tests
+    uv run ruff check --fix src tests
 fi
 
 
 echo running mypy...
-mypy src tests --exclude 'src/transcribe_anything/venv'
+uv run mypy src tests --exclude 'src/transcribe_anything/venv'

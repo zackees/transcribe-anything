@@ -1,5 +1,5 @@
 """
-    Super simple logger implementation.
+Super simple logger implementation.
 """
 
 INFO = 0

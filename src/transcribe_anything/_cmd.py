@@ -1,5 +1,5 @@
 """
-    Entry point for running the transcribe-anything prgram.
+Entry point for running the transcribe-anything prgram.
 """
 
 # flake8: noqa E501
@@ -59,11 +59,7 @@ def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
     whisper_options = get_whisper_options()
     device = get_computing_device()
-    help_str = (
-        f'transcribe_anything is using a "{device}" device.'
-        " Any unrecognized args are assumed to be for whisper"
-        " ai and will be passed as is to whisper ai."
-    )
+    help_str = f'transcribe_anything is using a "{device}" device.' " Any unrecognized args are assumed to be for whisper" " ai and will be passed as is to whisper ai."
     parser = argparse.ArgumentParser(description=help_str)
     parser.add_argument(
         "url_or_file",
@@ -72,10 +68,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--query-gpu-json-path",
-        help=(
-            "Query the GPU and store it in the given path,"
-            " warning takes a long time on first load!"
-        ),
+        help=("Query the GPU and store it in the given path," " warning takes a long time on first load!"),
         type=Path,
     )
     parser.add_argument(
@@ -119,18 +112,12 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--diarization_model",
-        help=(
-            "Name of the pretrained model/ checkpoint to perform diarization."
-            + " (default: pyannote/speaker-diarization). Only works for --device insane."
-        ),
+        help=("Name of the pretrained model/ checkpoint to perform diarization." + " (default: pyannote/speaker-diarization). Only works for --device insane."),
         default="pyannote/speaker-diarization-3.1",
     )
     parser.add_argument(
         "--timestamp",
-        help=(
-            "Whisper supports both chunked as well as word level timestamps. (default: chunk)."
-            + " Only works for --device insane."
-        ),
+        help=("Whisper supports both chunked as well as word level timestamps. (default: chunk)." + " Only works for --device insane."),
         choices=["chunk", "word"],
         default=None,
     )
@@ -163,10 +150,7 @@ def main() -> int:
     if args.model == "large-legacy":
         args.model = "large"
     elif args.model == "large":
-        print(
-            "Defaulting to large-v3 model for --model large,"
-            + " use --model large-legacy for the old model"
-        )
+        print("Defaulting to large-v3 model for --model large," + " use --model large-legacy for the old model")
         args.model = "large-v3"
     elif args.model is None and args.device == "insane":
         print("Defaulting to large-v3 model for --device insane")
@@ -187,9 +171,7 @@ def main() -> int:
     # For now, just stuff --diarization_model and --timestamp into unknown
     if args.diarization_model:
         if args.device != "insane":
-            print(
-                "--diarization_model only works with --device insane. Ignoring --diarization_model"
-            )
+            print("--diarization_model only works with --device insane. Ignoring --diarization_model")
         else:
             unknown.append(f"--diarization_model {args.diarization_model}")
 

@@ -27,7 +27,5 @@ def ytdlp_download(url: str, outdir: str) -> str:
     new_files = os.listdir(outdir)
     assert len(new_files) == 1, f"Expected 1 file, got {new_files}"
     downloaded_file = os.path.join(outdir, new_files[0])
-    assert os.path.exists(
-        downloaded_file
-    ), f"The expected file {downloaded_file} doesn't exist"
+    assert os.path.exists(downloaded_file), f"The expected file {downloaded_file} doesn't exist"
     return downloaded_file

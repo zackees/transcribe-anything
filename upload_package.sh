@@ -1,10 +1,8 @@
 #!/bin/bash
-
-# Check the operating system
-if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
-    # Linux or Mac OS
-    python3 setup.py upload
-else
-    # Other OS (like Windows)
-    python setup.py upload
-fi
+set -e
+rm -rf build dist
+. ./activate
+uv build
+echo "Uploading the package to PyPI via Twine…"
+twine upload dist/* --verbose
+# echo Pushing git tags…

@@ -1,8 +1,0 @@
-static-ffmpeg>=2.7
-yt-dlp>=2025.1.15
-appdirs>=1.4.4
-disklru>=1.0.7
-FileLock
-webvtt-py==0.4.6
-# srtranslator==0.2.6
-uv-iso-env>=1.0.33

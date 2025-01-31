@@ -23,10 +23,7 @@ class CudaDevice:
     device_id: int
 
     def __str__(self):
-        return (
-            f"{self.name} - VRAM: {self.vram / (1024 ** 3):.2f} GB, "
-            f"Multiprocessors: {self.multiprocessors}"
-        )
+        return f"{self.name} - VRAM: {self.vram / (1024 ** 3):.2f} GB, " f"Multiprocessors: {self.multiprocessors}"
 
     def to_json(self) -> dict[str, str | int]:
         """Returns a dictionary representation of the object."""

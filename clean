@@ -4,6 +4,9 @@ rm -rf venv
 rm -rf .venv
 rm -rf .env_*
 rm -rf src/transcribe_anything/venv
+rm -rf src/transcribe_anything/transcribe_anything.egg-info
+rm -rf src/transcribe_anything.egg-info
+rm -rf src/transcribe_anything/__pycache__
 # remove all *.pyc files
 find . -name "*.pyc" -exec rm -rf {} \;
 # remove all *.egg files

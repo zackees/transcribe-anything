@@ -30,10 +30,7 @@ class Chunk:
 
 def can_combine(chunk1: Chunk, chunk2: Chunk) -> bool:
     """Check if two chunks can be combined."""
-    return (
-        chunk1.speaker == chunk2.speaker
-        and abs(chunk1.timestamp_end - chunk2.timestamp_start) <= 0.1
-    )
+    return chunk1.speaker == chunk2.speaker and abs(chunk1.timestamp_end - chunk2.timestamp_start) <= 0.1
 
 
 def reduce(dat: list[Chunk]) -> list[Chunk]:
@@ -46,9 +43,7 @@ def reduce(dat: list[Chunk]) -> list[Chunk]:
             continue
         last_chunk = out[-1]
         if not can_combine(last_chunk, chunk):
-            chunk.reason = (
-                "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
-            )
+            chunk.reason = "speaker-switch" if last_chunk.speaker != chunk.speaker else "timeout"
             out.append(chunk)
             continue
         # combine
