@@ -28,4 +28,4 @@ jobs:
     - name: Install testing dependencies
       run: |
         brew install ffmpeg
-        whisper-mps --file-name tests/localfile/video.mp4 --language en
+        whisper-mps --file-name tests/localfile/video.mp4
