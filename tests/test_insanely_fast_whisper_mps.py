@@ -10,7 +10,6 @@ import shutil
 import unittest
 from pathlib import Path
 
-
 from transcribe_anything.util import is_mac_arm
 from transcribe_anything.whisper_mac import run_whisper_mac_english
 
@@ -34,8 +33,6 @@ class MacOsWhisperMpsTester(unittest.TestCase):
             model="small",
             output_dir=TESTS_DATA_DIR,
         )
-
-
 
 
 if __name__ == "__main__":

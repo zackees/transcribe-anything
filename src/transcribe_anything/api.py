@@ -251,8 +251,8 @@ def transcribe(
                 hugging_face_token=hugging_face_token,
                 other_args=other_args,
             )
-        elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English"):
-            run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir), task=task_str)
+        elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English") and (task_str == "transcribe"):
+            run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir))
         else:
             run_whisper(
                 input_wav=Path(tmp_wav),

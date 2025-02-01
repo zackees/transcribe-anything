@@ -43,7 +43,6 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     input_wav: Path,
     model: str,
     output_dir: Path,
-    task: str,
 ) -> None:
     """Runs whisper."""
     input_wav_abs = input_wav.resolve()
@@ -59,8 +58,7 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
         cmd_list.append(model)
     cmd_list.append("--output_dir")
     cmd_list.append(str(output_dir))
-    cmd_list.append("--task")
-    cmd_list.append(task)
+
     # Remove the empty strings.
     cmd_list = [str(x).strip() for x in cmd_list if str(x).strip()]
     # cmd = " ".join(cmd_list)
