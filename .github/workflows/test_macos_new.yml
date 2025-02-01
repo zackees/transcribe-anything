@@ -26,4 +26,6 @@ jobs:
     - name: Install dependencies
       run: pip install whisper-mps
     - name: Install testing dependencies
-      run: whisper-mps --file-name tests/localfiles/video.mp4
+      run: |
+        brew install ffmpeg
+        whisper-mps --file-name tests/localfiles/video.mp4
