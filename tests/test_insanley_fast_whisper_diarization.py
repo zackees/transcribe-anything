@@ -9,8 +9,10 @@ Tests transcribe_anything
 
 import os
 import shutil
+import subprocess
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from dotenv import load_dotenv
 
@@ -50,6 +52,36 @@ class InsanelFastWhisperDiarizationTester(unittest.TestCase):
         )
         expected_file = TESTS_DATA_DIR / "speaker.json"
         self.assertTrue(expected_file.exists())
+
+    @unittest.skipUnless(CAN_RUN_TEST, "No GPU, or HF_TOKEN not set")
+    def test_local_file_cli(self) -> None:
+        assert HF_TOKEN is not None
+        with TemporaryDirectory() as tempdir:
+            cmd_list: list[str] = [
+                "transcribe_anything",
+                str(TEST_WAV),
+                "--language",
+                "en",
+                "--model",
+                "tiny",
+                "--device",
+                "insane",
+                "--diarization_model",
+                "pyannote/speaker-diarization-3.1",
+                "--hf-token",
+                HF_TOKEN,
+                "--batch-size",
+                "8",
+                "--output_dir",
+                tempdir,
+            ]
+            try:
+                cmd_str = subprocess.list2cmdline(cmd_list)
+                print(f"Running: {cmd_str}")
+                subprocess.run(cmd_list, check=True)
+            except subprocess.CalledProcessError as e:  # pylint: disable=R0801
+                print(e.output)
+                raise e
 
 
 if __name__ == "__main__":
