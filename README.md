@@ -8,6 +8,10 @@
 ![image](https://github.com/zackees/transcribe-anything/assets/6856673/94bdd1fe-3225-438a-ac1b-09c81f1d4108)
 
 
+### New in 3.0!
+
+Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
+
 ### USES WHISPER AI
 
 Over 600+⭐'s because this program this app just works! This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
@@ -36,6 +40,8 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 # translate from any language to english
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
+# Mac accelerated back-end
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
 ```
 
 #### Insanely fast on `cuda` platforms
@@ -231,6 +237,7 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
 
 
 # Versions
+  * 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
   * 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
   * 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
   * 2.7.37: Fixed breakage due to numpy 2.0 being released.
