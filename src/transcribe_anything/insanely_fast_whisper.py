@@ -205,7 +205,7 @@ def run_insanely_fast_whisper(
     if sys.platform == "darwin":
         # Attempts fixed recommended for the mps machines. This seems
         # to be necessary since a recent update.
-        env["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "1.9"
+        env["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "7"
         env["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
     device_id = get_device_id()
     cmd_list = []
