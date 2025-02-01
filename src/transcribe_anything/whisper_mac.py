@@ -28,7 +28,7 @@ def get_environment() -> IsoEnv:
     content_lines.append("[project]")
     content_lines.append('name = "project"')
     content_lines.append('version = "0.1.0"')
-    content_lines.append('requires-python = "==3.10.*"')
+    content_lines.append('requires-python = "==3.11.*"')
     content_lines.append("dependencies = [")
     content_lines.append('  "whisper-mps",')
     content_lines.append("]")
