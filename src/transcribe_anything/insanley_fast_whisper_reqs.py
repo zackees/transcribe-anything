@@ -180,7 +180,7 @@ _COMPILED: dict[str, str] = {
 def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     """Generate the requirements for the generic case."""
     deps = [
-        "transformers==4.46.3",  # 4.47.X has problems with mac mps driver.
+        "transformers==4.46.3",  # 4.47.X has problems with mac mps driver see fix: https://github.com/huggingface/transformers/pull/35295
         "pyannote.audio==3.3.2",
         "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
