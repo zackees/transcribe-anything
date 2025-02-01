@@ -89,7 +89,7 @@ multidict==6.1.0
 multiprocess==0.70.16
 networkx==3.4.2
 numba==0.61.0
-numpy==1.26.4
+numpy==2.1.3
 omegaconf==2.3.0
 openai-whisper==20240930
 optuna==4.2.0
@@ -101,7 +101,7 @@ primepy==1.3
 propcache==0.2.1
 protobuf==5.29.3
 psutil==6.1.1
-pyannote-audio==3.1.0
+pyannote-audio==3.3.2
 pyannote-core==5.0.0
 pyannote-database==5.1.3
 pyannote-metrics==3.2.1
@@ -115,7 +115,7 @@ pyparsing==3.2.1
 pysocks==1.7.1
 python-dateutil==2.9.0.post0
 python-editor==1.0.4
-pytorch-lightning==2.1.4
+pytorch-lightning==2.5.0
 pytorch-metric-learning==2.8.1
 pytz==2025.1
 pyuseragents==1.0.5
@@ -155,7 +155,7 @@ torch==2.6.0+cu126
 torch-audiomentations==0.12.0
 torch-pitch-shift==1.2.5
 torchaudio==2.6.0
-torchmetrics==1.3.2
+torchmetrics==1.6.1
 tqdm==4.64.1
 transformers==4.48.2
 translatepy==2.3
@@ -214,7 +214,7 @@ def get_environment() -> IsoEnv:
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     has_nvidia = has_nvidia_smi()
     is_windows = sys.platform == "win32"
-    if False and has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
+    if has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
         dep_lines = _COMPILED["WIN_CUDA_260"].splitlines()
     else:
         dep_lines = _get_reqs_generic(has_nvidia)
