@@ -10,13 +10,14 @@ import shutil
 import unittest
 
 from transcribe_anything.api import transcribe
-from transcribe_anything.util import has_nvidia_smi, is_mac_arm
+from transcribe_anything.util import has_nvidia_smi, is_mac
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LOCALFILE_DIR = os.path.join(HERE, "localfile")
 TESTS_DATA_DIR = os.path.join(LOCALFILE_DIR, "text_video_api_insane", "en")
 
-CAN_RUN_TEST = has_nvidia_smi() or is_mac_arm()
+
+CAN_RUN_TEST = has_nvidia_smi() and not is_mac()
 
 
 class InsaneWhisperModeTester(unittest.TestCase):

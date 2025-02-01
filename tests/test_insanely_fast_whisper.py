@@ -15,14 +15,14 @@ from transcribe_anything.insanely_fast_whisper import (
     get_cuda_info,
     run_insanely_fast_whisper,
 )
-from transcribe_anything.util import has_nvidia_smi, is_mac_arm
+from transcribe_anything.util import has_nvidia_smi, is_mac
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
 TESTS_DATA_DIR = LOCALFILE_DIR / "text_video_insane" / "en"
 TEST_WAV = LOCALFILE_DIR / "video.wav"
 
-CAN_RUN_TEST = has_nvidia_smi() or is_mac_arm()
+CAN_RUN_TEST = has_nvidia_smi() and not is_mac()
 
 
 class InsanelFastWhisperTester(unittest.TestCase):

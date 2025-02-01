@@ -12,16 +12,22 @@ from urllib.parse import unquote
 PROCESS_TIMEOUT = 4 * 60 * 60
 
 
-def is_mac_arm():
+def is_mac_arm() -> bool:
     """Returns true if mac arm like m1, m2, etc."""
     if platform.system() != "Darwin":
         return False  # Not a Mac
+    else:
 
-    # Using uname to get the machine hardware name can indicate the architecture
-    machine = os.uname().machine  # pylint: disable=no-member
+        # Using uname to get the machine hardware name can indicate the architecture
+        machine = os.uname().machine  # type: ignore[attr-defined]
 
-    # ARM architectures can be 'arm64' or 'aarch64' depending on the platform
-    return machine in ["arm64", "aarch64"]
+        # ARM architectures can be 'arm64' or 'aarch64' depending on the platform
+        return machine in ["arm64", "aarch64"]
+
+
+def is_mac() -> bool:
+    """Returns True if the OS is macOS."""
+    return platform.system() == "Darwin"
 
 
 def sanitize_filename(string: str) -> str:
