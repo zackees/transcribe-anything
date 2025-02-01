@@ -12,8 +12,8 @@ from transcribe_anything.util import has_nvidia_smi
 HERE = Path(__file__).parent
 
 # Set the versions
-TENSOR_VERSION = "2.1.2"
-CUDA_VERSION = "cu121"
+TENSOR_VERSION = "2.6.0"
+CUDA_VERSION = "cu126"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
@@ -24,7 +24,7 @@ def get_current_python_version() -> str:
 
 
 # All deps for CUDA because it's the most finicky.
-_WIN_COMPILED_212: str = """
+_WIN_COMPILED_260: str = """
 accelerate==1.3.0
 aiohappyeyeballs==2.4.4
 aiohttp==3.11.11
@@ -145,16 +145,16 @@ speechbrain==1.0.2
 sqlalchemy==2.0.37
 srt==3.5.2
 srtranslator==0.3.5
-sympy==1.13.3
+sympy==1.13.1
 tabulate==0.9.0
 tensorboardx==2.6.2.2
 threadpoolctl==3.5.0
 tiktoken==0.8.0
 tokenizers==0.21.0
-torch==2.1.2+cu121
+torch==2.6.0+cu126
 torch-audiomentations==0.12.0
 torch-pitch-shift==1.2.5
-torchaudio==2.1.2
+torchaudio==2.6.0
 torchmetrics==1.3.2
 tqdm==4.64.1
 transformers==4.48.2
@@ -165,22 +165,6 @@ typer==0.15.1
 typing-extensions==4.12.2
 tzdata==2025.1
 urllib3==1.26.13
-typing-extensions==4.12.2
-tzdata==2025.1
-urllib3==1.26.13
-typing-extensions==4.12.2
-tzdata==2025.1
-urllib3==1.26.13
-tzdata==2025.1
-urllib3==1.26.13
-tzdata==2025.1
-urllib3==1.26.13
-tzdata==2025.1
-urllib3==1.26.13
-urllib3==1.26.13
-wcwidth==0.2.5
-wcwidth==0.2.5
-wcwidth==0.2.5
 wcwidth==0.2.5
 webdriverdownloader==1.1.0.3
 wsproto==1.2.0
@@ -189,23 +173,25 @@ yarl==1.18.3
 """
 
 _COMPILED: dict[str, str] = {
-    "WIN_CUDA_212": _WIN_COMPILED_212,
+    "WIN_CUDA_260": _WIN_COMPILED_260,
 }
 
 
 def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     """Generate the requirements for the generic case."""
     deps = [
-        "pyannote.audio==3.1.0",
+        "pyannote.audio==3.3.2",
         "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
-        "torchaudio==2.1.2",
+        "torchaudio==2.6.0",
         "datasets==2.17.1",
-        "pytorch-lightning==2.1.4",
-        "torchmetrics~=1.3.0",
+        "pytorch-lightning==2.5.0",
+        "torchmetrics==1.6.1",
         "srtranslator==0.3.5",
-        "numpy==1.26.4",
+        # "numpy==2.2.0",
         "safeIO==1.2",
+        "llvmlite==0.44.0",
+        "numba==0.61.0",
     ]
 
     content_lines: list[str] = []
@@ -228,8 +214,8 @@ def get_environment() -> IsoEnv:
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     has_nvidia = has_nvidia_smi()
     is_windows = sys.platform == "win32"
-    if has_nvidia and TENSOR_VERSION == "2.1.2" and is_windows:
-        dep_lines = _COMPILED["WIN_CUDA_212"].splitlines()
+    if False and has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
+        dep_lines = _COMPILED["WIN_CUDA_260"].splitlines()
     else:
         dep_lines = _get_reqs_generic(has_nvidia)
     # filter out empty lines
@@ -244,7 +230,7 @@ def get_environment() -> IsoEnv:
     content_lines.append("[project]")
     content_lines.append('name = "project"')
     content_lines.append('version = "0.1.0"')
-    content_lines.append('requires-python = "==3.10.*"')
+    content_lines.append('requires-python = "==3.11.*"')
     content_lines.append("dependencies = [")
     for dep in dep_lines:
         content_lines.append(f'  "{dep}",')
