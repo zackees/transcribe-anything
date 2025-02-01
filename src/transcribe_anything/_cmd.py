@@ -8,6 +8,7 @@ Entry point for running the transcribe-anything prgram.
 import argparse
 import json
 import os
+import platform
 import sys
 import traceback
 from pathlib import Path
@@ -94,11 +95,14 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         choices=[None] + whisper_options["language"],
     )
+    choices = [None, "cpu", "cuda", "insane"]
+    if platform.system() == "Darwin":
+        choices.append("mps")
     parser.add_argument(
         "--device",
         help="device to use for processing, None will auto select CUDA if available or else CPU",
         default=None,
-        choices=[None, "cpu", "cuda", "insane"],
+        choices=choices,
     )
     parser.add_argument(
         "--hf_token",

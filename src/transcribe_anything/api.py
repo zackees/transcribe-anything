@@ -27,6 +27,7 @@ from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.logger import log_error
 from transcribe_anything.util import chop_double_extension, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
+from transcribe_anything.whisper_mac import run_whisper_mac_english
 
 DISABLED_WARNINGS = [
     ".*set_audio_backend has been deprecated.*",
@@ -51,6 +52,7 @@ class Device(Enum):
     CPU = "cpu"
     CUDA = "cuda"
     INSANE = "insane"
+    MPS = "mps"
 
     def __str__(self) -> str:
         return self.value
@@ -67,6 +69,10 @@ class Device(Enum):
             return Device.CUDA
         if device == "insane":
             return Device.INSANE
+        if device == "mps":
+            if sys.platform != "darwin":
+                raise ValueError("MPS is only supported on macOS.")
+            return Device.MPS
         raise ValueError(f"Unknown device {device}")
 
 
@@ -222,6 +228,10 @@ def transcribe(
         print("#####################################")
     elif device_enum == Device.CPU:
         print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
+    elif device_enum == Device.MPS:
+        print("#####################################")
+        print("####### MAC MPS GPU MODE! ###########")
+        print("#####################################")
     else:
         raise ValueError(f"Unknown device {device}")
     print(f"Using device {device}")
@@ -241,6 +251,8 @@ def transcribe(
                 hugging_face_token=hugging_face_token,
                 other_args=other_args,
             )
+        elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English"):
+            run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir), task=task_str)
         else:
             run_whisper(
                 input_wav=Path(tmp_wav),
