@@ -56,8 +56,6 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     if model:
         cmd_list.append("--model")
         cmd_list.append(model)
-    cmd_list.append("--output_dir")
-    cmd_list.append(str(output_dir))
 
     # Remove the empty strings.
     cmd_list = [str(x).strip() for x in cmd_list if str(x).strip()]
