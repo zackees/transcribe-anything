@@ -26,4 +26,4 @@ jobs:
     - name: Install dependencies
       run: pip install whisper-mps
     - name: Install testing dependencies
-      run: whisper-mps tests/localfiles/video.mp4
+      run: whisper-mps --file-name tests/localfiles/video.mp4
