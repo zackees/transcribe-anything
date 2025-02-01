@@ -239,6 +239,9 @@ def run_insanely_fast_whisper(
     ]
     if hugging_face_token:
         cmd_list += ["--hf-token", hugging_face_token]
+        # remove --hf-token from other_args if it's there.
+        if other_args and "--hf-token" in other_args:
+            other_args.remove("--hf-token")
     if language:
         cmd_list += ["--language", language]
     batch_size = get_batch_size()

@@ -173,13 +173,16 @@ def main() -> int:
         if args.device != "insane":
             print("--diarization_model only works with --device insane. Ignoring --diarization_model")
         else:
-            unknown.append(f"--diarization_model {args.diarization_model}")
+            unknown.append("--diarization_model")
+            unknown.append(args.diarization_model)
 
     if args.timestamp:
         if args.device != "insane":
             print("--timestamp only works with --device insane. Ignoring --timestamp")
         else:
-            unknown.append(f"--timestamp {args.timestamp}")
+            # unknown.append(f"--timestamp {args.timestamp}")
+            unknown.append("--timestamp")
+            unknown.append(args.timestamp)
 
     if unknown:
         print(f"Args passed to whisper backend: {unknown}")
