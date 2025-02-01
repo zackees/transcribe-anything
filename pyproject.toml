@@ -17,7 +17,7 @@ dependencies = [
     "disklru>=1.0.7",
     "FileLock",
     "webvtt-py==0.4.6",
-    "uv-iso-env>=1.0.33",
+    "uv-iso-env>=1.0.36",
     "python-dotenv>=1.0.1",
 ]
 
@@ -60,3 +60,6 @@ disable_error_code = ["import-untyped"]
 [tool.black]
 line-length = 200
 target-version = ['py310']
+
+[tool.uv.workspace]
+members = ["tmp"]

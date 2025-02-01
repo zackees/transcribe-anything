@@ -180,6 +180,7 @@ _COMPILED: dict[str, str] = {
 def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     """Generate the requirements for the generic case."""
     deps = [
+        "transformers==4.46.3",  # 4.47.X has problems with mac mps driver.
         "pyannote.audio==3.3.2",
         "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
@@ -214,7 +215,7 @@ def get_environment() -> IsoEnv:
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
     has_nvidia = has_nvidia_smi()
     is_windows = sys.platform == "win32"
-    if has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
+    if False and has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
         dep_lines = _COMPILED["WIN_CUDA_260"].splitlines()
     else:
         dep_lines = _get_reqs_generic(has_nvidia)
