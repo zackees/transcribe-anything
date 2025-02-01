@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 uv venv --python 3.11
 uv pip install -r requirements.testing.txt
 uv pip install -e . --refresh-package uv-iso-env

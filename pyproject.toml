@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transcribe-anything"
-version = "2.3.7"  # Update this manually or configure setuptools-scm for automatic versioning
+version = "2.8.1"  # Update this manually or configure setuptools-scm for automatic versioning
 readme = "README.md"
 description = "Uses Whisper AI to transcribe speech from video and audio files. Also accepts URLs for YouTube, Rumble, BitChute, clear file links, etc."
 requires-python = ">=3.10"
@@ -18,6 +18,7 @@ dependencies = [
     "FileLock",
     "webvtt-py==0.4.6",
     "uv-iso-env>=1.0.33",
+    "python-dotenv>=1.0.1",
 ]
 
 maintainers = [{ name = "Zachary Vorhies", email = "dont@email.me" }]

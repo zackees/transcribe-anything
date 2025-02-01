@@ -274,6 +274,7 @@ def run_insanely_fast_whisper(
     json_data_str = json.dumps(json_data, indent=2)
 
     if hugging_face_token:
+        print("### HUGGING FACE TOKEN IS ACTIVE - GENERATING SPEAKER JSON ###")
         # Speaker diarization is active so generate the file
         try:
             speaker_json = generate_speaker_json(json_data)
@@ -282,6 +283,8 @@ def run_insanely_fast_whisper(
             speaker_json_file.write_text(speaker_json_str, encoding="utf-8")
         except Exception as exc:
             warnings.warn(f"Failed to generate speaker json beause of exception: {exc}")
+    else:
+        print("### HUGGING FACE TOKEN IS NOT ACTIVE - NO SPEAKER JSON GENERATED ###")
 
     # now write the pretty formatted json data back to the text file.
     outfile.write_text(json_data_str, encoding="utf-8")
