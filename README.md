@@ -23,7 +23,9 @@ Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradi
 
 Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
-Hardware acceleration on Windows/Linux/MacOS Arm (M1, M2, +) via `--device insane`
+Hardware acceleration on Windows/Linux `--device insane`
+
+MacArm acceleration when using `--device mps`
 
 Input a local file or youtube/rumble url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
@@ -51,7 +53,7 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
 
 If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hf_token` option.
 
-Also note, `insanely-fast-whisper` (`--device insane`) included in this project has been fixed to work with python 3.11. The upstream version is still broken on python 3.11 as of 1/22/2024.
+Compatible with Python 3.10 and above. Backends use an isolated environment with pinned requirements and python version.
 
 #### Speaker.json
 
