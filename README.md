@@ -119,6 +119,12 @@ pip install transcribe-anything
 
 GPU acceleration will be automatically enabled for windows and linux. Mac users are stuck with `--device cpu` mode. But it's possible that `--device insane` and `--model mps` on Mac M1+ will work, but this has been completely untested.
 
+Windows/Linux:
+  * Use `--device insane`
+
+Mac:
+  * Use `--device mps`
+
 # Usage
 
 ```bash
