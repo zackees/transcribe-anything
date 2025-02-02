@@ -7,15 +7,19 @@
 ![image](https://github.com/zackees/transcribe-anything/assets/6856673/94bdd1fe-3225-438a-ac1b-09c81f1d4108)
 
 
-### New in 3.0!
-
-Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
 
 ### USES WHISPER AI
 
 Over 600+⭐'s because this program this app just works! This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
+
+
+### New in 3.0!
+
+Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
+
+## About
 
 Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
