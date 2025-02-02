@@ -21,7 +21,7 @@ Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradi
 
 ## About
 
-Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
+Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. All whisper backends are executed in an isolated environment. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
 Hardware acceleration on Windows/Linux `--device insane`
 
