@@ -67,11 +67,15 @@ def generate_speaker_json(json_data: dict) -> list[dict]:
     # convert to a list of chunks
     chunks: list[Chunk] = []
     for chunk in speaker_chunks:
-        speaker = chunk["speaker"]
-        timestamp_start = float(chunk["timestamp"][0])
-        timestamp_end = float(chunk["timestamp"][1])
-        text = chunk["text"]
-        chunks.append(Chunk(speaker, timestamp_start, timestamp_end, text))
+        try:
+            speaker = chunk["speaker"]
+            timestamp_start = float(chunk["timestamp"][0])
+            timestamp_end = float(chunk["timestamp"][1])
+            text = chunk["text"]
+            chunks.append(Chunk(speaker, timestamp_start, timestamp_end, text))
+        except KeyError:
+            import warnings
+            warnings.warn(f"Invalid chunk: {chunk}")
     reduced = reduce(chunks)
     out = [chunk.to_json() for chunk in reduced]
     return out
