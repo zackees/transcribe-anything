@@ -75,6 +75,7 @@ def generate_speaker_json(json_data: dict) -> list[dict]:
             chunks.append(Chunk(speaker, timestamp_start, timestamp_end, text))
         except KeyError:
             import warnings
+
             warnings.warn(f"Invalid chunk: {chunk}")
     reduced = reduce(chunks)
     out = [chunk.to_json() for chunk in reduced]
