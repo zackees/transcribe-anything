@@ -49,6 +49,33 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane 
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
 ```
 
+*python api*
+```python
+from transcribe_anything import transcribe_anything
+
+transcribe_anything(
+    url_or_file="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    output_dir="output_dir",
+    task="transcribe",
+    model="large",
+    device="cuda"
+)
+
+# Full function signiture:
+def transcribe(
+    url_or_file: str,
+    output_dir: Optional[str] = None,
+    model: Optional[str] = None,              # tiny,small,medium,large
+    task: Optional[str] = None,               # transcribe or translate
+    language: Optional[str] = None,           # auto detected if none, "en" for english...
+    device: Optional[str] = None,             # cuda,cpu,insane,mps
+    embed: bool = False,                      # Produces a video.mp4 with the subtitles burned in.
+    hugging_face_token: Optional[str] = None, # If you want a speaker.json
+    other_args: Optional[list[str]] = None,   # Other args to be passed to to the whisper backend
+) -> str:
+
+```
+
 #### Insanely fast on `cuda` platforms
 
 If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hf_token` option.
