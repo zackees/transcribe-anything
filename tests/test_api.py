@@ -23,7 +23,7 @@ class ApiTester(unittest.TestCase):
         """Check that the command is installed by the setup process."""
         with TemporaryDirectory() as tempdir:
             print(f"Running in {tempdir}")
-            transcribe_anything(url_or_file=VIDEO_MP4, output_dir=tempdir, task="transcribe", model="large", device="cuda")
+            transcribe_anything(url_or_file=VIDEO_MP4, output_dir=tempdir, task="transcribe", model="tiny", device="cpu")
             output_has_files = len(list(Path(tempdir).iterdir())) > 0
             self.assertTrue(output_has_files)
 
