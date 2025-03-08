@@ -9,6 +9,8 @@ import argparse
 import json
 import shutil
 import sys
+import traceback
+import warnings
 from dataclasses import asdict, dataclass, fields
 from typing import Any
 
@@ -80,7 +82,13 @@ def cuda_cards_available() -> CudaInfo:
     # Have to import here, since others will import CudaDevice and CudaInfo.
     if shutil.which("nvidia-smi") is None:
         return CudaInfo(False, 0, [])
-    import torch  # type: ignore
+
+    try:
+        import torch  # type: ignore
+    except ImportError as e:
+        stacktrace: str = traceback.format_exc()
+        warnings.warn(f"\n{stacktrace}\n\nERROR importing TORCH!: {e}, disabling cuda")
+        return CudaInfo(False, 0, [])
 
     if torch.cuda.is_available():
         devices: list[CudaDevice] = []
