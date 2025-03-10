@@ -203,7 +203,7 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
         content_lines.append(f"torchaudio=={TENSOR_CUDA_VERSION}")
     else:
         content_lines.append(f"torch=={TENSOR_VERSION}")
-        content_lines.append(f"torchaudio=={TENSOR_VERSION}")        
+        content_lines.append(f"torchaudio=={TENSOR_VERSION}")
     if sys.platform != "darwin":
         # Add the windows specific dependencies.
         content_lines.append("intel-openmp==2024.0.3")
