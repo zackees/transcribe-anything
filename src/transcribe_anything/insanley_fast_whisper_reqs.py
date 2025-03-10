@@ -184,7 +184,6 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
         "pyannote.audio==3.3.2",
         "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
-        "torchaudio==2.6.0",
         "datasets==2.17.1",
         "pytorch-lightning==2.5.0",
         "torchmetrics==1.6.1",
@@ -201,8 +200,10 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
         content_lines.append(dep)
     if has_nvidia:
         content_lines.append(f"torch=={TENSOR_CUDA_VERSION}")
+        content_lines.append(f"torchaudio=={TENSOR_CUDA_VERSION}")
     else:
         content_lines.append(f"torch=={TENSOR_VERSION}")
+        content_lines.append(f"torchaudio=={TENSOR_VERSION}")        
     if sys.platform != "darwin":
         # Add the windows specific dependencies.
         content_lines.append("intel-openmp==2024.0.3")
@@ -240,10 +241,13 @@ def get_environment() -> IsoEnv:
     if has_nvidia:
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
-        content_lines.append("  { index = 'pytorch-cu121' },")
+        content_lines.append("  { index = 'pytorch-cu126' },")
+        content_lines.append("]")
+        content_lines.append("torchaudio = [")
+        content_lines.append("  { index = 'pytorch-cu126' },")
         content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
-        content_lines.append('name = "pytorch-cu121"')
+        content_lines.append('name = "pytorch-cu126"')
         content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
         content_lines.append("explicit = true")
 
