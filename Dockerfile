@@ -1,39 +1,46 @@
 ########################################################
 # This is a community contributed Dockerfile!
 # If you find any issues with it, please please open an issue on the GitHub repository:
-#   https://github.com/zackees/transcribe-anything/issues/new
+# https://github.com/zackees/transcribe-anything/issues/new
 
+# Use Ubuntu 22.04 as the base image
+FROM ubuntu:22.04
 
-FROM runpod/pytorch:2.1.1-py3.10-cuda12.1.1-devel-ubuntu22.04
+# Set the default shell for RUN commands to bash
+SHELL ["/bin/bash", "-c"]
 
-# BASICALLY update and upgrade the image dependencies
-RUN apt-get update && apt-get -y upgrade && apt-get clean
-
-# Check NVIDIA drivers with nvidia-smi
-RUN nvidia-smi
-
-# Check CUDA drivers with nvcc
-RUN nvcc --version
-
-# Add /usr/lib/x86_64-linux-gnu to LD_LIBRARY_PATH to fix the libcudart.so error
+# Set the LD_LIBRARY_PATH environment variable to include the system library directory
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
-# Install cuDNN 9.x for CUDA 12 (in this precompiled image, I think version 8 is installed) to fix the cuDNN9 library not found error
-RUN apt-get update && apt-get -y install cudnn9-cuda-12 && apt-get clean
+# Set the working directory in the container to /workspace
+WORKDIR /workspace
 
-# Now install cuSPARSELt, which is required to fix the error importing the libcusparselt.so library
+# Update the package lists and install wget
+RUN apt-get update && apt-get install -y wget
+
+# Download the CUDA keyring package from NVIDIA and install it to enable the CUDA repository
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
-    dpkg -i cuda-keyring_1.1-1_all.deb && \
-    apt-get update && \
-    apt-get -y install libcusparselt0 libcusparselt-dev && apt-get clean
+    dpkg -i cuda-keyring_1.1-1_all.deb
 
-# Check Python version
-RUN python3 --version
+# Update the package lists again (now including the new repository) and apply all available upgrades
+RUN apt-get -y update && apt-get -y upgrade
 
-# Now install transcribe-anything using pip
-RUN pip install transcribe-anything
+# Install the required packages:
+# - build-essential, dkms: tools for compiling software and managing kernel modules
+# - libnccl2, libnccl-dev: libraries for GPU communication
+# - cudnn9-cuda-12, cuda-toolkit-12-6: libraries and toolkit for CUDA development
+# - libcusparselt0, libcusparselt-dev: libraries for sparse operations on GPU
+# - python3.11, python3-pip, python3-venv: Python interpreter, package manager, and virtual environment tools
+RUN apt-get -y install build-essential dkms libnccl2 libnccl-dev cudnn9-cuda-12 cuda-toolkit-12-6 libcusparselt0 libcusparselt-dev python3.11 python3-pip git python3-venv
 
-# The container will not execute any command on startup;
-# you can enter it with "docker run -it <image_name> --gpus all /bin/bash" and manually run command like this :
-# transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
+# Create a Python virtual environment in the .venv directory
+RUN python3 -m venv .venv
+
+# Activate the virtual environment (note: activation only affects the current RUN layer and does not persist in subsequent layers)
+RUN source /workspace/.venv/bin/activate
+
+# Upgrade pip, setuptools, and wheel, and install the transcribe-anything package within the virtual environment
+RUN pip install --upgrade pip setuptools wheel transcribe-anything
+
+# Set the default command to run when the container starts (launches a bash shell)
 CMD ["bash"]
