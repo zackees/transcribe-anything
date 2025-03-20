@@ -84,6 +84,16 @@ def get_computing_device() -> str:
     return "cuda" if CUDA_AVAILABLE else "cpu"
 
 
+def _perform_cmd_substituions(cmd_list: list[str]) -> list[str]:
+    new_cmd_list = []
+    for cmd in cmd_list:
+        if cmd == "hf-token":
+            print("arg substitution: hf-token -> hf_token")
+            cmd = "hf_token"
+        new_cmd_list.append(cmd)
+    return new_cmd_list
+
+
 def run_whisper(  # pylint: disable=too-many-arguments
     input_wav: Path,
     device: str,
@@ -114,9 +124,10 @@ def run_whisper(  # pylint: disable=too-many-arguments
         # cmd_list.append(f'--language "{language}"')
         cmd_list.append("--language")
         cmd_list.append(language)
-
     if other_args:
         cmd_list.extend(other_args)
+    cmd_list = _perform_cmd_substituions(cmd_list)
+
     # Remove the empty strings.
     cmd_list = [str(x).strip() for x in cmd_list if str(x).strip()]
     # cmd = " ".join(cmd_list)
