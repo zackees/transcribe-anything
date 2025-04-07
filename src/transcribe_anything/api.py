@@ -86,7 +86,10 @@ def make_temp_wav() -> str:
 
     def cleanup() -> None:
         if os.path.exists(tmp.name):
-            os.remove(tmp.name)
+            try:
+                os.remove(tmp.name)
+            except Exception as exc:
+                warnings.warn(f"Failed to remove {tmp.name}: {exc}")
 
     atexit.register(cleanup)
     return tmp.name
@@ -208,117 +211,123 @@ def transcribe(
     print(f"making dir {output_dir}")
     os.makedirs(output_dir, exist_ok=True)
     tmp_wav = make_temp_wav()
-    assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
-    # tmp_mp3 = os.path.join(output_dir, "out.mp3")
-    fetch_audio(url_or_file, tmp_wav)
-    assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
-    # filemd5 = md5(file.encode("utf-8")).hexdigest()
-    # key = f"{file}-{filemd5}-{model}"
-    # cached_data = cache.get_json(key)
-    # print(f"Todo: cached data: {cached_data}")
-    device = device or get_computing_device()
-    device_enum = Device.from_str(device)
-    if device_enum == Device.CUDA:
-        print("#####################################")
-        print("######### GPU ACCELERATED! ##########")
-        print("#####################################")
-    elif device_enum == Device.INSANE:
-        print("#####################################")
-        print("####### INSANE GPU MODE! ############")
-        print("#####################################")
-    elif device_enum == Device.CPU:
-        print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
-    elif device_enum == Device.MPS:
-        print("#####################################")
-        print("####### MAC MPS GPU MODE! ###########")
-        print("#####################################")
-    else:
-        raise ValueError(f"Unknown device {device}")
-    print(f"Using device {device}")
-    model_str = f"{model}" if model else ""
-    task_str = f"{task}" if task else "transcribe"
-    language_str = f"{language}" if language else ""
-
-    print(f"Running whisper on {tmp_wav} (will install models on first run)")
-    with tempfile.TemporaryDirectory() as tmpdir:
-        if device_enum == Device.INSANE:
-            run_insanely_fast_whisper(
-                input_wav=Path(tmp_wav),
-                model=model_str,
-                output_dir=Path(tmpdir),
-                task=task_str,
-                language=language_str,
-                hugging_face_token=hugging_face_token,
-                other_args=other_args,
-            )
-        elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English") and (task_str == "transcribe"):
-            run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir))
+    try:
+        assert os.path.isdir(output_dir), f"Path {output_dir} is not found or not a directory."
+        # tmp_mp3 = os.path.join(output_dir, "out.mp3")
+        fetch_audio(url_or_file, tmp_wav)
+        assert os.path.exists(tmp_wav), f"Path {tmp_wav} doesn't exist."
+        # filemd5 = md5(file.encode("utf-8")).hexdigest()
+        # key = f"{file}-{filemd5}-{model}"
+        # cached_data = cache.get_json(key)
+        # print(f"Todo: cached data: {cached_data}")
+        device = device or get_computing_device()
+        device_enum = Device.from_str(device)
+        if device_enum == Device.CUDA:
+            print("#####################################")
+            print("######### GPU ACCELERATED! ##########")
+            print("#####################################")
+        elif device_enum == Device.INSANE:
+            print("#####################################")
+            print("####### INSANE GPU MODE! ############")
+            print("#####################################")
+        elif device_enum == Device.CPU:
+            print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
+        elif device_enum == Device.MPS:
+            print("#####################################")
+            print("####### MAC MPS GPU MODE! ###########")
+            print("#####################################")
         else:
-            run_whisper(
-                input_wav=Path(tmp_wav),
-                device=str(device),
-                model=model_str,
-                output_dir=Path(tmpdir),
-                task=task_str,
-                language=language_str,
-                other_args=other_args,
-            )
-        files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
-        srt_file: Optional[str] = None
-        for file in files:
-            # Change the filename to remove the double extension
-            file_name = os.path.basename(file)
-            base_path = os.path.dirname(file)
-            new_file = os.path.join(base_path, chop_double_extension(file_name))
-            _, ext = os.path.splitext(new_file)
-            if "speaker.json" in new_file:  # pass through speaker.json
-                outfile = os.path.join(output_dir, "speaker.json")
-            else:
-                outfile = os.path.join(output_dir, f"out{ext}")
-            if os.path.exists(outfile):
-                os.remove(outfile)
-            assert os.path.isfile(file), f"Path {file} doesn't exist."
-            assert not os.path.exists(outfile), f"Path {outfile} already exists."
-            shutil.move(file, outfile)
-            if ext == ".srt":
-                srt_file = outfile
-        output_dir = os.path.abspath(output_dir)
-        assert srt_file is not None, "No srt file found."
-        srt_file = os.path.abspath(srt_file)
-        if embed:
-            assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
-            out_mp4 = os.path.join(output_dir, "out.mp4")
-            static_ffmpeg_path = shutil.which("static_ffmpeg")
-            if static_ffmpeg_path is None:
-                raise FileNotFoundError("static_ffmpeg not found")
-            embed_ffmpeg_cmd_list = [
-                "static_ffmpeg",
-                "-y",
-                "-i",
-                url_or_file,
-                "-i",
-                srt_file,
-                "-vf",
-                f"subtitles={fix_subtitles_path(srt_file)}",
-                out_mp4,
-            ]
-            embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
-            print(f"Running:\n  {embed_ffmpeg_cmd}")
-            try:
-                _ = subprocess.run(
-                    embed_ffmpeg_cmd,
-                    universal_newlines=True,
-                    check=True,
-                    capture_output=True,
-                    shell=True,
+            raise ValueError(f"Unknown device {device}")
+        print(f"Using device {device}")
+        model_str = f"{model}" if model else ""
+        task_str = f"{task}" if task else "transcribe"
+        language_str = f"{language}" if language else ""
+
+        print(f"Running whisper on {tmp_wav} (will install models on first run)")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            if device_enum == Device.INSANE:
+                run_insanely_fast_whisper(
+                    input_wav=Path(tmp_wav),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    task=task_str,
+                    language=language_str,
+                    hugging_face_token=hugging_face_token,
+                    other_args=other_args,
                 )
-            except subprocess.CalledProcessError as exc:
-                stdout = exc.stdout
-                stderr = exc.stderr
-                warnings.warn(f"ffmpeg failed with return code {exc.returncode}\n{stdout}\n{stderr}")
-                raise
-    print(f"Done! Files were saved to {output_dir}")
-    return output_dir
+            elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English") and (task_str == "transcribe"):
+                run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir))
+            else:
+                run_whisper(
+                    input_wav=Path(tmp_wav),
+                    device=str(device),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    task=task_str,
+                    language=language_str,
+                    other_args=other_args,
+                )
+            files = [os.path.join(tmpdir, name) for name in os.listdir(tmpdir)]
+            srt_file: Optional[str] = None
+            for file in files:
+                # Change the filename to remove the double extension
+                file_name = os.path.basename(file)
+                base_path = os.path.dirname(file)
+                new_file = os.path.join(base_path, chop_double_extension(file_name))
+                _, ext = os.path.splitext(new_file)
+                if "speaker.json" in new_file:  # pass through speaker.json
+                    outfile = os.path.join(output_dir, "speaker.json")
+                else:
+                    outfile = os.path.join(output_dir, f"out{ext}")
+                if os.path.exists(outfile):
+                    os.remove(outfile)
+                assert os.path.isfile(file), f"Path {file} doesn't exist."
+                assert not os.path.exists(outfile), f"Path {outfile} already exists."
+                shutil.move(file, outfile)
+                if ext == ".srt":
+                    srt_file = outfile
+            output_dir = os.path.abspath(output_dir)
+            assert srt_file is not None, "No srt file found."
+            srt_file = os.path.abspath(srt_file)
+            if embed:
+                assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
+                out_mp4 = os.path.join(output_dir, "out.mp4")
+                static_ffmpeg_path = shutil.which("static_ffmpeg")
+                if static_ffmpeg_path is None:
+                    raise FileNotFoundError("static_ffmpeg not found")
+                embed_ffmpeg_cmd_list = [
+                    "static_ffmpeg",
+                    "-y",
+                    "-i",
+                    url_or_file,
+                    "-i",
+                    srt_file,
+                    "-vf",
+                    f"subtitles={fix_subtitles_path(srt_file)}",
+                    out_mp4,
+                ]
+                embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
+                print(f"Running:\n  {embed_ffmpeg_cmd}")
+                try:
+                    _ = subprocess.run(
+                        embed_ffmpeg_cmd,
+                        universal_newlines=True,
+                        check=True,
+                        capture_output=True,
+                        shell=True,
+                    )
+                except subprocess.CalledProcessError as exc:
+                    stdout = exc.stdout
+                    stderr = exc.stderr
+                    warnings.warn(f"ffmpeg failed with return code {exc.returncode}\n{stdout}\n{stderr}")
+                    raise
+        print(f"Done! Files were saved to {output_dir}")
+        return output_dir
+    finally:
+        try:
+            os.remove(tmp_wav)
+        except Exception as exc:
+            warnings.warn(f"Failed to remove {tmp_wav}: {exc}")
 
 
 if __name__ == "__main__":
