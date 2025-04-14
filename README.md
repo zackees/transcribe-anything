@@ -76,6 +76,17 @@ def transcribe(
 
 ```
 
+#### Fastest Transcription - Use `insane` mode with model `large-v3` + `batching`
+
+This is by far the fastest combination. Experimental, it produces text that tends to be lower quality:
+
+  * Higher chance for repeated text patterns.
+  * Timestamps in the vtt/srt files become unaligned.
+
+It's unclear if this is due to batching or `large-v3` itself. More testing is needed. If you do this then please let us know the results by filing a bug in the issues page.
+
+Large batch sizes require more significant amounts of Nvidia GPU Ram. For a 12 GB card, it's been experimentally shown that batch-size=8 will work on all videos from an internally tested data lake.
+
 #### Insanely fast on `cuda` platforms
 
 If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hf_token` option.
