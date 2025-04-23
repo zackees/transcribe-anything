@@ -285,6 +285,7 @@ is closed then to get back into the environment `cd transcribe_anything` and exe
 The real reason behind `transcribe-anything`'s surprising popularity comes from the fact that it just works. And the reason for this is that I can isolate environments for different configurations and install them lazily. If you have the same problem then consider my other tool: https://github.com/zackees/iso-env
 
 
+
 # Versions
   * 3.0.6: MacOS mps mode fixed/improved
     * PR: https://github.com/zackees/transcribe-anything/pull/39
