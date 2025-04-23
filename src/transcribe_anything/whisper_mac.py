@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import webvtt  # type: ignore
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
@@ -97,7 +97,8 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     # Prepare command
     cmd_list = [
         "whisper-mps",
-        "--file-name", input_wav.name,  # cwd is set to the same directory as the input file
+        "--file-name",
+        input_wav.name,  # cwd is set to the same directory as the input file
     ]
 
     if model:
@@ -122,7 +123,7 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
 
     # Read the JSON output
     try:
-        with open(output_json, 'r', encoding='utf-8') as f:
+        with open(output_json, "r", encoding="utf-8") as f:
             json_data = json.load(f)
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse whisper-mps output JSON: {e}")
@@ -131,17 +132,17 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     # 1. SRT file
     srt_content = _json_to_srt(json_data)
     srt_file = output_dir / "out.srt"
-    with open(srt_file, 'w', encoding='utf-8') as f:
+    with open(srt_file, "w", encoding="utf-8") as f:
         f.write(srt_content)
 
     # 2. Text file
     txt_file = output_dir / "out.txt"
-    with open(txt_file, 'w', encoding='utf-8') as f:
+    with open(txt_file, "w", encoding="utf-8") as f:
         f.write(json_data.get("text", ""))
 
     # 3. JSON file
     json_out_file = output_dir / "out.json"
-    with open(json_out_file, 'w', encoding='utf-8') as f:
+    with open(json_out_file, "w", encoding="utf-8") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=2)
 
     # 4. VTT file

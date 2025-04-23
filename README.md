@@ -286,6 +286,9 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
 
 
 # Versions
+  * 3.0.6: MacOS mps mode fixed/improved
+    * PR: https://github.com/zackees/transcribe-anything/pull/39
+    * Thank you https://github.com/aj47! 
   * 3.0.5: A temp wav file was not being cleaned up, now it is.
   * 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
   * 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
