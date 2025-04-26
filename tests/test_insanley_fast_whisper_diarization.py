@@ -16,9 +16,7 @@ from tempfile import TemporaryDirectory
 
 from dotenv import load_dotenv
 
-from transcribe_anything.insanely_fast_whisper import (
-    run_insanely_fast_whisper,
-)
+from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.util import has_nvidia_smi, is_mac_arm
 
 load_dotenv()  # take environment variables from .env.

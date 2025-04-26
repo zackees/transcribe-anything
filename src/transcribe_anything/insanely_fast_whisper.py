@@ -317,4 +317,4 @@ def run_insanely_fast_whisper(
     txt_file.write_text(txt_content, encoding="utf-8")
     convert_to_webvtt(srt_file, output_dir / "out.vtt")
     # print srt file
-    print(srt_content)
+    # print(srt_content)

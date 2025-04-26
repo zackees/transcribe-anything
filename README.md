@@ -287,6 +287,7 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
 
 
 # Versions
+  * 3.0.7: Insane whisperer mode no longer prints out the srt file during transcription completion.
   * 3.0.6: MacOS mps mode fixed/improved
     * PR: https://github.com/zackees/transcribe-anything/pull/39
     * Thank you https://github.com/aj47! 
