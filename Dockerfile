@@ -26,20 +26,22 @@ RUN nvidia-ctk runtime configure --runtime=docker
 
 RUN pip install uv
 RUN uv venv
-RUN uv pip install transcribe-everything
+RUN uv pip install transcribe-anything
 # Force install ffmpeg
 RUN uv run static_ffmpeg -version
 
 COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
 COPY ./entrypoint.sh entrypoint.sh
 
-RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-everything-init
+
 
 # Install the transcriber.
 ENV VERSION=3.0.7
 RUN uv pip install transcribe-anything>=${VERSION} \
     || uv pip install transcribe-anything==${VERSION} \
     || uv pip install transcribe-anything==${VERSION}
+
+# RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-anything-init
 
 COPY . .
 RUN uv pip install -e .
