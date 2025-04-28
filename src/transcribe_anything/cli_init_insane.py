@@ -22,7 +22,8 @@ def main() -> int:
     """Main entry point for the transcribe_anything package."""
     # locate the bundled sample.mp3
     print("Installing transcribe_anything (device insane) environment...")
-    get_environment()
+    env = get_environment(has_nvidia=True)
+    env.run(["pwd"])
     print("Installing static ffmpeg...")
     os.system("static_ffmpeg -version")
     return 0

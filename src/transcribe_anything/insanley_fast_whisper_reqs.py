@@ -211,10 +211,12 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     return content_lines
 
 
-def get_environment() -> IsoEnv:
+def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     """Returns the environment."""
     venv_dir = HERE / "venv" / "insanely_fast_whisper"
-    has_nvidia = has_nvidia_smi()
+    # has_nvidia = has_nvidia_smi()
+    if has_nvidia is None:
+        has_nvidia = has_nvidia_smi()
     is_windows = sys.platform == "win32"
     if False and has_nvidia and TENSOR_VERSION == "2.6.0" and is_windows:
         dep_lines = _COMPILED["WIN_CUDA_260"].splitlines()
