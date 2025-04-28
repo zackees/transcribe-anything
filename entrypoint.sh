@@ -28,4 +28,4 @@ if [[ "$1" == "--only-check-shared-libs" ]]; then
     exit 0
 fi
 
-transcribe-anything "$@"
+uv run transcribe-anything "$@"
