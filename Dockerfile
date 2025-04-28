@@ -30,9 +30,10 @@ RUN uv pip install transcribe-everything
 # Force install ffmpeg
 RUN uv run static_ffmpeg -version
 
-COPY ./che
+COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
+COPY ./entrypoint.sh entrypoint.sh
 
-RUN uv run transcribe-everything-init
+RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-everything-init
 
 # Install the transcriber.
 ENV VERSION=3.0.7
@@ -43,8 +44,6 @@ RUN uv pip install transcribe-anything>=${VERSION} \
 COPY . .
 RUN uv pip install -e .
 
-# copy your rclone config
-COPY rclone.conf .
 RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

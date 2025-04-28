@@ -1,0 +1,11 @@
+
+.*
+build
+description
+__pycache__
+dist
+.venv
+src/transcribe_anything/venv
+venv
+tests
+text_video

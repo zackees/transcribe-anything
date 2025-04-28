@@ -1,0 +1,11 @@
+services:
+  transcribe:
+    build: .
+    # Enable GPU access
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    ports:
+      - "8092:80"
