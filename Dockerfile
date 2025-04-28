@@ -1,46 +1,52 @@
-########################################################
-# This is a community contributed Dockerfile!
-# If you find any issues with it, please please open an issue on the GitHub repository:
-# https://github.com/zackees/transcribe-anything/issues/new
+# pick the CUDA version your host GPU driver supports
+FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-runtime
 
-# Use Ubuntu 22.04 as the base image
-FROM ubuntu:22.04
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set the default shell for RUN commands to bash
-SHELL ["/bin/bash", "-c"]
+WORKDIR /app
 
-# Set the LD_LIBRARY_PATH environment variable to include the system library directory
-ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+RUN apt-get update -y
 
-# Set the working directory in the container to /workspace
-WORKDIR /workspace
+# install any extra system deps
+RUN apt-get install -y build-essential
+RUN apt-get install -y curl dos2unix
 
-# Update the package lists and install wget
-RUN apt-get update && apt-get install -y wget
 
-# Download the CUDA keyring package from NVIDIA and install it to enable the CUDA repository
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
-    dpkg -i cuda-keyring_1.1-1_all.deb
+RUN distribution=$(. /etc/os-release;echo  $ID$VERSION_ID)  && \
+    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -  && \
+    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list
+ 
+RUN apt-get update -y
+RUN apt-get install -y nvidia-container-toolkit
 
-# Update the package lists again (now including the new repository) and apply all available upgrades
-RUN apt-get -y update && apt-get -y upgrade
+RUN mkdir -p /etc/docker
 
-# Install the required packages:
-# - build-essential, dkms: tools for compiling software and managing kernel modules
-# - libnccl2, libnccl-dev: libraries for GPU communication
-# - cudnn9-cuda-12, cuda-toolkit-12-6: libraries and toolkit for CUDA development
-# - libcusparselt0, libcusparselt-dev: libraries for sparse operations on GPU
-# - python3.11, python3-pip, python3-venv: Python interpreter, package manager, and virtual environment tools
-RUN apt-get -y install build-essential dkms libnccl2 libnccl-dev cudnn9-cuda-12 cuda-toolkit-12-6 libcusparselt0 libcusparselt-dev python3.11 python3-pip git python3-venv
+RUN nvidia-ctk runtime configure --runtime=docker
 
-# Create a Python virtual environment in the .venv directory
-RUN python3 -m venv .venv
+RUN pip install uv
+RUN uv venv
+RUN uv pip install transcribe-everything
+# Force install ffmpeg
+RUN uv run static_ffmpeg -version
 
-# Activate the virtual environment (note: activation only affects the current RUN layer and does not persist in subsequent layers)
-RUN source /workspace/.venv/bin/activate
+COPY ./che
 
-# Upgrade pip, setuptools, and wheel, and install the transcribe-anything package within the virtual environment
-RUN pip install --upgrade pip setuptools wheel transcribe-anything
+RUN uv run transcribe-everything-init
 
-# Set the default command to run when the container starts (launches a bash shell)
-CMD ["bash"]
+# Install the transcriber.
+ENV VERSION=3.0.7
+RUN uv pip install transcribe-anything>=${VERSION} \
+    || uv pip install transcribe-anything==${VERSION} \
+    || uv pip install transcribe-anything==${VERSION}
+
+COPY . .
+RUN uv pip install -e .
+
+# copy your rclone config
+COPY rclone.conf .
+RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+

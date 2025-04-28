@@ -81,6 +81,7 @@ def cuda_cards_available() -> CudaInfo:
     """
     # Have to import here, since others will import CudaDevice and CudaInfo.
     if shutil.which("nvidia-smi") is None:
+        print("nvidia-smi not found, disabling cuda")
         return CudaInfo(False, 0, [])
 
     try:
