@@ -51,7 +51,7 @@ RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
 COPY . .
 RUN uv pip install -e .
 
-RUN ./entrypoint.sh --only-check-shared-libs && uv run -m transcribe_anything.cli_init_insane
+RUN /bin/bash /app/entrypoint.sh --only-check-shared-libs && uv run -m transcribe_anything.cli_init_insane
 
 
 
