@@ -20,7 +20,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
 ]
 # VERSION
-version = "3.0.8"  # Update this manually or configure setuptools-scm for automatic versioning
+version = "3.0.9"  # Update this manually or configure setuptools-scm for automatic versioning
 maintainers = [{ name = "Zachary Vorhies", email = "dont@email.me" }]
 
 [project.urls]
@@ -39,7 +39,7 @@ namespaces = false  # Prevent setuptools from looking elsewhere
 [project.scripts]
 transcribe_anything = "transcribe_anything._cmd:main"
 transcribe-anything = "transcribe_anything._cmd:main"
-transcribe-anything-init = "transcribe_anything.cli_init:main"
+transcribe-anything-init-insane = "transcribe_anything.cli_init_insane:main"
 
 [tool.ruff]
 line-length = 200

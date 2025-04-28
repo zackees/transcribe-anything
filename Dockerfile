@@ -30,24 +30,25 @@ RUN uv pip install transcribe-anything
 # Force install ffmpeg
 RUN uv run static_ffmpeg -version
 
-COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
-COPY ./entrypoint.sh entrypoint.sh
-
-
 
 # Install the transcriber.
-ENV VERSION=3.0.7
+ENV VERSION=3.0.8
 RUN uv pip install transcribe-anything>=${VERSION} \
     || uv pip install transcribe-anything==${VERSION} \
     || uv pip install transcribe-anything==${VERSION}
 
-# RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-anything-init
+COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
+COPY ./entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
+RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-anything-init-insane
 
 COPY . .
 RUN uv pip install -e .
 
-RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
+
 
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+CMD ["--help"]
 
 
