@@ -44,11 +44,14 @@ RUN uv pip install transcribe-anything>=${VERSION} \
 RUN uv run static_ffmpeg -version
 
 COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
-COPY ./entrypoint.sh entrypoint.sh
+COPY ./entrypoint.sh /app/entrypoint.sh
 RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
 
 
 COPY . .
+
+RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
+
 RUN uv pip install -e .
 
 RUN /bin/bash /app/entrypoint.sh --only-check-shared-libs && uv run -m transcribe_anything.cli_init_insane

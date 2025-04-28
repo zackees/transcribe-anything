@@ -24,7 +24,7 @@ def main() -> int:
     print("Installing transcribe_anything (device insane) environment...")
     get_environment()
     print("Installing static ffmpeg...")
-    os.system("ffmpeg_static -version")
+    os.system("static_ffmpeg -version")
     return 0
 
 
