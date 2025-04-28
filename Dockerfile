@@ -41,18 +41,18 @@ RUN nvidia-ctk runtime configure --runtime=docker
 #     || uv pip install transcribe-anything>=${VERSION} \
 #     || uv pip install transcribe-anything>=${VERSION}
 
-RUN static_ffmpeg -version
+# RUN static_ffmpeg -version
 
-COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
-COPY ./entrypoint.sh /app/entrypoint.sh
-RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
+# COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
+# COPY ./entrypoint.sh /app/entrypoint.sh
+# RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
 
 
 COPY . .
 
 RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
 
-RUN ./install
+RUN pip install -e .
 
 RUN /bin/bash /app/entrypoint.sh --only-check-shared-libs && transcribe-anything-init-insane
 
