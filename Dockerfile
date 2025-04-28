@@ -24,26 +24,33 @@ RUN mkdir -p /etc/docker
 
 RUN nvidia-ctk runtime configure --runtime=docker
 
-RUN pip install uv
-RUN uv venv
-RUN uv pip install transcribe-anything
-# Force install ffmpeg
-RUN uv run static_ffmpeg -version
+# RUN pip install uv
+# RUN uv venv
+# RUN uv pip install transcribe-anything
+# # Force install ffmpeg
+# RUN uv run static_ffmpeg -version
 
+# RUN pip install transcribe-anything
+
+
+# transcribe-anything-init-insane
 
 # Install the transcriber.
-ENV VERSION=3.0.8
-RUN uv pip install transcribe-anything>=${VERSION} \
-    || uv pip install transcribe-anything==${VERSION} \
-    || uv pip install transcribe-anything==${VERSION}
+ENV VERSION=3.0.9
+RUN pip install transcribe-anything>=${VERSION} \
+    || pip install transcribe-anything==${VERSION} \
+    || pip install transcribe-anything==${VERSION}
+
+RUN static_ffmpeg -version
 
 COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
 COPY ./entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
-RUN ./entrypoint.sh --only-check-shared-libs && uv run transcribe-anything-init-insane
 
 COPY . .
-RUN uv pip install -e .
+RUN pip install -e .
+
+RUN ./entrypoint.sh --only-check-shared-libs && python3 -m transcribe_anything.cli_init_insane
 
 
 

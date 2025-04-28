@@ -5,9 +5,10 @@ Main entry point.
 import logging
 import os
 
+from transcribe_anything.insanley_fast_whisper_reqs import get_environment
+
 # for resource loading
 
-from transcribe_anything.insanley_fast_whisper_reqs import get_environment
 
 logger = logging.getLogger("transcribe_anything")
 logger.setLevel(logging.INFO)

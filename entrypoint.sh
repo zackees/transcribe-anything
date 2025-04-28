@@ -14,7 +14,7 @@ export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/nccl/lib/:
 
 
 # Check
-if uv run check_linux_shared_libraries.py
+if python3 check_linux_shared_libraries.py
 then
     echo "✓ check_linux_shared_libraries.py"
 else
@@ -28,4 +28,4 @@ if [[ "$1" == "--only-check-shared-libs" ]]; then
     exit 0
 fi
 
-uv run transcribe-anything "$@"
+transcribe-anything "$@"
