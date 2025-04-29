@@ -247,7 +247,17 @@ def run_insanely_fast_whisper(
             other_args.pop(idx)
     if language:
         cmd_list += ["--language", language]
-    batch_size = get_batch_size()
+
+    batch_size: int | None = None
+    if other_args:
+        # Check if the other_args contains --batch-size and remove it.
+        if "--batch-size" in other_args:
+            idx = other_args.index("--batch-size")
+            idx2 = idx + 1
+            batch_size = int(other_args[idx2])
+            other_args.pop(idx2)
+            other_args.pop(idx)
+    batch_size = get_batch_size() or batch_size
     if batch_size is not None:
         cmd_list += ["--batch-size", f"{batch_size}"]
     if other_args:
@@ -266,7 +276,7 @@ def run_insanely_fast_whisper(
     while True:
         rtn = proc.poll()
         if rtn is None:
-            time.sleep(0.25)
+            time.sleep(0.1)
             continue
         if rtn != 0:
             msg = f"Failed to execute {cmd}\n "
