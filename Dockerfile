@@ -24,42 +24,14 @@ RUN mkdir -p /etc/docker
 
 RUN nvidia-ctk runtime configure --runtime=docker
 
-# RUN pip install uv
-# RUN uv venv
-# RUN uv pip install transcribe-anything
-# # Force install ffmpeg
-# RUN uv run static_ffmpeg -version
-
-# RUN pip install transcribe-anything
-
-
-# transcribe-anything-init-insane
-
-# Install the transcriber.
-# ENV VERSION=3.0.9
-# RUN uv pip install transcribe-anything>=${VERSION} \
-#     || uv pip install transcribe-anything>=${VERSION} \
-#     || uv pip install transcribe-anything>=${VERSION}
-
-# RUN static_ffmpeg -version
-
-# COPY ./check_linux_shared_libraries.py check_linux_shared_libraries.py
-# COPY ./entrypoint.sh /app/entrypoint.sh
-# RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
-
-
 COPY . .
-
 RUN chmod +x entrypoint.sh && dos2unix entrypoint.sh
-
 RUN pip install -e .
 
+# Now install the lengthy list of heavy dependencies so startup is reasonable.
 RUN /bin/bash /app/entrypoint.sh --only-check-shared-libs && transcribe-anything-init-insane
 
-
-
 ENTRYPOINT ["/app/entrypoint.sh"]
-
 CMD ["--help"]
 
 
