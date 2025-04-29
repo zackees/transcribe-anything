@@ -155,6 +155,10 @@ This front end app for whisper boasts the easiest install in the whisper ecosyst
 pip install transcribe-anything
 ```
 
+# Docker
+
+We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It is tuned specifically for `device=insane`. If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-anything) which operates on entire remote sub paths.
+
 # GPU Acceleration
 
 GPU acceleration will be automatically enabled for windows and linux. Mac users are stuck with `--device cpu` mode. But it's possible that `--device insane` and `--model mps` on Mac M1+ will work, but this has been completely untested.
