@@ -36,10 +36,7 @@ exclude = ["tests*", "docs*", "examples*"]
 namespaces = false  # Prevent setuptools from looking elsewhere
 
 
-[project.scripts]
-transcribe_anything = "transcribe_anything._cmd:main"
-transcribe-anything = "transcribe_anything._cmd:main"
-transcribe-anything-init-insane = "transcribe_anything.cli_init_insane:main"
+
 
 [tool.ruff]
 line-length = 200
@@ -64,3 +61,8 @@ target-version = ['py310']
 
 [tool.uv.workspace]
 members = ["tmp"]
+
+[project.scripts]
+transcribe_anything = "transcribe_anything._cmd:main"
+transcribe-anything = "transcribe_anything._cmd:main"
+transcribe-anything-init-insane = "transcribe_anything.cli_init_insane:main"
