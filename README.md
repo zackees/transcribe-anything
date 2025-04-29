@@ -19,7 +19,7 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
 
-For linux users we have a [Dockerfile](Dockerfile) to help you out in installation
+For linux users we have a [Dockerfile](Dockerfile) to help you out in the installation.
 
 ## About
 
@@ -157,7 +157,7 @@ pip install transcribe-anything
 
 # Docker
 
-We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It is tuned specifically for `device=insane`. If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-anything) which operates on entire remote sub paths.
+We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It is tuned specifically for `device=insane`. If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-everything) which operates on entire remote paths.
 
 # GPU Acceleration
 
