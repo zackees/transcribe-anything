@@ -157,7 +157,7 @@ pip install transcribe-anything
 
 # Docker
 
-We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It is tuned specifically for `device=insane`. If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-everything) which operates on entire remote paths.
+We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It is tuned specifically for `device=insane`. If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-everything) which operates on entire remote paths hierarchies.
 
 # GPU Acceleration
 
