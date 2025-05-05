@@ -19,7 +19,11 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
 
-For linux users we have a [Dockerfile](Dockerfile) to help you out in the installation.
+**GPU Accelerated Dockerfile**
+
+Recently added in 3.0.10 is a GPU accelerated [Dockerfile](Dockerfile).
+
+However, if you are using a Dockerfile then you probably are doing transcriptions at scale for an AI pipeline. In that case check out the sister project: [https://github.com/zackees/transcribe-everything](https://github.com/zackees/transcribe-everything), built specifically for this purpose. It has it's own dockerfile built with nvidia acceleration in mind. This project allows you to supply credentials and a remote path, and every mp3/media file will be transcribed. There is also an install script for deploying to a GPU accelerated droplet.
 
 ## About
 
