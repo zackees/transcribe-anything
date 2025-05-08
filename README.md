@@ -23,7 +23,11 @@ Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradi
 
 Recently added in 3.0.10 is a GPU accelerated [Dockerfile](Dockerfile).
 
-However, if you are using a Dockerfile then you probably are doing transcriptions at scale for an AI pipeline. In that case check out the sister project: [https://github.com/zackees/transcribe-everything](https://github.com/zackees/transcribe-everything), built specifically for this purpose. It's GPU accelerated, and uses `device=insane` by default. It has it's own dockerfile built specifically for GPU acceleration. This project allows you to supply credentials and a remote path, and every mp3/media file will be transcribed. There is also an install script for deploying to a GPU accelerated droplet.
+If you are are doing translations at scale, check out the sister project: [https://github.com/zackees/transcribe-everything](https://github.com/zackees/transcribe-everything).
+
+You can pull the docker image like so:
+
+`docker pull niteris/transcribe-anything`
 
 ## About
 
