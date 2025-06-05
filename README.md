@@ -60,7 +60,7 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
 # Use custom prompt for better recognition of specific terms
 transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
 # Load prompt from file
-transcribe-anything video.mp4 --prompt_file examples/prompts/technical_terms.txt
+transcribe-anything video.mp4 --prompt_file my_custom_prompt.txt
 ```
 
 *python api*
@@ -200,7 +200,7 @@ Whisper supports custom prompts to improve transcription accuracy for domain-spe
 transcribe-anything video.mp4 --initial_prompt "The speaker discusses artificial intelligence, machine learning, and neural networks."
 
 # Load prompt from file
-transcribe-anything video.mp4 --prompt_file examples/prompts/technical_terms.txt
+transcribe-anything video.mp4 --prompt_file my_custom_prompt.txt
 ```
 
 ### Python API
@@ -223,14 +223,6 @@ transcribe(
     initial_prompt=prompt
 )
 ```
-
-## Example Prompt Files
-
-The repository includes example prompt files for common use cases:
-
-- `examples/prompts/technical_terms.txt` - AI, programming, and technology terms
-- `examples/prompts/medical_terms.txt` - Medical and healthcare terminology
-- `examples/prompts/business_names.txt` - Common company and product names
 
 ## Best Practices
 
