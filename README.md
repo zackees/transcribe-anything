@@ -57,6 +57,10 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
 # Mac accelerated back-end
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
+# Use custom prompt for better recognition of specific terms
+transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
+# Load prompt from file
+transcribe-anything video.mp4 --prompt_file examples/prompts/technical_terms.txt
 ```
 
 *python api*
@@ -82,6 +86,7 @@ def transcribe(
     embed: bool = False,                      # Produces a video.mp4 with the subtitles burned in.
     hugging_face_token: Optional[str] = None, # If you want a speaker.json
     other_args: Optional[list[str]] = None,   # Other args to be passed to to the whisper backend
+    initial_prompt: Optional[str] = None,     # Custom prompt for better recognition of specific terms
 ) -> str:
 
 ```
@@ -176,6 +181,63 @@ Windows/Linux:
 
 Mac:
   * Use `--device mps`
+
+# Custom Prompts and Vocabulary
+
+Whisper supports custom prompts to improve transcription accuracy for domain-specific vocabulary, names, or technical terms. This is especially useful when transcribing content with:
+
+- Technical terminology (AI, machine learning, programming terms)
+- Proper names (people, companies, products)
+- Medical or scientific terms
+- Industry-specific jargon
+
+## Using Custom Prompts
+
+### Command Line
+
+```bash
+# Direct prompt
+transcribe-anything video.mp4 --initial_prompt "The speaker discusses artificial intelligence, machine learning, and neural networks."
+
+# Load prompt from file
+transcribe-anything video.mp4 --prompt_file examples/prompts/technical_terms.txt
+```
+
+### Python API
+
+```python
+from transcribe_anything import transcribe
+
+# Direct prompt
+transcribe(
+    url_or_file="video.mp4",
+    initial_prompt="The speaker discusses AI, PyTorch, TensorFlow, and deep learning algorithms."
+)
+
+# Load prompt from file
+with open("my_prompt.txt", "r") as f:
+    prompt = f.read()
+
+transcribe(
+    url_or_file="video.mp4",
+    initial_prompt=prompt
+)
+```
+
+## Example Prompt Files
+
+The repository includes example prompt files for common use cases:
+
+- `examples/prompts/technical_terms.txt` - AI, programming, and technology terms
+- `examples/prompts/medical_terms.txt` - Medical and healthcare terminology
+- `examples/prompts/business_names.txt` - Common company and product names
+
+## Best Practices
+
+- Keep prompts concise but comprehensive for your domain
+- Include variations of terms (e.g., "AI", "artificial intelligence")
+- Focus on terms that Whisper commonly misrecognizes
+- Test with and without prompts to measure improvement
 
 # Usage
 

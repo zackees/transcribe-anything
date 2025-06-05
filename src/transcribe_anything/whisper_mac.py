@@ -79,6 +79,7 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     input_wav: Path,
     model: str,
     output_dir: Path,
+    other_args: list[str] | None = None,
 ) -> None:
     """Runs whisper with Apple MPS acceleration.
 
@@ -103,6 +104,10 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
 
     if model:
         cmd_list.extend(["--model", model])
+
+    # Add other arguments if provided
+    if other_args:
+        cmd_list.extend(other_args)
 
     # Execute command
     cmd = subprocess.list2cmdline(cmd_list)
