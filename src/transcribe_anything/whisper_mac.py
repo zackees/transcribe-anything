@@ -3,6 +3,7 @@ Runs whisper api with Apple MLX support using lightning-whisper-mlx.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -11,6 +12,19 @@ import webvtt  # type: ignore
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 HERE = Path(__file__).parent
+
+
+def get_mlx_cache_dir() -> Path:
+    """Get the cache directory for MLX models, consistent with other backends.
+
+    Returns the cache directory path where MLX models should be stored.
+    This matches the pattern used by other whisper backends (~/.cache/whisper/)
+    but keeps MLX models in a separate subdirectory for organization.
+    """
+    # Use the same cache pattern as standard whisper but with mlx_models subdirectory
+    cache_dir = Path.home() / ".cache" / "whisper" / "mlx_models"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
 
 
 def get_environment() -> IsoEnv:
@@ -217,26 +231,61 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     # Get the environment and run transcription
     env = get_environment()
 
+    # Get the cache directory for consistent model storage
+    cache_dir = get_mlx_cache_dir()
+
     # Create a Python script to run the transcription in the isolated environment
     script_content = f'''
 import sys
 import json
+import os
 from pathlib import Path
 
 try:
-    from lightning_whisper_mlx import LightningWhisperMLX
+    from lightning_whisper_mlx.transcribe import transcribe_audio
+    from huggingface_hub import hf_hub_download
 
-    # Initialize the model
-    whisper = LightningWhisperMLX(
-        model="{model}",
-        batch_size={batch_size},
-        quant=None
-    )
+    # Model mapping (same as in lightning_whisper_mlx)
+    models = {{
+        "tiny": {{"base": "mlx-community/whisper-tiny"}},
+        "small": {{"base": "mlx-community/whisper-small-mlx"}},
+        "base": {{"base": "mlx-community/whisper-base-mlx"}},
+        "medium": {{"base": "mlx-community/whisper-medium-mlx"}},
+        "large": {{"base": "mlx-community/whisper-large-mlx"}},
+        "large-v2": {{"base": "mlx-community/whisper-large-v2-mlx"}},
+        "large-v3": {{"base": "mlx-community/whisper-large-v3-mlx"}},
+        "distil-small.en": {{"base": "mustafaaljadery/distil-whisper-mlx"}},
+        "distil-medium.en": {{"base": "mustafaaljadery/distil-whisper-mlx"}},
+        "distil-large-v2": {{"base": "mustafaaljadery/distil-whisper-mlx"}},
+        "distil-large-v3": {{"base": "mustafaaljadery/distil-whisper-mlx"}},
+    }}
 
-    # Transcribe the audio
-    result = whisper.transcribe(
-        audio_path="{input_wav_abs}",
+    model_name = "{model}"
+    cache_dir = Path("{cache_dir}")
+
+    # Determine repo_id and model directory
+    if model_name not in models:
+        raise ValueError(f"Model {{model_name}} not supported")
+
+    repo_id = models[model_name]["base"]
+    model_dir = cache_dir / model_name
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    # Download model files to cache directory
+    weights_file = model_dir / "weights.npz"
+    config_file = model_dir / "config.json"
+
+    if not weights_file.exists():
+        hf_hub_download(repo_id=repo_id, filename="weights.npz", local_dir=str(model_dir))
+    if not config_file.exists():
+        hf_hub_download(repo_id=repo_id, filename="config.json", local_dir=str(model_dir))
+
+    # Transcribe the audio using the cached model
+    result = transcribe_audio(
+        audio="{input_wav_abs}",
+        path_or_hf_repo=str(model_dir),
         language={repr(parsed_args.get("language"))},
+        batch_size={batch_size},
         initial_prompt={repr(initial_prompt)}
     )
 
