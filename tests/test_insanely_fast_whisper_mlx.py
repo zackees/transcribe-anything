@@ -1,5 +1,5 @@
 """
-Tests transcribe_anything with lightning-whisper-mlx
+Tests transcribe_anything with lightning-whisper-mlx (MLX backend)
 """
 
 # pylint: disable=bad-option-value,useless-option-value,no-self-use,protected-access,R0801
@@ -22,7 +22,7 @@ CAN_RUN_TEST = is_mac_arm()
 
 
 class MacOsWhisperMLXTester(unittest.TestCase):
-    """Tester for transcribe anything with lightning-whisper-mlx."""
+    """Tester for transcribe anything with lightning-whisper-mlx (MLX backend)."""
 
     @unittest.skipUnless(CAN_RUN_TEST, "Not mac")
     def test_local_file_english(self) -> None:

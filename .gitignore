@@ -139,3 +139,15 @@ transcribe_anything/WHISPER_OPTIONS.json
 !.aiderignore
 activate
 uv.lock
+
+# MLX model files (downloaded at runtime)
+mlx_models/
+src/mlx_models/
+
+# Test output files
+tests/localfile/output.json
+tests/localfile/text_video_*
+
+# Video files
+*.mp4
+*.wav

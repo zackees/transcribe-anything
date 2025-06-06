@@ -97,7 +97,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     choices = [None, "cpu", "cuda", "insane"]
     if platform.system() == "Darwin":
-        choices.append("mps")
+        choices.extend(["mlx", "mps"])  # mps for backward compatibility
     parser.add_argument(
         "--device",
         help="device to use for processing, None will auto select CUDA if available or else CPU",
