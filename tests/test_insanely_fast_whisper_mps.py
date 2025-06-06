@@ -34,6 +34,25 @@ class MacOsWhisperMpsTester(unittest.TestCase):
             output_dir=TESTS_DATA_DIR,
         )
 
+    @unittest.skipUnless(CAN_RUN_TEST, "Not mac")
+    def test_local_file_with_initial_prompt(self) -> None:
+        """Check that the command works with initial_prompt (should be filtered out)."""
+        test_dir = LOCALFILE_DIR / "text_video_mps_prompt"
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+        # This should work without error, even though initial_prompt is not supported
+        run_whisper_mac_english(
+            input_wav=TEST_WAV,
+            model="small",
+            output_dir=test_dir,
+            other_args=["--initial_prompt", "test vocabulary terms"]
+        )
+
+        # Verify output files were created
+        self.assertTrue((test_dir / "out.txt").exists())
+        self.assertTrue((test_dir / "out.srt").exists())
+        self.assertTrue((test_dir / "out.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

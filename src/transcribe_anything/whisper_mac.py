@@ -75,6 +75,51 @@ def _json_to_srt(json_data: Dict[str, Any]) -> str:
     return srt_content
 
 
+def _filter_unsupported_args(other_args: list[str]) -> list[str]:
+    """Filter out arguments that are not supported by whisper-mps.
+
+    whisper-mps only supports:
+    - --file-name
+    - --model-name
+    - --youtube-url
+
+    This function removes unsupported arguments and logs warnings for important ones.
+    """
+    if not other_args:
+        return []
+
+    # Arguments that whisper-mps doesn't support
+    unsupported_args = {
+        "--initial_prompt": "Initial prompt is not supported by whisper-mps backend. Consider using --device insane or --device cpu for custom vocabulary support.",
+        "--language": "Language specification is not supported by whisper-mps backend.",
+        "--task": "Task specification is not supported by whisper-mps backend.",
+        "--output_dir": "Output directory is handled internally by whisper-mps.",
+        "--device": "Device is handled internally by whisper-mps.",
+        "--word_timestamps": "Word timestamps are not supported by whisper-mps backend.",
+        "--verbose": "Verbose mode is not supported by whisper-mps backend.",
+    }
+
+    filtered_args = []
+    i = 0
+    while i < len(other_args):
+        arg = other_args[i]
+
+        # Check if this argument is unsupported
+        if arg in unsupported_args:
+            sys.stderr.write(f"Warning: {unsupported_args[arg]}\n")
+            # Skip this argument and its value (if it has one)
+            if i + 1 < len(other_args) and not other_args[i + 1].startswith("--"):
+                i += 2  # Skip both the argument and its value
+            else:
+                i += 1  # Skip just the argument
+        else:
+            # Keep supported arguments
+            filtered_args.append(arg)
+            i += 1
+
+    return filtered_args
+
+
 def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     input_wav: Path,
     model: str,
@@ -103,11 +148,14 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
     ]
 
     if model:
-        cmd_list.extend(["--model", model])
+        cmd_list.extend(["--model-name", model])
 
-    # Add other arguments if provided
+    # Filter out unsupported arguments for whisper-mps
+    # whisper-mps only supports: --file-name, --model-name, --youtube-url
     if other_args:
-        cmd_list.extend(other_args)
+        filtered_args = _filter_unsupported_args(other_args)
+        if filtered_args:
+            cmd_list.extend(filtered_args)
 
     # Execute command
     cmd = subprocess.list2cmdline(cmd_list)
