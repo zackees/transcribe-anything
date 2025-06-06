@@ -17,6 +17,8 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
 
+**Model Storage:** MLX models are now stored in `~/.cache/whisper/mlx_models/` for consistency with other backends, instead of cluttering your current working directory.
+
 **GPU Accelerated Dockerfile**
 
 Recently added in 3.0.10 is a GPU accelerated [Dockerfile](Dockerfile).
