@@ -27,7 +27,7 @@ def get_environment() -> IsoEnv:
     content_lines.append('version = "0.1.0"')
     content_lines.append('requires-python = ">=3.10"')
     content_lines.append("dependencies = [")
-    content_lines.append('  "lightning-whisper-mlx>=0.0.10",')
+    content_lines.append('  "lightning-whisper-mlx @ git+https://github.com/aj47/lightning-whisper-mlx.git",')
     content_lines.append('  "webvtt-py",')
     content_lines.append('  "numpy",')
     content_lines.append("]")
@@ -214,14 +214,6 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     verbose = parsed_args.get("verbose", False)
     temperature = parsed_args.get("temperature", 0.0)
 
-    # Warn about unsupported features
-    if initial_prompt:
-        sys.stderr.write("Warning: initial_prompt is not supported by lightning-whisper-mlx backend. Custom vocabulary will be ignored.\n")
-    if word_timestamps:
-        sys.stderr.write("Warning: word_timestamps is not supported by lightning-whisper-mlx backend.\n")
-    if temperature != 0.0:
-        sys.stderr.write("Warning: temperature is not supported by lightning-whisper-mlx backend.\n")
-
     # Get the environment and run transcription
     env = get_environment()
 
@@ -244,7 +236,8 @@ try:
     # Transcribe the audio
     result = whisper.transcribe(
         audio_path="{input_wav_abs}",
-        language={repr(parsed_args.get("language"))}
+        language={repr(parsed_args.get("language"))},
+        initial_prompt={repr(initial_prompt)}
     )
 
     # Print the result as JSON
