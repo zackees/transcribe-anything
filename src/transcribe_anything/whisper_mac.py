@@ -1,11 +1,9 @@
 """
-Runs whisper api with Apple MPS support.
+Runs whisper api with Apple MLX support using lightning-whisper-mlx.
 """
 
 import json
-import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,12 +11,11 @@ import webvtt  # type: ignore
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 HERE = Path(__file__).parent
-CUDA_AVAILABLE: Optional[bool] = None
 
 
 def get_environment() -> IsoEnv:
-    """Returns the environment."""
-    venv_dir = HERE / "venv" / "whisper_darwin"
+    """Returns the environment for lightning-whisper-mlx."""
+    venv_dir = HERE / "venv" / "whisper_mlx"
     content_lines: list[str] = []
 
     content_lines.append("[build-system]")
@@ -28,10 +25,11 @@ def get_environment() -> IsoEnv:
     content_lines.append("[project]")
     content_lines.append('name = "project"')
     content_lines.append('version = "0.1.0"')
-    content_lines.append('requires-python = "==3.11.*"')
+    content_lines.append('requires-python = ">=3.10"')
     content_lines.append("dependencies = [")
-    content_lines.append('  "whisper-mps",')
+    content_lines.append('  "lightning-whisper-mlx @ git+https://github.com/aj47/lightning-whisper-mlx.git",')
     content_lines.append('  "webvtt-py",')
+    content_lines.append('  "numpy",')
     content_lines.append("]")
     content = "\n".join(content_lines)
     pyproject_toml = PyProjectToml(content)
@@ -53,7 +51,7 @@ def _format_timestamp(seconds: float) -> str:
 
 
 def _json_to_srt(json_data: Dict[str, Any]) -> str:
-    """Convert whisper-mps JSON output to SRT format."""
+    """Convert lightning-whisper-mlx JSON output to SRT format."""
     srt_content = ""
 
     if "segments" not in json_data:
@@ -63,9 +61,17 @@ def _json_to_srt(json_data: Dict[str, Any]) -> str:
         return srt_content
 
     for i, segment in enumerate(json_data["segments"], start=1):
-        start_time = segment.get("start", 0)
-        end_time = segment.get("end", start_time + 5)  # Default to 5 seconds if no end time
-        text = segment.get("text", "").strip()
+        # Handle both old format (start/end) and new format (list with start, end, text)
+        if isinstance(segment, list) and len(segment) >= 3:
+            # New format: [start_seek, end_seek, text]
+            start_time = segment[0] * 0.02  # Convert seek to seconds (assuming 50fps)
+            end_time = segment[1] * 0.02
+            text = segment[2].strip()
+        else:
+            # Old format: dict with start/end/text
+            start_time = segment.get("start", 0)
+            end_time = segment.get("end", start_time + 5)  # Default to 5 seconds if no end time
+            text = segment.get("text", "").strip()
 
         if text:  # Only include non-empty segments
             srt_content += f"{i}\n"
@@ -75,113 +81,8 @@ def _json_to_srt(json_data: Dict[str, Any]) -> str:
     return srt_content
 
 
-def _filter_unsupported_args(other_args: list[str]) -> list[str]:
-    """Filter out arguments that are not supported by whisper-mps.
-
-    whisper-mps only supports:
-    - --file-name
-    - --model-name
-    - --youtube-url
-
-    This function removes unsupported arguments and logs warnings for important ones.
-    """
-    if not other_args:
-        return []
-
-    # Arguments that whisper-mps doesn't support
-    unsupported_args = {
-        "--initial_prompt": "Initial prompt is not supported by whisper-mps backend. Consider using --device insane or --device cpu for custom vocabulary support.",
-        "--language": "Language specification is not supported by whisper-mps backend.",
-        "--task": "Task specification is not supported by whisper-mps backend.",
-        "--output_dir": "Output directory is handled internally by whisper-mps.",
-        "--device": "Device is handled internally by whisper-mps.",
-        "--word_timestamps": "Word timestamps are not supported by whisper-mps backend.",
-        "--verbose": "Verbose mode is not supported by whisper-mps backend.",
-    }
-
-    filtered_args = []
-    i = 0
-    while i < len(other_args):
-        arg = other_args[i]
-
-        # Check if this argument is unsupported
-        if arg in unsupported_args:
-            sys.stderr.write(f"Warning: {unsupported_args[arg]}\n")
-            # Skip this argument and its value (if it has one)
-            if i + 1 < len(other_args) and not other_args[i + 1].startswith("--"):
-                i += 2  # Skip both the argument and its value
-            else:
-                i += 1  # Skip just the argument
-        else:
-            # Keep supported arguments
-            filtered_args.append(arg)
-            i += 1
-
-    return filtered_args
-
-
-def run_whisper_mac_english(  # pylint: disable=too-many-arguments
-    input_wav: Path,
-    model: str,
-    output_dir: Path,
-    other_args: list[str] | None = None,
-) -> None:
-    """Runs whisper with Apple MPS acceleration.
-
-    This function executes the whisper-mps command to transcribe audio using Apple's
-    Metal Performance Shaders (MPS) for acceleration on Apple Silicon hardware.
-    It then processes the JSON output to generate SRT, VTT, and TXT files.
-    """
-    input_wav_abs = input_wav.resolve()
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True)
-    env = get_environment()
-
-    # whisper-mps saves the output JSON in the same directory as the input file
-    output_json = input_wav_abs.parent / "output.json"
-
-    # Prepare command
-    cmd_list = [
-        "whisper-mps",
-        "--file-name",
-        input_wav.name,  # cwd is set to the same directory as the input file
-    ]
-
-    if model:
-        cmd_list.extend(["--model-name", model])
-
-    # Filter out unsupported arguments for whisper-mps
-    # whisper-mps only supports: --file-name, --model-name, --youtube-url
-    if other_args:
-        filtered_args = _filter_unsupported_args(other_args)
-        if filtered_args:
-            cmd_list.extend(filtered_args)
-
-    # Execute command
-    cmd = subprocess.list2cmdline(cmd_list)
-    sys.stderr.write(f"Running:\n  {cmd}\n")
-    proc = env.open_proc(cmd_list, shell=False, cwd=input_wav_abs.parent)
-    while True:
-        rtn = proc.poll()
-        if rtn is None:
-            time.sleep(0.25)
-            continue
-        if rtn != 0:
-            raise OSError(f"Failed to execute {cmd}")
-        break
-
-    # Process output files
-    if not output_json.exists():
-        raise FileNotFoundError(f"whisper-mps did not generate the expected output file: {output_json}")
-
-    # Read the JSON output
-    try:
-        with open(output_json, "r", encoding="utf-8") as f:
-            json_data = json.load(f)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse whisper-mps output JSON: {e}")
-
-    # Generate output files
+def _generate_output_files(json_data: Dict[str, Any], output_dir: Path, initial_prompt: str | None = None) -> None:
+    """Generate all output files from the transcription result."""
     # 1. SRT file
     srt_content = _json_to_srt(json_data)
     srt_file = output_dir / "out.srt"
@@ -190,8 +91,12 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
 
     # 2. Text file
     txt_file = output_dir / "out.txt"
+    text_content = json_data.get("text", "")
+    # Remove initial prompt from the beginning if it was used
+    if initial_prompt and text_content.startswith(initial_prompt.strip()):
+        text_content = text_content[len(initial_prompt.strip()):].strip()
     with open(txt_file, "w", encoding="utf-8") as f:
-        f.write(json_data.get("text", ""))
+        f.write(text_content)
 
     # 3. JSON file
     json_out_file = output_dir / "out.json"
@@ -204,3 +109,199 @@ def run_whisper_mac_english(  # pylint: disable=too-many-arguments
         webvtt.from_srt(srt_file).save(vtt_file)
     except Exception as e:
         sys.stderr.write(f"Warning: Failed to convert SRT to VTT: {e}\n")
+
+
+def _parse_other_args(other_args: list[str]) -> dict[str, Any]:
+    """Parse other_args into a dictionary of parameters for lightning-whisper-mlx.
+
+    Supported arguments:
+    - --initial_prompt: Custom vocabulary/context prompt
+    - --language: Language code (e.g., 'en', 'es', 'fr')
+    - --task: 'transcribe' or 'translate'
+    - --word_timestamps: Enable word-level timestamps
+    - --verbose: Enable verbose output
+    - --temperature: Sampling temperature
+    - --batch_size: Batch size for processing
+    """
+    if not other_args:
+        return {}
+
+    parsed_args = {}
+    i = 0
+    while i < len(other_args):
+        arg = other_args[i]
+
+        if arg == "--initial_prompt" and i + 1 < len(other_args):
+            parsed_args["initial_prompt"] = other_args[i + 1]
+            i += 2
+        elif arg == "--language" and i + 1 < len(other_args):
+            parsed_args["language"] = other_args[i + 1]
+            i += 2
+        elif arg == "--task" and i + 1 < len(other_args):
+            parsed_args["task"] = other_args[i + 1]
+            i += 2
+        elif arg == "--word_timestamps":
+            parsed_args["word_timestamps"] = True
+            i += 1
+        elif arg == "--verbose":
+            parsed_args["verbose"] = True
+            i += 1
+        elif arg == "--temperature" and i + 1 < len(other_args):
+            try:
+                parsed_args["temperature"] = float(other_args[i + 1])
+            except ValueError:
+                sys.stderr.write(f"Warning: Invalid temperature value '{other_args[i + 1]}', using default\n")
+            i += 2
+        elif arg == "--batch_size" and i + 1 < len(other_args):
+            try:
+                parsed_args["batch_size"] = int(other_args[i + 1])
+            except ValueError:
+                sys.stderr.write(f"Warning: Invalid batch_size value '{other_args[i + 1]}', using default\n")
+            i += 2
+        else:
+            # Skip unsupported arguments with a warning
+            if arg.startswith("--"):
+                sys.stderr.write(f"Warning: Argument '{arg}' is not supported by lightning-whisper-mlx backend\n")
+                if i + 1 < len(other_args) and not other_args[i + 1].startswith("--"):
+                    i += 2  # Skip both the argument and its value
+                else:
+                    i += 1  # Skip just the argument
+            else:
+                i += 1
+
+    return parsed_args
+
+
+def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
+    input_wav: Path,
+    model: str,
+    output_dir: Path,
+    language: str | None = None,
+    task: str = "transcribe",
+    other_args: list[str] | None = None,
+) -> None:
+    """Runs whisper with Apple MLX acceleration using lightning-whisper-mlx.
+
+    This function uses the lightning-whisper-mlx library to transcribe audio using Apple's
+    MLX framework for acceleration on Apple Silicon hardware.
+    It generates SRT, VTT, TXT, and JSON output files.
+
+    Args:
+        input_wav: Path to the input WAV file
+        model: Whisper model to use (tiny, small, medium, large, etc.)
+        output_dir: Directory to save output files
+        language: Language code (e.g., 'en', 'es', 'fr'). If None, auto-detect.
+        task: Task to perform ('transcribe' or 'translate')
+        other_args: Additional arguments to pass to the transcription
+    """
+    input_wav_abs = input_wav.resolve()
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
+
+    # Parse additional arguments
+    parsed_args = _parse_other_args(other_args or [])
+
+    # Override with explicit parameters
+    if language:
+        parsed_args["language"] = language
+    if task:
+        parsed_args["task"] = task
+
+    # Set defaults
+    batch_size = parsed_args.get("batch_size", 12)
+    initial_prompt = parsed_args.get("initial_prompt")
+    word_timestamps = parsed_args.get("word_timestamps", False)
+    verbose = parsed_args.get("verbose", False)
+    temperature = parsed_args.get("temperature", 0.0)
+
+    # Get the environment and run transcription
+    env = get_environment()
+
+    # Create a Python script to run the transcription in the isolated environment
+    script_content = f'''
+import sys
+import json
+from pathlib import Path
+
+try:
+    from lightning_whisper_mlx import LightningWhisperMLX
+
+    # Initialize the model
+    whisper = LightningWhisperMLX(
+        model="{model}",
+        batch_size={batch_size},
+        quant=None
+    )
+
+    # Transcribe the audio
+    result = whisper.transcribe(
+        audio_path="{input_wav_abs}",
+        language={repr(parsed_args.get("language"))},
+        initial_prompt={repr(initial_prompt)}
+    )
+
+    # Print the result as JSON
+    print(json.dumps(result, ensure_ascii=False))
+
+except Exception as e:
+    print(f"Error: {{e}}", file=sys.stderr)
+    sys.exit(1)
+'''
+
+    # Write the script to a temporary file
+    script_file = output_dir / "transcribe_script.py"
+    with open(script_file, "w", encoding="utf-8") as f:
+        f.write(script_content)
+
+    try:
+        # Execute the script in the isolated environment
+        if verbose:
+            sys.stderr.write(f"Running lightning-whisper-mlx transcription on {input_wav_abs}\n")
+
+        result = env.run([str(script_file)], shell=False, check=False, capture_output=True, text=True)
+
+        # Check for errors and display stderr if there was a problem
+        if result.returncode != 0:
+            error_msg = f"lightning-whisper-mlx script failed with return code {result.returncode}"
+            if result.stderr:
+                error_msg += f"\nSTDERR: {result.stderr}"
+            if result.stdout:
+                error_msg += f"\nSTDOUT: {result.stdout}"
+            raise RuntimeError(error_msg)
+
+        # Parse the JSON output
+        try:
+            json_data = json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            error_msg = f"Failed to parse lightning-whisper-mlx output JSON: {e}"
+            if result.stderr:
+                error_msg += f"\nSTDERR: {result.stderr}"
+            if result.stdout:
+                error_msg += f"\nSTDOUT: {result.stdout}"
+            raise ValueError(error_msg)
+
+        # Generate output files
+        _generate_output_files(json_data, output_dir, initial_prompt)
+
+    finally:
+        # Clean up the temporary script
+        if script_file.exists():
+            script_file.unlink()
+
+
+# Keep the old function name for backward compatibility
+def run_whisper_mac_english(  # pylint: disable=too-many-arguments
+    input_wav: Path,
+    model: str,
+    output_dir: Path,
+    other_args: list[str] | None = None,
+) -> None:
+    """Legacy function for backward compatibility. Calls run_whisper_mac_mlx."""
+    run_whisper_mac_mlx(
+        input_wav=input_wav,
+        model=model,
+        output_dir=output_dir,
+        language="en",
+        task="transcribe",
+        other_args=other_args,
+    )
