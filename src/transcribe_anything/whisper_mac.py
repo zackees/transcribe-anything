@@ -27,7 +27,7 @@ def get_environment() -> IsoEnv:
     content_lines.append('version = "0.1.0"')
     content_lines.append('requires-python = ">=3.10"')
     content_lines.append("dependencies = [")
-    content_lines.append('  "lightning-whisper-mlx>=0.1.0",')
+    content_lines.append('  "lightning-whisper-mlx>=0.0.10",')
     content_lines.append('  "webvtt-py",')
     content_lines.append('  "numpy",')
     content_lines.append("]")
@@ -214,6 +214,14 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     verbose = parsed_args.get("verbose", False)
     temperature = parsed_args.get("temperature", 0.0)
 
+    # Warn about unsupported features
+    if initial_prompt:
+        sys.stderr.write("Warning: initial_prompt is not supported by lightning-whisper-mlx backend. Custom vocabulary will be ignored.\n")
+    if word_timestamps:
+        sys.stderr.write("Warning: word_timestamps is not supported by lightning-whisper-mlx backend.\n")
+    if temperature != 0.0:
+        sys.stderr.write("Warning: temperature is not supported by lightning-whisper-mlx backend.\n")
+
     # Get the environment and run transcription
     env = get_environment()
 
@@ -257,13 +265,27 @@ except Exception as e:
         if verbose:
             sys.stderr.write(f"Running lightning-whisper-mlx transcription on {input_wav_abs}\n")
 
-        result = env.run([str(script_file)], shell=False, check=True, capture_output=True, text=True)
+        result = env.run([str(script_file)], shell=False, check=False, capture_output=True, text=True)
+
+        # Check for errors and display stderr if there was a problem
+        if result.returncode != 0:
+            error_msg = f"lightning-whisper-mlx script failed with return code {result.returncode}"
+            if result.stderr:
+                error_msg += f"\nSTDERR: {result.stderr}"
+            if result.stdout:
+                error_msg += f"\nSTDOUT: {result.stdout}"
+            raise RuntimeError(error_msg)
 
         # Parse the JSON output
         try:
             json_data = json.loads(result.stdout)
         except json.JSONDecodeError as e:
-            raise ValueError(f"Failed to parse lightning-whisper-mlx output JSON: {e}")
+            error_msg = f"Failed to parse lightning-whisper-mlx output JSON: {e}"
+            if result.stderr:
+                error_msg += f"\nSTDERR: {result.stderr}"
+            if result.stdout:
+                error_msg += f"\nSTDOUT: {result.stdout}"
+            raise ValueError(error_msg)
 
         # Generate output files
         _generate_output_files(json_data, output_dir, initial_prompt)

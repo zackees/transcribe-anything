@@ -1,19 +1,17 @@
 # transcribe-anything
-[![MacOS_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml) 
+
+[![MacOS_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_macos.yml)
 [![Win_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_win.yml)
 [![Ubuntu_Tests](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/test_ubuntu.yml)
 [![Lint](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml/badge.svg)](https://github.com/zackees/transcribe-anything/actions/workflows/lint.yml)
 
 ![image](https://github.com/zackees/transcribe-anything/assets/6856673/94bdd1fe-3225-438a-ac1b-09c81f1d4108)
 
-
-
 ### USES WHISPER AI
 
 Over 700+⭐'s because this program this app just works! Works great for windows and mac. This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
-
 
 ### New in 3.1!
 
@@ -31,7 +29,7 @@ You can pull the docker image like so:
 
 ## About
 
-Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. All whisper backends are executed in an isolated environment. GPU acceleration is *automatic*, using the *blazingly* fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
+Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. All whisper backends are executed in an isolated environment. GPU acceleration is _automatic_, using the _blazingly_ fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
 Hardware acceleration on Windows/Linux `--device insane`
 
@@ -44,8 +42,6 @@ Uses whisper AI so this is state of the art translation service - completely fre
 Your data stays private and is not uploaded to any service.
 
 The new version now has state of the art speed in transcriptions, thanks to the new backend `--device insane`, as well as producing a `speaker.json` file.
-
-
 
 ```bash
 pip install transcribe-anything
@@ -63,7 +59,8 @@ transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machin
 transcribe-anything video.mp4 --prompt_file my_custom_prompt.txt
 ```
 
-*python api*
+_python api_
+
 ```python
 from transcribe_anything import transcribe_anything
 
@@ -95,8 +92,8 @@ def transcribe(
 
 This is by far the fastest combination. Experimental, it produces text that tends to be lower quality:
 
-  * Higher chance for repeated text patterns.
-  * Timestamps in the vtt/srt files become unaligned.
+- Higher chance for repeated text patterns.
+- Timestamps in the vtt/srt files become unaligned.
 
 It's unclear if this is due to batching or `large-v3` itself. More testing is needed. If you do this then please let us know the results by filing a bug in the issues page.
 
@@ -115,32 +112,24 @@ When diarization is enabled via `--hf_token` (hugging face token) then the outpu
 What's special to this app is that we also generate a `speaker.json` which is a de-chunkified version of the output json speaker section.
 
 ### speaker.json example:
+
 ```json
 [
   {
     "speaker": "SPEAKER_00",
-    "timestamp": [
-      0.0,
-      7.44
-    ],
+    "timestamp": [0.0, 7.44],
     "text": "for that. But welcome, Zach Vorhees. Great to have you back on. Thank you, Matt. Craving me back onto your show. Man, we got a lot to talk about.",
     "reason": "beginning"
   },
   {
     "speaker": "SPEAKER_01",
-    "timestamp": [
-      7.44,
-      33.52
-    ],
+    "timestamp": [7.44, 33.52],
     "text": "Oh, we do. 2023 was the year that OpenAI released, you know, chat GPT-4, which I think most people would say has surpassed average human intelligence, at least in test taking, perhaps not in, you know, reasoning and things like that. But it was a major year for AI. I think that most people are behind the curve on this. What's your take of what just happened in the last 12 months and what it means for the future of human cognition versus machine cognition?",
     "reason": "speaker-switch"
   },
   {
     "speaker": "SPEAKER_00",
-    "timestamp": [
-      33.52,
-      44.08
-    ],
+    "timestamp": [33.52, 44.08],
     "text": "Yeah. Well, you know, at the beginning of 2023, we had a pretty weak AI system, which was a chat GPT 3.5 turbo was the best that we had. And then between the beginning of last",
     "reason": "speaker-switch"
   }
@@ -156,7 +145,6 @@ Insane mode eats up a lot of memory and it's common to get out of memory errors 
 Also, please don't use `distil-whisper/distil-large-v2`, it produces extremely bad stuttering and it's not entirely clear why this is. I've had to switch it out of production environments because it's so bad. It's also non-deterministic so I think that somehow a fallback non-zero temperature is being used, which produces these stutterings.
 
 `cuda` is the original AI model supplied by openai. It's more stable but MUCH slower. It also won't produce a `speaker.json` file which looks like this:
-
 
 `--embed`. This app will optionally embed subtitles directly "burned" into an output video.
 
@@ -177,10 +165,12 @@ We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It i
 GPU acceleration will be automatically enabled for windows and linux. Mac users are stuck with `--device cpu` mode. But it's possible that `--device insane` and `--model mps` on Mac M1+ will work, but this has been completely untested.
 
 Windows/Linux:
-  * Use `--device insane`
+
+- Use `--device insane`
 
 Mac:
-  * Use `--device mps`
+
+- Use `--device mps`
 
 # Custom Prompts and Vocabulary
 
@@ -329,119 +319,118 @@ The environment is now active and the next step will only install to the local p
 is closed then to get back into the environment `cd transcribe_anything` and execute `source activate.sh`
 
 ## Required: Install to current python environment
-  * `pip install transcribe-anything`
-    * The command `transcribe_anything` will magically become available.
-  * `transcribe_anything <YOUTUBE_URL>`
 
+- `pip install transcribe-anything`
+  - The command `transcribe_anything` will magically become available.
+- `transcribe_anything <YOUTUBE_URL>`
 
 # Tech Stack
-  * OpenAI whisper
-  * insanely-fast-whisper
-  * yt-dlp: https://github.com/yt-dlp/yt-dlp
-  * static-ffmpeg
-    * github: https://github.com/zackees/static_ffmpeg
-    * pypi: https://pypi.org/project/static-ffmpeg/
+
+- OpenAI whisper
+- insanely-fast-whisper
+- yt-dlp: https://github.com/yt-dlp/yt-dlp
+- static-ffmpeg
+  - github: https://github.com/zackees/static_ffmpeg
+  - pypi: https://pypi.org/project/static-ffmpeg/
 
 # Testing
 
-  * Every commit is tested for standard linters and a batch of unit tests.
+- Every commit is tested for standard linters and a batch of unit tests.
 
 ## Updated version 2.3.0
 
-`transcribe-anything` now works much better across different configurations and is now much faster. Why? I switched the environment isolation that I was using from my own homespun version built on top of `venv` to the AMAZING `uv` system. The biggest improvement is the runtime speed and re-installs. UV is just insane at how fast it is for checking the environment. Also it turns out that `uv` has  strict package dependency checking which found a minor bug where a certain version of one of the `pytorch` dependencies was being constantly re-installed because of a dependency conflict that pip was apparently perfectly happy to never warn about. This manifested as certain packages being constantly re-installed with the previous version. `uv` identified this as an error immediately and was fixed.
+`transcribe-anything` now works much better across different configurations and is now much faster. Why? I switched the environment isolation that I was using from my own homespun version built on top of `venv` to the AMAZING `uv` system. The biggest improvement is the runtime speed and re-installs. UV is just insane at how fast it is for checking the environment. Also it turns out that `uv` has strict package dependency checking which found a minor bug where a certain version of one of the `pytorch` dependencies was being constantly re-installed because of a dependency conflict that pip was apparently perfectly happy to never warn about. This manifested as certain packages being constantly re-installed with the previous version. `uv` identified this as an error immediately and was fixed.
 
 The real reason behind `transcribe-anything`'s surprising popularity comes from the fact that it just works. And the reason for this is that I can isolate environments for different configurations and install them lazily. If you have the same problem then consider my other tool: https://github.com/zackees/iso-env
 
-
-
 # Versions
-  * 3.0.7: Insane whisperer mode no longer prints out the srt file during transcription completion.
-  * 3.0.6: MacOS mps mode fixed/improved
-    * PR: https://github.com/zackees/transcribe-anything/pull/39
-    * Thank you https://github.com/aj47! 
-  * 3.0.5: A temp wav file was not being cleaned up, now it is.
-  * 3.1.0: Upgraded Mac-arm backend to [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx), enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP!
-  * 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
-  * 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
-  * 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
-  * 2.7.37: Fixed breakage due to numpy 2.0 being released.
-  * 2.7.36: Fixed some ffmpeg dependencies.
-  * 2.7.35: All `ffmpeg` commands are now `static_ffmpeg` commands. Fixes issue.
-  * 2.7.34: Various fixes.
-  * 2.7.33: Fixes linux
-  * 2.7.32: Fixes mac m1 and m2.
-  * 2.7.31: Adds a warning if using python 3.12, which isn't supported yet in the backend.
-  * 2.7.30: adds --query-gpu-json-path
-  * 2.7.29: Made to json -> srt more robust for `--device insane`, bad entries will be skipped but warn.
-  * 2.7.28: Fixes bad title fetching with weird characters.
-  * 2.7.27: `pytorch-audio` upgrades broke this package. Upgrade to latest version to resolve.
-  * 2.7.26: Add model option `distil-whisper/distil-large-v2`
-  * 2.7.25: Windows (Linux/MacOS) bug with `--device insane` and python 3.11 installing wrong `insanely-fast-whisper` version.
-  * 2.7.22: Fixes `transcribe-anything` on Linux.
-  * 2.7.21: Tested that Mac Arm can run `--device insane`. Added tests to ensure this.
-  * 2.7.20: Fixes wrong type being returned when speaker.json happens to be empty.
-  * 2.7.19: speaker.json is now in plain json format instead of json5 format
-  * 2.7.18: Fixes tests
-  * 2.7.17: Fixes speaker.json nesting.
-  * 2.7.16: Adds `--save_hf_token`
-  * 2.7.15: Fixes 2.7.14 breakage.
-  * 2.7.14: (Broken) Now generates `speaker.json` when diarization is enabled.
-  * 2.7.13: Default diarization model is now pyannote/speaker-diarization-3.1
-  * 2.7.12: Adds srt_swap for line breaks and improved isolated_environment usage.
-  * 2.7.11: `--device insane` now generates a *.vtt translation file
-  * 2.7.10: Better support for namespaced models. Trims text output in output json. Output json is now formatted with indents. SRT file is now printed out for `--device insane`
-  * 2.7.9: All SRT translation errors fixed for `--device insane`. All tests pass.
-  * 2.7.8: During error of `--device insane`, write out the error.json file into the destination.
-  * 2.7.7: Better error messages during failure.
-  * 2.7.6: Improved generation of out.txt, removes linebreaks.
-  * 2.7.5: `--device insane` now generates better conforming srt files.
-  * 2.7.3: Various fixes for the `insane` mode backend.
-  * 2.7.0: Introduces an `insanely-fast-whisper`, enable by using `--device insane`
-  * 2.6.0: GPU acceleration now happens automatically on Windows thanks to `isolated-environment`. This will also prevent
-           interference with different versions of torch for other AI tools.
-  * 2.5.0: `--model large` now aliases to `--model large-v3`. Use `--model large-legacy` to use original large model.
-  * 2.4.0: pytorch updated to 2.1.2, gpu install script updated to same + cuda version is now 121.
-  * 2.3.9: Fallback to `cpu` device if `gpu` device is not compatible.
-  * 2.3.8: Fix --models arg which
-  * 2.3.7: Critical fix: fixes dependency breakage with open-ai. Fixes windows use of embedded tool.
-  * 2.3.6: Fixes typo in readme for installation instructions.
-  * 2.3.5: Now has `--embed` to burn the subtitles into the video itself. Only works on local mp4 files at the moment.
-  * 2.3.4: Removed `out.mp3` and instead use a temporary wav file, as that is faster to process. --no-keep-audio has now been removed.
-  * 2.3.3: Fix case where there spaces in name (happens on windows)
-  * 2.3.2: Fix windows transcoding error
-  * 2.3.1: static-ffmpeg >= 2.5 now specified
-  * 2.3.0: Now uses the official version of whisper ai
-  * 2.2.1: "test_" is now prepended to all the different output folder names.
-  * 2.2.0: Now explictly setting a language will put the file in a folder with that language name, allowing multi language passes without overwriting.
-  * 2.1.2: yt-dlp pinned to new minimum version. Fixes downloading issues from old lib. Adds audio normalization by default.
-  * 2.1.1: Updates keywords for easier pypi finding.
-  * 2.1.0: Unknown args are now assumed to be for whisper and passed to it as-is. Fixes https://github.com/zackees/transcribe-anything/issues/3
-  * 2.0.13: Now works with python 3.9
-  * 2.0.12: Adds --device to argument parameters. This will default to CUDA if available, else CPU.
-  * 2.0.11: Automatically deletes files in the out directory if they already exist.
-  * 2.0.10: fixes local file issue https://github.com/zackees/transcribe-anything/issues/2
-  * 2.0.9: fixes sanitization of path names for some youtube videos
-  * 2.0.8: fix `--output_dir` not being respected.
-  * 2.0.7: `install_cuda.sh` -> `install_cuda.py`
-  * 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
-  * 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
-  * 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
-  * 2.0.2: Minor cleanup of file names (no more out.mp3.txt, it's now out.txt)
-  * 2.0.1: Fixes missing dependencies and adds whisper option.
-  * 2.0.0: New! Now a front end for Whisper ai!
+
+- 3.0.7: Insane whisperer mode no longer prints out the srt file during transcription completion.
+- 3.0.6: MacOS mps mode fixed/improved
+  - PR: https://github.com/zackees/transcribe-anything/pull/39
+  - Thank you https://github.com/aj47!
+- 3.0.5: A temp wav file was not being cleaned up, now it is.
+- 3.1.0: Upgraded Mac-arm backend to [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx), enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP!
+- 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
+- 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
+- 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
+- 2.7.37: Fixed breakage due to numpy 2.0 being released.
+- 2.7.36: Fixed some ffmpeg dependencies.
+- 2.7.35: All `ffmpeg` commands are now `static_ffmpeg` commands. Fixes issue.
+- 2.7.34: Various fixes.
+- 2.7.33: Fixes linux
+- 2.7.32: Fixes mac m1 and m2.
+- 2.7.31: Adds a warning if using python 3.12, which isn't supported yet in the backend.
+- 2.7.30: adds --query-gpu-json-path
+- 2.7.29: Made to json -> srt more robust for `--device insane`, bad entries will be skipped but warn.
+- 2.7.28: Fixes bad title fetching with weird characters.
+- 2.7.27: `pytorch-audio` upgrades broke this package. Upgrade to latest version to resolve.
+- 2.7.26: Add model option `distil-whisper/distil-large-v2`
+- 2.7.25: Windows (Linux/MacOS) bug with `--device insane` and python 3.11 installing wrong `insanely-fast-whisper` version.
+- 2.7.22: Fixes `transcribe-anything` on Linux.
+- 2.7.21: Tested that Mac Arm can run `--device insane`. Added tests to ensure this.
+- 2.7.20: Fixes wrong type being returned when speaker.json happens to be empty.
+- 2.7.19: speaker.json is now in plain json format instead of json5 format
+- 2.7.18: Fixes tests
+- 2.7.17: Fixes speaker.json nesting.
+- 2.7.16: Adds `--save_hf_token`
+- 2.7.15: Fixes 2.7.14 breakage.
+- 2.7.14: (Broken) Now generates `speaker.json` when diarization is enabled.
+- 2.7.13: Default diarization model is now pyannote/speaker-diarization-3.1
+- 2.7.12: Adds srt_swap for line breaks and improved isolated_environment usage.
+- 2.7.11: `--device insane` now generates a \*.vtt translation file
+- 2.7.10: Better support for namespaced models. Trims text output in output json. Output json is now formatted with indents. SRT file is now printed out for `--device insane`
+- 2.7.9: All SRT translation errors fixed for `--device insane`. All tests pass.
+- 2.7.8: During error of `--device insane`, write out the error.json file into the destination.
+- 2.7.7: Better error messages during failure.
+- 2.7.6: Improved generation of out.txt, removes linebreaks.
+- 2.7.5: `--device insane` now generates better conforming srt files.
+- 2.7.3: Various fixes for the `insane` mode backend.
+- 2.7.0: Introduces an `insanely-fast-whisper`, enable by using `--device insane`
+- 2.6.0: GPU acceleration now happens automatically on Windows thanks to `isolated-environment`. This will also prevent
+  interference with different versions of torch for other AI tools.
+- 2.5.0: `--model large` now aliases to `--model large-v3`. Use `--model large-legacy` to use original large model.
+- 2.4.0: pytorch updated to 2.1.2, gpu install script updated to same + cuda version is now 121.
+- 2.3.9: Fallback to `cpu` device if `gpu` device is not compatible.
+- 2.3.8: Fix --models arg which
+- 2.3.7: Critical fix: fixes dependency breakage with open-ai. Fixes windows use of embedded tool.
+- 2.3.6: Fixes typo in readme for installation instructions.
+- 2.3.5: Now has `--embed` to burn the subtitles into the video itself. Only works on local mp4 files at the moment.
+- 2.3.4: Removed `out.mp3` and instead use a temporary wav file, as that is faster to process. --no-keep-audio has now been removed.
+- 2.3.3: Fix case where there spaces in name (happens on windows)
+- 2.3.2: Fix windows transcoding error
+- 2.3.1: static-ffmpeg >= 2.5 now specified
+- 2.3.0: Now uses the official version of whisper ai
+- 2.2.1: "test\_" is now prepended to all the different output folder names.
+- 2.2.0: Now explictly setting a language will put the file in a folder with that language name, allowing multi language passes without overwriting.
+- 2.1.2: yt-dlp pinned to new minimum version. Fixes downloading issues from old lib. Adds audio normalization by default.
+- 2.1.1: Updates keywords for easier pypi finding.
+- 2.1.0: Unknown args are now assumed to be for whisper and passed to it as-is. Fixes https://github.com/zackees/transcribe-anything/issues/3
+- 2.0.13: Now works with python 3.9
+- 2.0.12: Adds --device to argument parameters. This will default to CUDA if available, else CPU.
+- 2.0.11: Automatically deletes files in the out directory if they already exist.
+- 2.0.10: fixes local file issue https://github.com/zackees/transcribe-anything/issues/2
+- 2.0.9: fixes sanitization of path names for some youtube videos
+- 2.0.8: fix `--output_dir` not being respected.
+- 2.0.7: `install_cuda.sh` -> `install_cuda.py`
+- 2.0.6: Fixes twitter video fetching. --keep-audio -> --no-keep-audio
+- 2.0.5: Fix bad filename on trailing urls ending with /, adds --keep-audio
+- 2.0.3: GPU support is now added. Run the `install_cuda.sh` script to enable.
+- 2.0.2: Minor cleanup of file names (no more out.mp3.txt, it's now out.txt)
+- 2.0.1: Fixes missing dependencies and adds whisper option.
+- 2.0.0: New! Now a front end for Whisper ai!
 
 ## Notes:
 
-  * Insanely Fast whisper for GPU
-    * https://github.com/Vaibhavs10/insanely-fast-whisper
-  * Fast Whisper for CPU
-    * https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file
-  * A better whisper CLI that supports more options but has a manual install.
-    * https://github.com/ochen1/insanely-fast-whisper-cli/blob/main/requirements.txt
-  * Subtitles translator:
-    * https://github.com/TDHM/Subtitles-Translator
-  * Forum post on how to avoid stuttering
-    * https://community.openai.com/t/how-to-avoid-hallucinations-in-whisper-transcriptions/125300/23
-  * More stable transcriptions:
-    * https://github.com/jianfch/stable-ts?tab=readme-ov-file
-
+- Insanely Fast whisper for GPU
+  - https://github.com/Vaibhavs10/insanely-fast-whisper
+- Fast Whisper for CPU
+  - https://github.com/SYSTRAN/faster-whisper?tab=readme-ov-file
+- A better whisper CLI that supports more options but has a manual install.
+  - https://github.com/ochen1/insanely-fast-whisper-cli/blob/main/requirements.txt
+- Subtitles translator:
+  - https://github.com/TDHM/Subtitles-Translator
+- Forum post on how to avoid stuttering
+  - https://community.openai.com/t/how-to-avoid-hallucinations-in-whisper-transcriptions/125300/23
+- More stable transcriptions:
+  - https://github.com/jianfch/stable-ts?tab=readme-ov-file
