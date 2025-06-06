@@ -52,7 +52,7 @@ class Device(Enum):
     CPU = "cpu"
     CUDA = "cuda"
     INSANE = "insane"
-    MPS = "mps"
+    MLX = "mlx"
 
     def __str__(self) -> str:
         return self.value
@@ -69,10 +69,15 @@ class Device(Enum):
             return Device.CUDA
         if device == "insane":
             return Device.INSANE
+        if device == "mlx":
+            if sys.platform != "darwin":
+                raise ValueError("MLX is only supported on macOS.")
+            return Device.MLX
+        # Backward compatibility: accept 'mps' as alias for 'mlx'
         if device == "mps":
             if sys.platform != "darwin":
-                raise ValueError("MPS is only supported on macOS.")
-            return Device.MPS
+                raise ValueError("MLX (formerly MPS) is only supported on macOS.")
+            return Device.MLX
         raise ValueError(f"Unknown device {device}")
 
 
@@ -179,7 +184,7 @@ def transcribe(
         model: Whisper model to use (tiny, small, medium, large, etc.)
         task: Task to perform (transcribe or translate)
         language: Language of the audio (auto-detected if None)
-        device: Device to use (cuda, cpu, insane, mps)
+        device: Device to use (cuda, cpu, insane, mlx)
         embed: Whether to embed subtitles into video file
         hugging_face_token: Token for speaker diarization
         other_args: Additional arguments to pass to Whisper backend
@@ -235,9 +240,9 @@ def transcribe(
             print("#####################################")
         elif device_enum == Device.CPU:
             print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
-        elif device_enum == Device.MPS:
+        elif device_enum == Device.MLX:
             print("#####################################")
-            print("####### MAC MPS GPU MODE! ###########")
+            print("####### MAC MLX GPU MODE! ###########")
             print("#####################################")
         else:
             raise ValueError(f"Unknown device {device}")
@@ -265,7 +270,7 @@ def transcribe(
                     hugging_face_token=hugging_face_token,
                     other_args=other_args,
                 )
-            elif device_enum == Device.MPS:
+            elif device_enum == Device.MLX:
                 run_whisper_mac_mlx(
                     input_wav=Path(tmp_wav),
                     model=model_str,

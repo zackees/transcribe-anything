@@ -15,7 +15,7 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 ### New in 3.1!
 
-Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
+Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
 
 **GPU Accelerated Dockerfile**
 
@@ -33,7 +33,7 @@ Easiest whisper implementation to install and use. Just install with `pip instal
 
 Hardware acceleration on Windows/Linux `--device insane`
 
-MacArm acceleration when using `--device mps` (now with multi-language support and custom vocabulary)
+MacArm acceleration when using `--device mlx` (now with multi-language support and custom vocabulary)
 
 Input a local file or youtube/rumble url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
@@ -52,7 +52,7 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 # translate from any language to english
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
 # Mac accelerated back-end
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mps
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
 # Use custom prompt for better recognition of specific terms
 transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
 # Load prompt from file
@@ -79,7 +79,7 @@ def transcribe(
     model: Optional[str] = None,              # tiny,small,medium,large
     task: Optional[str] = None,               # transcribe or translate
     language: Optional[str] = None,           # auto detected if none, "en" for english...
-    device: Optional[str] = None,             # cuda,cpu,insane,mps
+    device: Optional[str] = None,             # cuda,cpu,insane,mlx
     embed: bool = False,                      # Produces a video.mp4 with the subtitles burned in.
     hugging_face_token: Optional[str] = None, # If you want a speaker.json
     other_args: Optional[list[str]] = None,   # Other args to be passed to to the whisper backend
@@ -162,7 +162,7 @@ We have a [Dockerfile](Dockerfile) that will be descently fast for startup. It i
 
 # GPU Acceleration
 
-GPU acceleration will be automatically enabled for windows and linux. Mac users are stuck with `--device cpu` mode. But it's possible that `--device insane` and `--model mps` on Mac M1+ will work, but this has been completely untested.
+GPU acceleration will be automatically enabled for windows and linux. Mac users can use `--device mlx` for hardware acceleration on Apple Silicon. `--device insane` may also work on Mac M1+ but has been less tested.
 
 Windows/Linux:
 
@@ -170,7 +170,7 @@ Windows/Linux:
 
 Mac:
 
-- Use `--device mps`
+- Use `--device mlx`
 
 # Custom Prompts and Vocabulary
 
@@ -346,12 +346,12 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
 # Versions
 
 - 3.0.7: Insane whisperer mode no longer prints out the srt file during transcription completion.
-- 3.0.6: MacOS mps mode fixed/improved
+- 3.0.6: MacOS MLX mode fixed/improved
   - PR: https://github.com/zackees/transcribe-anything/pull/39
   - Thank you https://github.com/aj47!
 - 3.0.5: A temp wav file was not being cleaned up, now it is.
-- 3.1.0: Upgraded Mac-arm backend to [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx), enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP!
-- 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
+- 3.1.0: Upgraded Mac-arm backend to [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx), enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP!
+- 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps` (now `--device mlx`). Only does english, but is quite fast.
 - 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
 - 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
 - 2.7.37: Fixed breakage due to numpy 2.0 being released.
