@@ -27,7 +27,7 @@ from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.logger import log_error
 from transcribe_anything.util import chop_double_extension, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
-from transcribe_anything.whisper_mac import run_whisper_mac_english
+from transcribe_anything.whisper_mac import run_whisper_mac_mlx
 
 DISABLED_WARNINGS = [
     ".*set_audio_backend has been deprecated.*",
@@ -265,8 +265,15 @@ def transcribe(
                     hugging_face_token=hugging_face_token,
                     other_args=other_args,
                 )
-            elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English") and (task_str == "transcribe"):
-                run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir), other_args=other_args)
+            elif device_enum == Device.MPS:
+                run_whisper_mac_mlx(
+                    input_wav=Path(tmp_wav),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    language=language_str if language_str else None,
+                    task=task_str,
+                    other_args=other_args
+                )
             else:
                 run_whisper(
                     input_wav=Path(tmp_wav),

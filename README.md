@@ -15,9 +15,9 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
 
 
-### New in 3.0!
+### New in 3.1!
 
-Mac acceleration option using the new [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend. Enable with `--device mps`. English only, and does not support the `speaker.json` output, but is quite fast.
+Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
 
 **GPU Accelerated Dockerfile**
 
@@ -35,7 +35,7 @@ Easiest whisper implementation to install and use. Just install with `pip instal
 
 Hardware acceleration on Windows/Linux `--device insane`
 
-MacArm acceleration when using `--device mps`
+MacArm acceleration when using `--device mps` (now with multi-language support and custom vocabulary)
 
 Input a local file or youtube/rumble url and this tool will transcribe it using Whisper AI into subtitle files and raw text.
 
@@ -360,6 +360,7 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
     * PR: https://github.com/zackees/transcribe-anything/pull/39
     * Thank you https://github.com/aj47! 
   * 3.0.5: A temp wav file was not being cleaned up, now it is.
+  * 3.1.0: Upgraded Mac-arm backend to [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx), enable with `--device mps`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP!
   * 3.0.0: Implemented new Mac-arm accelerated [whisper-mps](https://github.com/AtomGradient/whisper-mps) backend, enable with `--device mps`. Only does english, but is quite fast.
   * 2.3.0: Swapped out the environment isolator. Now based on `uv`, should fix the missing dll's on some windows systems.
   * 2.7.39: Fix `--hf-token` usage for insanely fast whisper backend.
