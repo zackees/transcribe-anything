@@ -27,7 +27,7 @@ from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.logger import log_error
 from transcribe_anything.util import chop_double_extension, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
-from transcribe_anything.whisper_mac import run_whisper_mac_english
+from transcribe_anything.whisper_mac import run_whisper_mac_mlx
 
 DISABLED_WARNINGS = [
     ".*set_audio_backend has been deprecated.*",
@@ -52,7 +52,7 @@ class Device(Enum):
     CPU = "cpu"
     CUDA = "cuda"
     INSANE = "insane"
-    MPS = "mps"
+    MLX = "mlx"
 
     def __str__(self) -> str:
         return self.value
@@ -69,10 +69,15 @@ class Device(Enum):
             return Device.CUDA
         if device == "insane":
             return Device.INSANE
+        if device == "mlx":
+            if sys.platform != "darwin":
+                raise ValueError("MLX is only supported on macOS.")
+            return Device.MLX
+        # Backward compatibility: accept 'mps' as alias for 'mlx'
         if device == "mps":
             if sys.platform != "darwin":
-                raise ValueError("MPS is only supported on macOS.")
-            return Device.MPS
+                raise ValueError("MLX (formerly MPS) is only supported on macOS.")
+            return Device.MLX
         raise ValueError(f"Unknown device {device}")
 
 
@@ -168,9 +173,27 @@ def transcribe(
     embed: bool = False,
     hugging_face_token: Optional[str] = None,
     other_args: Optional[list[str]] = None,
+    initial_prompt: Optional[str] = None,
 ) -> str:
     """
-    Runs the program.
+    Runs the transcription program.
+
+    Args:
+        url_or_file: Path to local file or URL (YouTube, etc.)
+        output_dir: Directory to save output files
+        model: Whisper model to use (tiny, small, medium, large, etc.)
+        task: Task to perform (transcribe or translate)
+        language: Language of the audio (auto-detected if None)
+        device: Device to use (cuda, cpu, insane, mlx)
+        embed: Whether to embed subtitles into video file
+        hugging_face_token: Token for speaker diarization
+        other_args: Additional arguments to pass to Whisper backend
+        initial_prompt: Initial prompt to provide context for transcription.
+                       Useful for custom vocabulary, names, or domain-specific terms.
+                       Example: "The speaker discusses AI, machine learning, and neural networks."
+
+    Returns:
+        Path to the output directory containing transcription files
     """
     # add the paths for any dependent tools that may rely on ffmpeg
     static_ffmpeg.add_paths()
@@ -217,9 +240,9 @@ def transcribe(
             print("#####################################")
         elif device_enum == Device.CPU:
             print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
-        elif device_enum == Device.MPS:
+        elif device_enum == Device.MLX:
             print("#####################################")
-            print("####### MAC MPS GPU MODE! ###########")
+            print("####### MAC MLX GPU MODE! ###########")
             print("#####################################")
         else:
             raise ValueError(f"Unknown device {device}")
@@ -227,6 +250,13 @@ def transcribe(
         model_str = f"{model}" if model else ""
         task_str = f"{task}" if task else "transcribe"
         language_str = f"{language}" if language else ""
+
+        # Handle initial_prompt parameter
+        if initial_prompt:
+            if other_args is None:
+                other_args = []
+            other_args.extend(["--initial_prompt", initial_prompt])
+            print(f"Using initial prompt: {initial_prompt[:100]}{'...' if len(initial_prompt) > 100 else ''}")
 
         print(f"Running whisper on {tmp_wav} (will install models on first run)")
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -240,8 +270,15 @@ def transcribe(
                     hugging_face_token=hugging_face_token,
                     other_args=other_args,
                 )
-            elif device_enum == Device.MPS and (language_str == "" or language_str == "en" or language_str == "English") and (task_str == "transcribe"):
-                run_whisper_mac_english(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir))
+            elif device_enum == Device.MLX:
+                run_whisper_mac_mlx(
+                    input_wav=Path(tmp_wav),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    language=language_str if language_str else None,
+                    task=task_str,
+                    other_args=other_args
+                )
             else:
                 run_whisper(
                     input_wav=Path(tmp_wav),

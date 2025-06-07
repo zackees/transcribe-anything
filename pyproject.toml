@@ -20,7 +20,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
 ]
 # VERSION
-version = "3.0.11"  # Update this manually or configure setuptools-scm for automatic versioning
+version = "3.1.0"  # Update this manually or configure setuptools-scm for automatic versioning
 maintainers = [{ name = "Zachary Vorhies", email = "dont@email.me" }]
 
 [project.urls]
