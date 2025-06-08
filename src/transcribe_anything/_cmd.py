@@ -97,7 +97,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     choices = [None, "cpu", "cuda", "insane"]
     if platform.system() == "Darwin":
-        choices.append("mps")
+        choices.extend(["mlx", "mps"])  # mps for backward compatibility
     parser.add_argument(
         "--device",
         help="device to use for processing, None will auto select CUDA if available or else CPU",
@@ -130,12 +130,41 @@ def parse_arguments() -> argparse.Namespace:
         help="whether to embed the translation file into the output file",
         action="store_true",
     )
+    parser.add_argument(
+        "--initial_prompt",
+        help="Initial prompt to provide context for transcription. Useful for custom vocabulary, names, or domain-specific terms. Example: 'The speaker discusses AI, machine learning, and neural networks.'",
+        default=None,
+        type=str,
+    )
+    parser.add_argument(
+        "--prompt_file",
+        help="Path to a text file containing the initial prompt. Alternative to --initial_prompt.",
+        default=None,
+        type=str,
+    )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
     if args.url_or_file is None and args.query_gpu_json_path is None:
         print("No file or url provided")
         parser.print_help()
         sys.exit(1)
+
+    # Handle prompt arguments
+    if args.initial_prompt and args.prompt_file:
+        print("Error: Cannot specify both --initial_prompt and --prompt_file")
+        sys.exit(1)
+
+    if args.prompt_file:
+        try:
+            with open(args.prompt_file, 'r', encoding='utf-8') as f:
+                args.initial_prompt = f.read().strip()
+        except FileNotFoundError:
+            print(f"Error: Prompt file not found: {args.prompt_file}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error reading prompt file: {e}")
+            sys.exit(1)
+
     args.unknown = unknown
     return args
 
@@ -187,6 +216,13 @@ def main() -> int:
             # unknown.append(f"--timestamp {args.timestamp}")
             unknown.append("--timestamp")
             unknown.append(args.timestamp)
+
+    # Add initial_prompt to other_args if specified
+    if args.initial_prompt:
+        if unknown is None:
+            unknown = []
+        unknown.extend(["--initial_prompt", args.initial_prompt])
+        print(f"Using initial prompt: {args.initial_prompt[:100]}{'...' if len(args.initial_prompt) > 100 else ''}")
 
     if unknown:
         print(f"Args passed to whisper backend: {unknown}")
