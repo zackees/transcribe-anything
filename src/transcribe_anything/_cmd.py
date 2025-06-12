@@ -73,6 +73,11 @@ def parse_arguments() -> argparse.Namespace:
         type=Path,
     )
     parser.add_argument(
+        "--clear-nvidia-cache",
+        help="Clear the NVIDIA detection cache to force re-detection",
+        action="store_true",
+    )
+    parser.add_argument(
         "--output_dir",
         help="Provide output directory name,d efaults to the filename of the file.",
         default=None,
@@ -144,7 +149,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
-    if args.url_or_file is None and args.query_gpu_json_path is None:
+    if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, 'clear_nvidia_cache', False):
         print("No file or url provided")
         parser.print_help()
         sys.exit(1)
@@ -173,6 +178,14 @@ def main() -> int:
     """Main entry point for the command line tool."""
     args = parse_arguments()
     unknown = args.unknown
+
+    # Handle clear NVIDIA cache option
+    if getattr(args, 'clear_nvidia_cache', False):
+        from transcribe_anything.util import clear_nvidia_cache
+        clear_nvidia_cache()
+        print("NVIDIA detection cache cleared successfully.")
+        return 0
+
     if args.query_gpu_json_path is not None:
         from transcribe_anything.insanely_fast_whisper import get_cuda_info
 

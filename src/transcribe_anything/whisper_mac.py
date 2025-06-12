@@ -5,6 +5,7 @@ Runs whisper api with Apple MLX support using lightning-whisper-mlx.
 import json
 import os
 import sys
+import hashlib
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -46,6 +47,11 @@ def get_environment() -> IsoEnv:
     content_lines.append('  "numpy",')
     content_lines.append("]")
     content = "\n".join(content_lines)
+
+    # Debug: Log the pyproject.toml content hash to track changes
+    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()[:8]
+    print(f"Debug: whisper_mac.py pyproject.toml hash: {content_hash}", file=sys.stderr)
+
     pyproject_toml = PyProjectToml(content)
     args = IsoEnvArgs(venv_dir, build_info=pyproject_toml)
     env = IsoEnv(args)
