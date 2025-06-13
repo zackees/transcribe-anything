@@ -7,33 +7,9 @@ This script shows how the caching prevents repeated environment regeneration.
 """
 
 import hashlib
-import sys
 import unittest
-from pathlib import Path
 
-# Import the modules that use NVIDIA detection
-
-
-HERE = Path(__file__).parent
-PROJECT_ROOT = HERE.parent
-SRC = PROJECT_ROOT / "src"
-
-# Add src to path
-sys.path.insert(0, str(SRC))
-
-import importlib.util
-
-
-def load_module(name, path):
-    """Load a module from a file path."""
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-# Load modules
-util_module = load_module("util", SRC / "transcribe_anything" / "util.py")
+from transcribe_anything import util as util_module
 
 
 class TestNvidiaDetectionCache(unittest.TestCase):
@@ -65,7 +41,8 @@ class TestNvidiaDetectionCache(unittest.TestCase):
 
         try:
             # Load whisper module
-            whisper_module = load_module("whisper", SRC / "transcribe_anything" / "whisper.py")
+            from transcribe_anything import whisper as whisper_module
+
             print(f"Whisper module loaded successfully: {whisper_module.__name__}")
 
             # Generate environment multiple times and check hash consistency
