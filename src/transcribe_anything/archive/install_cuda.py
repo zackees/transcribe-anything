@@ -26,9 +26,7 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument("--display-cuda-version", default=CUDA_VERSION, help="displays cuda version")
-argparser.add_argument(
-    "--force", action="store_true", help="Force install and ignore missing nvida drivers"
-)
+argparser.add_argument("--force", action="store_true", help="Force install and ignore missing nvida drivers")
 args = argparser.parse_args()
 
 HAS_NVIDIA: bool = shutil.which("nvidia-smi") is not None
@@ -38,9 +36,7 @@ if not HAS_NVIDIA and not args.force:
     sys.exit(1)
 
 # Get the stdout from pip list
-pip_list_stdout = subprocess.run(
-    ["pip", "list", "--format", "json"], check=True, capture_output=True, universal_newlines=True
-).stdout
+pip_list_stdout = subprocess.run(["pip", "list", "--format", "json"], check=True, capture_output=True, universal_newlines=True).stdout
 
 # Delete the torch package if it doesn't have the cuda version
 if args.force or True:  # always do this path now.  # pylint: disable=condition-evals-to-constant
