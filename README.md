@@ -13,6 +13,28 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
 
+### New in 3.2!
+
+**Turbo Mac acceleration using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend.**
+
+This is a communinity contribution by https://github.com/aj47. On behalf of all the mac users, thank you!
+
+#### MLX Backend details
+
+  * 4x faster than the `mps` whisper backend.
+  * Supports multiple languages (`mps` only supports english).
+  * Supports custom vocabulary via `--initial_prompt`.
+  
+#### Usage
+
+
+```bash
+# Mac accelerated back-end
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
+```
+
+Special thank
+
 ### New in 3.1!
 
 Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
