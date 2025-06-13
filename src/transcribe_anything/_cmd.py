@@ -149,7 +149,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
-    if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, 'clear_nvidia_cache', False):
+    if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, "clear_nvidia_cache", False):
         print("No file or url provided")
         parser.print_help()
         sys.exit(1)
@@ -161,7 +161,7 @@ def parse_arguments() -> argparse.Namespace:
 
     if args.prompt_file:
         try:
-            with open(args.prompt_file, 'r', encoding='utf-8') as f:
+            with open(args.prompt_file, "r", encoding="utf-8") as f:
                 args.initial_prompt = f.read().strip()
         except FileNotFoundError:
             print(f"Error: Prompt file not found: {args.prompt_file}")
@@ -180,8 +180,9 @@ def main() -> int:
     unknown = args.unknown
 
     # Handle clear NVIDIA cache option
-    if getattr(args, 'clear_nvidia_cache', False):
+    if getattr(args, "clear_nvidia_cache", False):
         from transcribe_anything.util import clear_nvidia_cache
+
         clear_nvidia_cache()
         print("NVIDIA detection cache cleared successfully.")
         return 0

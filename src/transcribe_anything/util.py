@@ -2,15 +2,15 @@
 Determines whether this device is cpu or gpu.
 """
 
+import json
 import os
 import platform
 import re
 import shutil
-from html import unescape
-from urllib.parse import unquote
-from pathlib import Path
-import json
 import sys
+from html import unescape
+from pathlib import Path
+from urllib.parse import unquote
 
 PROCESS_TIMEOUT = 4 * 60 * 60
 
@@ -81,7 +81,7 @@ def _load_nvidia_cache() -> dict:
     """Load the NVIDIA detection cache from disk."""
     try:
         if _NVIDIA_CACHE_FILE.exists():
-            with open(_NVIDIA_CACHE_FILE, 'r', encoding='utf-8') as f:
+            with open(_NVIDIA_CACHE_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
     except (json.JSONDecodeError, OSError) as e:
         print(f"Warning: Failed to load NVIDIA cache: {e}", file=sys.stderr)
@@ -91,7 +91,7 @@ def _load_nvidia_cache() -> dict:
 def _save_nvidia_cache(cache_data: dict) -> None:
     """Save the NVIDIA detection cache to disk."""
     try:
-        with open(_NVIDIA_CACHE_FILE, 'w', encoding='utf-8') as f:
+        with open(_NVIDIA_CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(cache_data, f, indent=2)
     except OSError as e:
         print(f"Warning: Failed to save NVIDIA cache: {e}", file=sys.stderr)
@@ -117,7 +117,7 @@ def has_nvidia_smi() -> bool:
     # Check if we have a cached result for this system fingerprint
     if current_fingerprint in _NVIDIA_DETECTION_CACHE:
         cached_result = _NVIDIA_DETECTION_CACHE[current_fingerprint]
-        print(f"Debug: Using cached NVIDIA detection result: {cached_result} for fingerprint: {current_fingerprint}", file=sys.stderr)
+        # print(f"Debug: Using cached NVIDIA detection result: {cached_result} for fingerprint: {current_fingerprint}", file=sys.stderr)
         return cached_result
 
     # Perform actual detection

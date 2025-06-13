@@ -271,14 +271,7 @@ def transcribe(
                     other_args=other_args,
                 )
             elif device_enum == Device.MLX:
-                run_whisper_mac_mlx(
-                    input_wav=Path(tmp_wav),
-                    model=model_str,
-                    output_dir=Path(tmpdir),
-                    language=language_str if language_str else None,
-                    task=task_str,
-                    other_args=other_args
-                )
+                run_whisper_mac_mlx(input_wav=Path(tmp_wav), model=model_str, output_dir=Path(tmpdir), language=language_str if language_str else None, task=task_str, other_args=other_args)
             else:
                 run_whisper(
                     input_wav=Path(tmp_wav),

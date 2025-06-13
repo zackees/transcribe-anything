@@ -5,7 +5,6 @@ Runs whisper api.
 import subprocess
 import sys
 import time
-import hashlib
 from pathlib import Path
 from typing import Optional
 
@@ -70,8 +69,8 @@ def get_environment() -> IsoEnv:
     content = "\n".join(content_lines)
 
     # Debug: Log the pyproject.toml content hash to track changes
-    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()[:8]
-    print(f"Debug: whisper.py pyproject.toml hash: {content_hash}, needs_extra_index: {needs_extra_index}", file=sys.stderr)
+    # content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()[:8]
+    # print(f"Debug: whisper.py pyproject.toml hash: {content_hash}, needs_extra_index: {needs_extra_index}", file=sys.stderr)
 
     pyproject_toml = PyProjectToml(content)
     args = IsoEnvArgs(venv_dir, build_info=pyproject_toml)

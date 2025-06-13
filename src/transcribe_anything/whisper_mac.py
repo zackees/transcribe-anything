@@ -3,11 +3,9 @@ Runs whisper api with Apple MLX support using lightning-whisper-mlx.
 """
 
 import json
-import os
 import sys
-import hashlib
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import webvtt  # type: ignore
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
@@ -49,8 +47,8 @@ def get_environment() -> IsoEnv:
     content = "\n".join(content_lines)
 
     # Debug: Log the pyproject.toml content hash to track changes
-    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()[:8]
-    print(f"Debug: whisper_mac.py pyproject.toml hash: {content_hash}", file=sys.stderr)
+    # content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()[:8]
+    # print(f"Debug: whisper_mac.py pyproject.toml hash: {content_hash}", file=sys.stderr)
 
     pyproject_toml = PyProjectToml(content)
     args = IsoEnvArgs(venv_dir, build_info=pyproject_toml)
@@ -114,7 +112,7 @@ def _generate_output_files(json_data: Dict[str, Any], output_dir: Path, initial_
     text_content = json_data.get("text", "")
     # Remove initial prompt from the beginning if it was used
     if initial_prompt and text_content.startswith(initial_prompt.strip()):
-        text_content = text_content[len(initial_prompt.strip()):].strip()
+        text_content = text_content[len(initial_prompt.strip()) :].strip()
     with open(txt_file, "w", encoding="utf-8") as f:
         f.write(text_content)
 
@@ -146,7 +144,7 @@ def _parse_other_args(other_args: list[str]) -> dict[str, Any]:
     if not other_args:
         return {}
 
-    parsed_args = {}
+    parsed_args: dict = {}
     i = 0
     while i < len(other_args):
         arg = other_args[i]
@@ -230,9 +228,11 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     # Set defaults
     batch_size = parsed_args.get("batch_size", 12)
     initial_prompt = parsed_args.get("initial_prompt")
-    word_timestamps = parsed_args.get("word_timestamps", False)
+    # unusued
+    # word_timestamps = parsed_args.get("word_timestamps", False)
     verbose = parsed_args.get("verbose", False)
-    temperature = parsed_args.get("temperature", 0.0)
+    # unused
+    # temperature = parsed_args.get("temperature", 0.0)
 
     # Get the environment and run transcription
     env = get_environment()
@@ -241,7 +241,7 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     cache_dir = get_mlx_cache_dir()
 
     # Create a Python script to run the transcription in the isolated environment
-    script_content = f'''
+    script_content = f"""
 import sys
 import json
 import os
@@ -301,7 +301,7 @@ try:
 except Exception as e:
     print(f"Error: {{e}}", file=sys.stderr)
     sys.exit(1)
-'''
+"""
 
     # Write the script to a temporary file
     script_file = output_dir / "transcribe_script.py"

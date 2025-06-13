@@ -3,7 +3,6 @@ Requirements for the insanely fast whisper.
 """
 
 import sys
-import hashlib
 from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
@@ -99,10 +98,6 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
         content_lines.append("explicit = true")
 
     content = "\n".join(content_lines)
-
-    # Debug: Log the pyproject.toml content hash to track changes
-    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()[:8]
-    print(f"Debug: insanley_fast_whisper_reqs.py pyproject.toml hash: {content_hash}, has_nvidia: {has_nvidia}, is_windows: {is_windows}", file=sys.stderr)
 
     build_info = PyProjectToml(content)
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)

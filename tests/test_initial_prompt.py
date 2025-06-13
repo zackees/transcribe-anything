@@ -26,12 +26,9 @@ class TestInitialPrompt(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = transcribe(
-                url_or_file=str(self.test_wav),
-                output_dir=tmpdir,
-                model="tiny",  # Use smallest model for speed
-                initial_prompt="The speaker discusses technology and artificial intelligence."
+                url_or_file=str(self.test_wav), output_dir=tmpdir, model="tiny", initial_prompt="The speaker discusses technology and artificial intelligence."  # Use smallest model for speed
             )
-            
+
             # Check that output files were created
             self.assertTrue(os.path.exists(output_dir))
             srt_file = os.path.join(output_dir, "out.srt")
@@ -43,14 +40,8 @@ class TestInitialPrompt(unittest.TestCase):
             self.skipTest(f"Test file {self.test_wav} not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_dir = transcribe(
-                url_or_file=str(self.test_wav),
-                output_dir=tmpdir,
-                model="tiny",
-                initial_prompt="Technology discussion with AI terms.",
-                other_args=["--word_timestamps", "True"]
-            )
-            
+            output_dir = transcribe(url_or_file=str(self.test_wav), output_dir=tmpdir, model="tiny", initial_prompt="Technology discussion with AI terms.", other_args=["--word_timestamps", "True"])
+
             # Check that output files were created
             self.assertTrue(os.path.exists(output_dir))
             srt_file = os.path.join(output_dir, "out.srt")
@@ -62,12 +53,8 @@ class TestInitialPrompt(unittest.TestCase):
             self.skipTest(f"Test file {self.test_wav} not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_dir = transcribe(
-                url_or_file=str(self.test_wav),
-                output_dir=tmpdir,
-                model="tiny"
-            )
-            
+            output_dir = transcribe(url_or_file=str(self.test_wav), output_dir=tmpdir, model="tiny")
+
             # Check that output files were created
             self.assertTrue(os.path.exists(output_dir))
             srt_file = os.path.join(output_dir, "out.srt")

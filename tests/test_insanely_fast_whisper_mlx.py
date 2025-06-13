@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 
 from transcribe_anything.util import is_mac_arm
-from transcribe_anything.whisper_mac import run_whisper_mac_mlx, run_whisper_mac_english
+from transcribe_anything.whisper_mac import run_whisper_mac_english, run_whisper_mac_mlx
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 LOCALFILE_DIR = HERE / "localfile"
@@ -28,13 +28,7 @@ class MacOsWhisperMLXTester(unittest.TestCase):
     def test_local_file_english(self) -> None:
         """Check that the command works on a local file with English."""
         shutil.rmtree(TESTS_DATA_DIR, ignore_errors=True)
-        run_whisper_mac_mlx(
-            input_wav=TEST_WAV,
-            model="small",
-            output_dir=TESTS_DATA_DIR,
-            language="en",
-            task="transcribe"
-        )
+        run_whisper_mac_mlx(input_wav=TEST_WAV, model="small", output_dir=TESTS_DATA_DIR, language="en", task="transcribe")
 
         # Verify output files were created
         self.assertTrue((TESTS_DATA_DIR / "out.txt").exists())
@@ -49,14 +43,7 @@ class MacOsWhisperMLXTester(unittest.TestCase):
         shutil.rmtree(test_dir, ignore_errors=True)
 
         # This should work with initial_prompt support
-        run_whisper_mac_mlx(
-            input_wav=TEST_WAV,
-            model="small",
-            output_dir=test_dir,
-            language="en",
-            task="transcribe",
-            other_args=["--initial_prompt", "test vocabulary terms"]
-        )
+        run_whisper_mac_mlx(input_wav=TEST_WAV, model="small", output_dir=test_dir, language="en", task="transcribe", other_args=["--initial_prompt", "test vocabulary terms"])
 
         # Verify output files were created
         self.assertTrue((test_dir / "out.txt").exists())
@@ -88,13 +75,7 @@ class MacOsWhisperMLXTester(unittest.TestCase):
         shutil.rmtree(test_dir, ignore_errors=True)
 
         # Test with auto-detection (no language specified)
-        run_whisper_mac_mlx(
-            input_wav=TEST_WAV,
-            model="small",
-            output_dir=test_dir,
-            language=None,  # Auto-detect
-            task="transcribe"
-        )
+        run_whisper_mac_mlx(input_wav=TEST_WAV, model="small", output_dir=test_dir, language=None, task="transcribe")  # Auto-detect
 
         # Verify output files were created
         self.assertTrue((test_dir / "out.txt").exists())
