@@ -1,24 +1,29 @@
-#! /bin/bash
+#!/bin/bash
 
+# Python code quality and formatting automation script
+# Runs black, isort, ruff, and mypy on src and tests directories
 
 echo activating venv...
 . ./activate
 
+# Exit on any command failure
 set -e
 
 echo installing pip dependencies
 
-
+# Format code with black (first pass)
 echo running black...
 uv run black src tests --exclude 'src/transcribe_anything/venv'
 
+# Sort imports with isort
 echo running isort...
 uv run isort src tests
 
+# Format code with black again (ensures consistency after import sorting)
 echo re-running black now
-uv run black src tests  --exclude 'src/transcribe_anything/venv'
+uv run black src tests --exclude 'src/transcribe_anything/venv'
 
-# does --clean exist
+# Run ruff linter with auto-fix (unless --no-ruff flag is passed)
 if [[ $* == *--no-ruff* ]]; then
     echo skipping ruff...
 else
@@ -26,6 +31,6 @@ else
     uv run ruff check --fix src tests
 fi
 
-
+# Run mypy for static type checking
 echo running mypy...
 uv run mypy src tests --exclude 'src/transcribe_anything/venv'
