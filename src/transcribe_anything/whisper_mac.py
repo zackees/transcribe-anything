@@ -233,6 +233,7 @@ def run_whisper_mac_mlx(  # pylint: disable=too-many-arguments
     word_timestamps = parsed_args.get("word_timestamps", False)
     verbose = parsed_args.get("verbose", False)
     temperature = parsed_args.get("temperature", 0.0)
+    task_param = parsed_args.get("task", task)  # Use parsed task or fallback to function parameter
 
     # Get the environment and run transcription
     env = get_environment()
@@ -291,8 +292,12 @@ try:
         audio="{input_wav_abs}",
         path_or_hf_repo=str(model_dir),
         language={repr(parsed_args.get("language"))},
+        task={repr(task_param)},
         batch_size={batch_size},
-        initial_prompt={repr(initial_prompt)}
+        initial_prompt={repr(initial_prompt)},
+        word_timestamps={repr(word_timestamps)},
+        verbose={repr(verbose)},
+        temperature={repr(temperature)}
     )
 
     # Print the result as JSON

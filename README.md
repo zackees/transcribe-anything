@@ -15,7 +15,9 @@ Over 700+⭐'s because this program this app just works! Works great for windows
 
 ### New in 3.1!
 
-Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, and both transcribe/translate tasks. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
+Mac acceleration option using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend. Enable with `--device mlx`. Now supports multiple languages, custom vocabulary via `--initial_prompt`, both transcribe/translate tasks, and **batch processing** for improved throughput. 10x faster than Whisper CPP, 4x faster than previous MLX implementations!
+
+**Batch Processing:** MLX backend supports `--batch_size` parameter (default: 12) for improved throughput. Higher batch sizes provide better performance but require more memory.
 
 **Model Storage:** MLX models are now stored in `~/.cache/whisper/mlx_models/` for consistency with other backends, instead of cluttering your current working directory.
 
@@ -55,6 +57,8 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
 # Mac accelerated back-end
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
+# Mac accelerated with custom batch size for better throughput
+transcribe-anything video.mp4 --device mlx --batch_size 24
 # Use custom prompt for better recognition of specific terms
 transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
 # Load prompt from file
@@ -173,6 +177,27 @@ Windows/Linux:
 Mac:
 
 - Use `--device mlx`
+
+#### MLX Batch Processing
+
+The MLX backend supports batch processing for improved throughput on Apple Silicon:
+
+```bash
+# Default batch size (12)
+transcribe-anything video.mp4 --device mlx
+
+# Custom batch size for better performance
+transcribe-anything video.mp4 --device mlx --batch_size 24
+
+# Lower batch size for memory-constrained systems
+transcribe-anything video.mp4 --device mlx --batch_size 6
+```
+
+**Batch Size Guidelines:**
+- Default: 12 (good balance of speed and memory usage)
+- Higher values (16-24): Better throughput but require more unified memory
+- Lower values (4-8): Use if experiencing memory issues
+- The optimal batch size depends on your model size and available unified memory
 
 # Custom Prompts and Vocabulary
 

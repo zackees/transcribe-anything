@@ -101,6 +101,47 @@ class MacOsWhisperMLXTester(unittest.TestCase):
         self.assertTrue((test_dir / "out.srt").exists())
         self.assertTrue((test_dir / "out.json").exists())
 
+    @unittest.skipUnless(CAN_RUN_TEST, "Not mac")
+    def test_batch_size_functionality(self) -> None:
+        """Check that batch_size parameter works correctly."""
+        test_dir = LOCALFILE_DIR / "text_video_batch_size"
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+        # Test with custom batch_size
+        run_whisper_mac_mlx(
+            input_wav=TEST_WAV,
+            model="small",
+            output_dir=test_dir,
+            language="en",
+            task="transcribe",
+            other_args=["--batch_size", "6"]  # Custom batch size
+        )
+
+        # Verify output files were created
+        self.assertTrue((test_dir / "out.txt").exists())
+        self.assertTrue((test_dir / "out.srt").exists())
+        self.assertTrue((test_dir / "out.json").exists())
+        self.assertTrue((test_dir / "out.vtt").exists())
+
+    @unittest.skipUnless(CAN_RUN_TEST, "Not mac")
+    def test_batch_size_parsing(self) -> None:
+        """Check that batch_size argument parsing works correctly."""
+        from transcribe_anything.whisper_mac import _parse_other_args
+
+        # Test valid batch_size
+        result = _parse_other_args(["--batch_size", "24"])
+        self.assertEqual(result["batch_size"], 24)
+
+        # Test with other arguments
+        result = _parse_other_args(["--language", "en", "--batch_size", "8", "--verbose"])
+        self.assertEqual(result["batch_size"], 8)
+        self.assertEqual(result["language"], "en")
+        self.assertTrue(result["verbose"])
+
+        # Test invalid batch_size (should not crash, just use default)
+        result = _parse_other_args(["--batch_size", "invalid"])
+        self.assertNotIn("batch_size", result)  # Should be filtered out due to ValueError
+
 
 if __name__ == "__main__":
     unittest.main()
