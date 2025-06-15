@@ -207,7 +207,7 @@ Mac:
 | **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--temperature`, `--beam_size` | Windows/Linux GPU |
 | **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
 
-> **Note:** Any unrecognized arguments are automatically passed to the underlying whisper backend, so you can use most standard whisper options with any backend.
+> **Note:** The MLX backend has a focused feature set optimized for Apple Silicon. The Insanely Fast and CPU backends support more extensive whisper options that are passed through automatically.
 
 ## Custom Prompts and Vocabulary
 
@@ -260,9 +260,9 @@ transcribe(
 
 ## MLX Backend Arguments (--device mlx)
 
-The MLX backend supports additional arguments for fine-tuning performance and output:
+The MLX backend supports additional arguments for fine-tuning performance:
 
-### Performance Options
+### Available Options
 
 ```bash
 # Adjust batch size for better performance/memory trade-off
@@ -271,15 +271,8 @@ transcribe-anything video.mp4 --device mlx --batch_size 24
 # Enable verbose output for debugging
 transcribe-anything video.mp4 --device mlx --verbose
 
-# Set sampling temperature (experimental)
-transcribe-anything video.mp4 --device mlx --temperature 0.2
-```
-
-### Output Options
-
-```bash
-# Enable word-level timestamps (experimental)
-transcribe-anything video.mp4 --device mlx --word_timestamps
+# Use custom prompt for better recognition of specific terms
+transcribe-anything video.mp4 --device mlx --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
 ```
 
 ### MLX-Specific Arguments
@@ -288,9 +281,15 @@ transcribe-anything video.mp4 --device mlx --word_timestamps
 |----------|------|---------|-------------|
 | `--batch_size` | int | 12 | Batch size for processing. Higher values use more memory but may be faster |
 | `--verbose` | flag | false | Enable verbose output for debugging |
-| `--temperature` | float | 0.0 | Sampling temperature (experimental, currently unused) |
-| `--word_timestamps` | flag | false | Enable word-level timestamps (experimental, currently unused) |
-| `--initial_prompt` | string | None | Custom vocabulary/context prompt |
+| `--initial_prompt` | string | None | Custom vocabulary/context prompt for better recognition |
+
+### Supported Models
+
+The MLX backend supports these whisper models optimized for Apple Silicon:
+- `tiny`, `small`, `base`, `medium`, `large`, `large-v2`, `large-v3`
+- Distilled models: `distil-small.en`, `distil-medium.en`, `distil-large-v2`, `distil-large-v3`
+
+> **Note:** The MLX backend uses the lightning-whisper-mlx library which has a focused feature set optimized for Apple Silicon. Advanced whisper options like `--temperature` and `--word_timestamps` are not currently supported by this backend.
 
 ## Insanely Fast Whisper Arguments (--device insane)
 
@@ -400,8 +399,8 @@ transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
 # MLX with custom prompt for technical content
 transcribe-anything lecture.mp4 --device mlx --initial_prompt "The speaker discusses machine learning, neural networks, PyTorch, and TensorFlow."
 
-# MLX with multiple options
-transcribe-anything video.mp4 --device mlx --batch_size 20 --verbose --temperature 0.1 --task translate --language es
+# MLX with multiple options (using main arguments for language/task)
+transcribe-anything video.mp4 --device mlx --batch_size 20 --verbose --task translate --language es
 ```
 
 ### Insanely Fast Whisper (GPU)
