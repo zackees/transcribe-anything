@@ -69,18 +69,19 @@ The new version now has state of the art speed in transcriptions, thanks to the 
 
 ```bash
 pip install transcribe-anything
-# slow cpu mode, works everywhere
+
+# Basic usage - CPU mode (works everywhere, slower)
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
-# insanely fast using the insanely-fast-whisper backend.
+
+# GPU accelerated (Windows/Linux)
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
-# translate from any language to english
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane --task translate
-# Mac accelerated back-end
+
+# Mac Apple Silicon accelerated
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
-# Use custom prompt for better recognition of specific terms
-transcribe-anything video.mp4 --initial_prompt "The speaker discusses AI, machine learning, and neural networks."
-# Load prompt from file
-transcribe-anything video.mp4 --prompt_file my_custom_prompt.txt
+
+# Advanced options (see Advanced Options section below for full details)
+transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
+transcribe-anything video.mp4 --device insane --batch-size 8 --temperature 0.1
 ```
 
 _python api_
@@ -196,7 +197,19 @@ Mac:
 
 - Use `--device mlx`
 
-# Custom Prompts and Vocabulary
+# Advanced Options and Backend-Specific Arguments
+
+## Quick Reference
+
+| Backend | Device Flag | Key Arguments | Best For |
+|---------|-------------|---------------|----------|
+| **MLX** | `--device mlx` | `--batch_size`, `--verbose`, `--initial_prompt` | Mac Apple Silicon |
+| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--temperature`, `--beam_size` | Windows/Linux GPU |
+| **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
+
+> **Note:** Any unrecognized arguments are automatically passed to the underlying whisper backend, so you can use most standard whisper options with any backend.
+
+## Custom Prompts and Vocabulary
 
 Whisper supports custom prompts to improve transcription accuracy for domain-specific vocabulary, names, or technical terms. This is especially useful when transcribing content with:
 
@@ -205,9 +218,9 @@ Whisper supports custom prompts to improve transcription accuracy for domain-spe
 - Medical or scientific terms
 - Industry-specific jargon
 
-## Using Custom Prompts
+### Using Custom Prompts
 
-### Command Line
+#### Command Line
 
 ```bash
 # Direct prompt
@@ -217,7 +230,7 @@ transcribe-anything video.mp4 --initial_prompt "The speaker discusses artificial
 transcribe-anything video.mp4 --prompt_file my_custom_prompt.txt
 ```
 
-### Python API
+#### Python API
 
 ```python
 from transcribe_anything import transcribe
@@ -238,17 +251,231 @@ transcribe(
 )
 ```
 
-## Best Practices
+#### Best Practices
 
 - Keep prompts concise but comprehensive for your domain
 - Include variations of terms (e.g., "AI", "artificial intelligence")
 - Focus on terms that Whisper commonly misrecognizes
 - Test with and without prompts to measure improvement
 
-# Usage
+## MLX Backend Arguments (--device mlx)
+
+The MLX backend supports additional arguments for fine-tuning performance and output:
+
+### Performance Options
 
 ```bash
- transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+# Adjust batch size for better performance/memory trade-off
+transcribe-anything video.mp4 --device mlx --batch_size 24
+
+# Enable verbose output for debugging
+transcribe-anything video.mp4 --device mlx --verbose
+
+# Set sampling temperature (experimental)
+transcribe-anything video.mp4 --device mlx --temperature 0.2
+```
+
+### Output Options
+
+```bash
+# Enable word-level timestamps (experimental)
+transcribe-anything video.mp4 --device mlx --word_timestamps
+```
+
+### MLX-Specific Arguments
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `--batch_size` | int | 12 | Batch size for processing. Higher values use more memory but may be faster |
+| `--verbose` | flag | false | Enable verbose output for debugging |
+| `--temperature` | float | 0.0 | Sampling temperature (experimental, currently unused) |
+| `--word_timestamps` | flag | false | Enable word-level timestamps (experimental, currently unused) |
+| `--initial_prompt` | string | None | Custom vocabulary/context prompt |
+
+## Insanely Fast Whisper Arguments (--device insane)
+
+The insanely-fast-whisper backend supports extensive customization options:
+
+### Performance Options
+
+```bash
+# Adjust batch size (critical for GPU memory management)
+transcribe-anything video.mp4 --device insane --batch-size 8
+
+# Use different model variants
+transcribe-anything video.mp4 --device insane --model large-v3
+
+# Enable speaker diarization with HuggingFace token
+transcribe-anything video.mp4 --device insane --hf_token your_token_here
+```
+
+### Advanced Whisper Options
+
+All standard Whisper arguments can be passed through to the insanely-fast-whisper backend:
+
+```bash
+# Sampling and generation parameters
+transcribe-anything video.mp4 --device insane --temperature 0.1 --best_of 5 --beam_size 5
+
+# Quality thresholds
+transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.4 --logprob_threshold -1.0
+
+# Timestamp options
+transcribe-anything video.mp4 --device insane --word_timestamps --prepend_punctuations "\"'"¿([{-" --append_punctuations "\"'.。,，!！?？:：")]}、"
+
+# Processing options
+transcribe-anything video.mp4 --device insane --condition_on_previous_text False --fp16 True
+```
+
+### Insanely Fast Whisper Arguments
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `--batch-size` | int | auto | Batch size for processing. Critical for GPU memory management |
+| `--temperature` | float | 0.0 | Sampling temperature for generation |
+| `--best_of` | int | 5 | Number of candidates to consider |
+| `--beam_size` | int | 5 | Beam size for beam search |
+| `--patience` | float | 1.0 | Patience for beam search |
+| `--length_penalty` | float | 1.0 | Length penalty for beam search |
+| `--compression_ratio_threshold` | float | 2.4 | Compression ratio threshold for quality filtering |
+| `--logprob_threshold` | float | -1.0 | Log probability threshold for quality filtering |
+| `--no_speech_threshold` | float | 0.6 | Threshold for detecting silence |
+| `--word_timestamps` | flag | false | Enable word-level timestamps |
+| `--condition_on_previous_text` | bool | true | Use previous text as context |
+| `--fp16` | bool | true | Use 16-bit floating point precision |
+
+## General Whisper Arguments
+
+Many standard Whisper arguments work across all backends and are passed through automatically:
+
+### Common Options
+
+```bash
+# Language and task options (also available as main arguments)
+transcribe-anything video.mp4 --language es --task translate
+
+# Output formatting
+transcribe-anything video.mp4 --highlight_words True --max_line_width 80 --max_line_count 2
+
+# Audio processing
+transcribe-anything video.mp4 --threads 4 --clip_timestamps "0,30"
+```
+
+### Batch Size Recommendations
+
+**MLX Backend (`--device mlx`):**
+- Default: 12
+- Recommended range: 8-24
+- Higher values for more VRAM, lower for less
+
+**Insanely Fast Whisper (`--device insane`):**
+- Default: auto-detected based on GPU
+- Recommended for 12GB GPU: 8
+- Recommended for 24GB GPU: 16-24
+- Start low and increase if no OOM errors
+
+# Usage Examples
+
+## Basic Usage
+
+```bash
+# Basic transcription
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+# Local file
+transcribe-anything video.mp4
+```
+
+## Backend-Specific Examples
+
+### MLX Backend (Mac Apple Silicon)
+
+```bash
+# Basic MLX usage
+transcribe-anything video.mp4 --device mlx
+
+# MLX with custom batch size and verbose output
+transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
+
+# MLX with custom prompt for technical content
+transcribe-anything lecture.mp4 --device mlx --initial_prompt "The speaker discusses machine learning, neural networks, PyTorch, and TensorFlow."
+
+# MLX with multiple options
+transcribe-anything video.mp4 --device mlx --batch_size 20 --verbose --temperature 0.1 --task translate --language es
+```
+
+### Insanely Fast Whisper (GPU)
+
+```bash
+# Basic insane mode
+transcribe-anything video.mp4 --device insane
+
+# Insane mode with custom batch size (important for GPU memory)
+transcribe-anything video.mp4 --device insane --batch-size 8
+
+# Insane mode with speaker diarization
+transcribe-anything video.mp4 --device insane --hf_token your_huggingface_token
+
+# Insane mode with advanced options
+transcribe-anything video.mp4 --device insane --batch-size 12 --temperature 0.1 --beam_size 5 --word_timestamps
+
+# High-quality transcription with strict thresholds
+transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.0 --logprob_threshold -0.5 --no_speech_threshold 0.8
+```
+
+### CPU Backend (Universal)
+
+```bash
+# CPU mode (works everywhere, slower)
+transcribe-anything video.mp4 --device cpu
+
+# CPU with custom model and language
+transcribe-anything video.mp4 --device cpu --model medium --language fr --task transcribe
+```
+
+## Troubleshooting Common Issues
+
+### Out of Memory Errors
+
+If you encounter GPU out-of-memory errors:
+
+```bash
+# Reduce batch size for MLX
+transcribe-anything video.mp4 --device mlx --batch_size 8
+
+# Reduce batch size for insane mode
+transcribe-anything video.mp4 --device insane --batch-size 4
+
+# Use smaller model
+transcribe-anything video.mp4 --device insane --model small --batch-size 8
+```
+
+### Poor Quality Transcriptions
+
+For better quality:
+
+```bash
+# Use larger model
+transcribe-anything video.mp4 --device insane --model large-v3
+
+# Adjust quality thresholds
+transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.0 --logprob_threshold -0.5
+
+# Use custom prompt for domain-specific content
+transcribe-anything video.mp4 --initial_prompt "Medical terminology: diagnosis, treatment, symptoms, patient care"
+```
+
+### Performance Optimization
+
+For faster processing:
+
+```bash
+# Increase batch size (if you have enough GPU memory)
+transcribe-anything video.mp4 --device mlx --batch_size 24
+transcribe-anything video.mp4 --device insane --batch-size 16
+
+# Use smaller model for speed
+transcribe-anything video.mp4 --device insane --model small
 ```
 
 Will output:
