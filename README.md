@@ -81,7 +81,7 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
 
 # Advanced options (see Advanced Options section below for full details)
 transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
-transcribe-anything video.mp4 --device insane --batch-size 8 --temperature 0.1
+transcribe-anything video.mp4 --device insane --batch-size 8 --flash True
 ```
 
 _python api_
@@ -204,10 +204,10 @@ Mac:
 | Backend | Device Flag | Key Arguments | Best For |
 |---------|-------------|---------------|----------|
 | **MLX** | `--device mlx` | `--batch_size`, `--verbose`, `--initial_prompt` | Mac Apple Silicon |
-| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--temperature`, `--beam_size` | Windows/Linux GPU |
+| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--flash`, `--timestamp` | Windows/Linux GPU |
 | **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
 
-> **Note:** The MLX backend has a focused feature set optimized for Apple Silicon. The Insanely Fast and CPU backends support more extensive whisper options that are passed through automatically.
+> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. CPU backend supports the full range of standard OpenAI Whisper arguments.
 
 ## Custom Prompts and Vocabulary
 
@@ -293,7 +293,7 @@ The MLX backend supports these whisper models optimized for Apple Silicon:
 
 ## Insanely Fast Whisper Arguments (--device insane)
 
-The insanely-fast-whisper backend supports extensive customization options:
+The insanely-fast-whisper backend supports these specific options:
 
 ### Performance Options
 
@@ -304,61 +304,70 @@ transcribe-anything video.mp4 --device insane --batch-size 8
 # Use different model variants
 transcribe-anything video.mp4 --device insane --model large-v3
 
-# Enable speaker diarization with HuggingFace token
-transcribe-anything video.mp4 --device insane --hf_token your_token_here
+# Enable Flash Attention 2 for faster processing
+transcribe-anything video.mp4 --device insane --flash True
 ```
 
-### Advanced Whisper Options
-
-All standard Whisper arguments can be passed through to the insanely-fast-whisper backend:
+### Speaker Diarization Options
 
 ```bash
-# Sampling and generation parameters
-transcribe-anything video.mp4 --device insane --temperature 0.1 --best_of 5 --beam_size 5
+# Enable speaker diarization with HuggingFace token
+transcribe-anything video.mp4 --device insane --hf_token your_token_here
 
-# Quality thresholds
-transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.4 --logprob_threshold -1.0
+# Specify exact number of speakers
+transcribe-anything video.mp4 --device insane --hf_token your_token --num-speakers 3
 
-# Timestamp options
-transcribe-anything video.mp4 --device insane --word_timestamps --prepend_punctuations "\"'"¿([{-" --append_punctuations "\"'.。,，!！?？:：")]}、"
+# Set speaker range
+transcribe-anything video.mp4 --device insane --hf_token your_token --min-speakers 2 --max-speakers 5
+```
 
-# Processing options
-transcribe-anything video.mp4 --device insane --condition_on_previous_text False --fp16 True
+### Timestamp Options
+
+```bash
+# Choose timestamp granularity
+transcribe-anything video.mp4 --device insane --timestamp chunk  # default
+transcribe-anything video.mp4 --device insane --timestamp word   # word-level
 ```
 
 ### Insanely Fast Whisper Arguments
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `--batch-size` | int | auto | Batch size for processing. Critical for GPU memory management |
-| `--temperature` | float | 0.0 | Sampling temperature for generation |
-| `--best_of` | int | 5 | Number of candidates to consider |
-| `--beam_size` | int | 5 | Beam size for beam search |
-| `--patience` | float | 1.0 | Patience for beam search |
-| `--length_penalty` | float | 1.0 | Length penalty for beam search |
-| `--compression_ratio_threshold` | float | 2.4 | Compression ratio threshold for quality filtering |
-| `--logprob_threshold` | float | -1.0 | Log probability threshold for quality filtering |
-| `--no_speech_threshold` | float | 0.6 | Threshold for detecting silence |
-| `--word_timestamps` | flag | false | Enable word-level timestamps |
-| `--condition_on_previous_text` | bool | true | Use previous text as context |
-| `--fp16` | bool | true | Use 16-bit floating point precision |
+| `--batch-size` | int | 24 | Batch size for processing. Critical for GPU memory management |
+| `--flash` | bool | false | Use Flash Attention 2 for faster processing |
+| `--timestamp` | choice | chunk | Timestamp granularity: "chunk" or "word" |
+| `--hf_token` | string | None | HuggingFace token for speaker diarization |
+| `--num-speakers` | int | None | Exact number of speakers (cannot use with min/max) |
+| `--min-speakers` | int | None | Minimum number of speakers |
+| `--max-speakers` | int | None | Maximum number of speakers |
+| `--diarization_model` | string | pyannote/speaker-diarization | Diarization model to use |
 
-## General Whisper Arguments
+> **Note:** The insanely-fast-whisper backend uses a different architecture than standard OpenAI Whisper. It does NOT support standard whisper arguments like `--temperature`, `--beam_size`, `--best_of`, etc. These are specific to the OpenAI implementation.
 
-Many standard Whisper arguments work across all backends and are passed through automatically:
+## CPU Backend Arguments (--device cpu)
 
-### Common Options
+The CPU backend uses the standard OpenAI Whisper implementation and supports many additional arguments:
+
+### Standard Whisper Options
 
 ```bash
 # Language and task options (also available as main arguments)
-transcribe-anything video.mp4 --language es --task translate
+transcribe-anything video.mp4 --device cpu --language es --task translate
+
+# Generation parameters
+transcribe-anything video.mp4 --device cpu --temperature 0.1 --best_of 5 --beam_size 5
+
+# Quality thresholds
+transcribe-anything video.mp4 --device cpu --compression_ratio_threshold 2.4 --logprob_threshold -1.0
 
 # Output formatting
-transcribe-anything video.mp4 --highlight_words True --max_line_width 80 --max_line_count 2
+transcribe-anything video.mp4 --device cpu --word_timestamps --highlight_words True
 
 # Audio processing
-transcribe-anything video.mp4 --threads 4 --clip_timestamps "0,30"
+transcribe-anything video.mp4 --device cpu --threads 4 --clip_timestamps "0,30"
 ```
+
+> **Note:** The CPU backend supports most standard OpenAI Whisper arguments. These are passed through automatically and documented in the [OpenAI Whisper repository](https://github.com/openai/whisper).
 
 ### Batch Size Recommendations
 
@@ -368,9 +377,11 @@ transcribe-anything video.mp4 --threads 4 --clip_timestamps "0,30"
 - Higher values for more VRAM, lower for less
 
 **Insanely Fast Whisper (`--device insane`):**
-- Default: auto-detected based on GPU
-- Recommended for 12GB GPU: 8
+- Default: 24
+- Recommended for 8GB GPU: 4-8
+- Recommended for 12GB GPU: 8-12
 - Recommended for 24GB GPU: 16-24
+- Use `--flash True` for better memory efficiency
 - Start low and increase if no OOM errors
 
 # Usage Examples
@@ -412,14 +423,17 @@ transcribe-anything video.mp4 --device insane
 # Insane mode with custom batch size (important for GPU memory)
 transcribe-anything video.mp4 --device insane --batch-size 8
 
+# Insane mode with Flash Attention 2 for speed
+transcribe-anything video.mp4 --device insane --batch-size 12 --flash True
+
 # Insane mode with speaker diarization
 transcribe-anything video.mp4 --device insane --hf_token your_huggingface_token
 
-# Insane mode with advanced options
-transcribe-anything video.mp4 --device insane --batch-size 12 --temperature 0.1 --beam_size 5 --word_timestamps
+# Insane mode with word-level timestamps and speaker diarization
+transcribe-anything video.mp4 --device insane --timestamp word --hf_token your_token --num-speakers 3
 
-# High-quality transcription with strict thresholds
-transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.0 --logprob_threshold -0.5 --no_speech_threshold 0.8
+# High-performance setup with all optimizations
+transcribe-anything video.mp4 --device insane --batch-size 16 --flash True --timestamp word
 ```
 
 ### CPU Backend (Universal)
@@ -457,11 +471,14 @@ For better quality:
 # Use larger model
 transcribe-anything video.mp4 --device insane --model large-v3
 
-# Adjust quality thresholds
-transcribe-anything video.mp4 --device insane --compression_ratio_threshold 2.0 --logprob_threshold -0.5
+# Enable Flash Attention 2 for better performance
+transcribe-anything video.mp4 --device insane --flash True
 
-# Use custom prompt for domain-specific content
+# Use custom prompt for domain-specific content (works with all backends)
 transcribe-anything video.mp4 --initial_prompt "Medical terminology: diagnosis, treatment, symptoms, patient care"
+
+# For CPU backend, you can use standard whisper quality options
+transcribe-anything video.mp4 --device cpu --compression_ratio_threshold 2.0 --logprob_threshold -0.5
 ```
 
 ### Performance Optimization
@@ -473,8 +490,14 @@ For faster processing:
 transcribe-anything video.mp4 --device mlx --batch_size 24
 transcribe-anything video.mp4 --device insane --batch-size 16
 
+# Enable Flash Attention 2 for insane mode (significant speedup)
+transcribe-anything video.mp4 --device insane --flash True --batch-size 16
+
 # Use smaller model for speed
 transcribe-anything video.mp4 --device insane --model small
+
+# Use distilled models for even faster processing
+transcribe-anything video.mp4 --device insane --model distil-whisper/large-v2 --flash True
 ```
 
 Will output:
