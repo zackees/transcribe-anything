@@ -1,11 +1,14 @@
 services:
   transcribe:
     build: .
-    # Enable GPU access
+    
+    # Enable GPU access for CUDA acceleration
     deploy:
       resources:
         reservations:
           devices:
             - capabilities: [gpu]
+    
+    # Expose container port 80 on host port 8092
     ports:
       - "8092:80"

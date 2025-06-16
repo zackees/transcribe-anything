@@ -1,25 +1,36 @@
 #!/bin/bash
+
+#==============================================================================
+# UV Environment Setup for transcribe-anything
+# Creates Python 3.11 venv, installs dependencies, creates activation symlinks
+#==============================================================================
+
+# Enable error handling and command tracing
 set -e
 set -x
+
+# Create virtual environment and install dependencies
 uv venv --python 3.11
 uv pip install -r requirements.testing.txt
 uv pip install -e . --refresh-package uv-iso-env
-# This is needed to force the installation to finalize.
+
+# Finalize installation
 uv run python -c "import os; _ = os.getcwd()"
 set +e
 
-# if ./activate exists, remove it
+# Remove existing activation symlink
 if [ -f activate ]; then
     rm activate
 fi
-# symlink activate to .venv/bin/activate on linux/mac and .venv/Scripts/activate on windows
+
+# Create platform-specific activation symlink
 if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
     ln -s .venv/bin/activate activate
 else
     ln -s .venv/Scripts/activate activate
 fi
 
-# if on windows symlink .venv/bin -> .venv/Scripts
+# Windows compatibility: link bin -> Scripts
 if [[ "$OSTYPE" == "msys" ]]; then
     if [ -d .venv/bin ]; then
         rm -rf .venv/Scripts
