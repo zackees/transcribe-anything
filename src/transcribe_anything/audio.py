@@ -26,7 +26,7 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
             "-filter:a",
             "speechnorm=e=12.5:r=0.00001:l=1",
         ]
-    cmd_list += ["-acodec", "pcm_s16le", "-ar", "44100", "-ac", "1", str(tmpwavepath)]
+    cmd_list += ["-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", str(tmpwavepath)]
     cmd = subprocess.list2cmdline(cmd_list)
     print(f"Running:\n  {cmd}")
     try:
@@ -76,7 +76,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                 "-acodec",
                 "pcm_s16le",
                 "-ar",
-                "44100",
+                "16000",
                 "-ac",
                 "1",
                 "out.wav",
