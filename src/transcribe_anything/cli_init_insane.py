@@ -4,6 +4,7 @@ Main entry point.
 
 import logging
 import os
+import sys
 
 from transcribe_anything.insanley_fast_whisper_reqs import get_environment
 
@@ -23,7 +24,10 @@ def main() -> int:
     # locate the bundled sample.mp3
     print("Installing transcribe_anything (device insane) environment...")
     env = get_environment(has_nvidia=True)
-    env.run(["pwd"])
+    if sys.platform == "win32":
+        env.run(["python", "-c", "import os; print(os.getcwd())"])
+    else:
+        env.run([cwd])
     print("Installing static ffmpeg...")
     os.system("static_ffmpeg -version")
     return 0
