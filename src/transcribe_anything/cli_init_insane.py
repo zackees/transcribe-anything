@@ -27,7 +27,7 @@ def main() -> int:
     if sys.platform == "win32":
         env.run(["python", "-c", "import os; print(os.getcwd())"])
     else:
-        env.run([cwd])
+        env.run(["pwd"])
     print("Installing static ffmpeg...")
     os.system("static_ffmpeg -version")
     return 0
