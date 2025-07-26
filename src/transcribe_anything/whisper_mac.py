@@ -68,6 +68,12 @@ def _format_timestamp(seconds: float) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
 
+# Constants for timestamp conversion
+# Based on Whisper's audio processing: SAMPLE_RATE=16000, HOP_LENGTH=160
+# Each mel frame represents HOP_LENGTH/SAMPLE_RATE = 160/16000 = 0.01 seconds
+FRAME_HOP_SECONDS = 0.01
+
+
 def _json_to_srt(json_data: Dict[str, Any]) -> str:
     """Convert lightning-whisper-mlx JSON output to SRT format."""
     srt_content = ""
@@ -82,11 +88,17 @@ def _json_to_srt(json_data: Dict[str, Any]) -> str:
         # Handle both old format (start/end) and new format (list with start, end, text)
         if isinstance(segment, list) and len(segment) >= 3:
             # New format: [start_seek, end_seek, text]
-            start_time = segment[0] * 0.02  # Convert seek to seconds (assuming 50fps)
-            end_time = segment[1] * 0.02
+            # Convert mel frame indices to seconds using correct conversion factor
+            start_time = segment[0] * FRAME_HOP_SECONDS
+            end_time = segment[1] * FRAME_HOP_SECONDS
             text = segment[2].strip()
+
+            # Sanity check for timestamp ordering
+            if end_time < start_time:
+                sys.stderr.write(f"Warning: segment {i} end time {end_time} < start time {start_time}, skipping\n")
+                continue
         else:
-            # Old format: dict with start/end/text
+            # Old format: dict with start/end/text (already in seconds)
             start_time = segment.get("start", 0)
             end_time = segment.get("end", start_time + 5)  # Default to 5 seconds if no end time
             text = segment.get("text", "").strip()
