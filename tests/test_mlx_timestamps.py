@@ -13,9 +13,9 @@ conversion factor is now used for MLX list-format segments.
 
 Issue Reference: #1 (MLX Mode Timestamp Accuracy)
 """
+
 from __future__ import annotations
 
-import json
 import re
 import shutil
 import sys
@@ -24,8 +24,8 @@ from pathlib import Path
 
 import pytest
 
-from transcribe_anything.whisper_mac import _json_to_srt, run_whisper_mac_mlx
 from transcribe_anything.util import is_mac_arm
+from transcribe_anything.whisper_mac import _json_to_srt, run_whisper_mac_mlx
 
 HERE = Path(__file__).parent
 LOCALFILE_DIR = HERE / "localfile"
@@ -85,7 +85,7 @@ def test_bug_demonstration_old_vs_new_factor() -> None:
     # that should span the full duration when converted correctly
     json_data = {
         "segments": [
-            [0, 500, "First half"],      # 0-5 seconds with 0.01 factor
+            [0, 500, "First half"],  # 0-5 seconds with 0.01 factor
             [500, 1000, "Second half"],  # 5-10 seconds with 0.01 factor
         ],
         "text": "First half Second half",
@@ -199,21 +199,14 @@ def test_integration_mlx_vs_reference_srt() -> None:
     time_diff = abs(mlx_end_secs - ref_end_secs)
     tolerance = 2.0  # Allow 2 second difference (different models may segment differently)
 
-    assert time_diff <= tolerance, (
-        f"MLX end time differs too much from reference: "
-        f"MLX={mlx_end_secs:.3f}s, Reference={ref_end_secs:.3f}s, "
-        f"Diff={time_diff:.3f}s (tolerance={tolerance}s)"
-    )
+    assert time_diff <= tolerance, f"MLX end time differs too much from reference: " f"MLX={mlx_end_secs:.3f}s, Reference={ref_end_secs:.3f}s, " f"Diff={time_diff:.3f}s (tolerance={tolerance}s)"
 
     # Additional check: MLX end time should be reasonable relative to audio duration
     with wave.open(str(TEST_WAV), "rb") as w:
         wav_duration = w.getnframes() / w.getframerate()
 
     mlx_ratio = mlx_end_secs / wav_duration
-    assert 0.7 <= mlx_ratio <= 1.1, (
-        f"MLX end time ratio unreasonable: {mlx_ratio:.3f} "
-        f"(MLX={mlx_end_secs:.3f}s, WAV={wav_duration:.3f}s)"
-    )
+    assert 0.7 <= mlx_ratio <= 1.1, f"MLX end time ratio unreasonable: {mlx_ratio:.3f} " f"(MLX={mlx_end_secs:.3f}s, WAV={wav_duration:.3f}s)"
 
 
 def test_reference_srt_structure_validation() -> None:
@@ -250,4 +243,3 @@ if __name__ == "__main__":  # pragma: no cover
     import pytest as _pytest
 
     sys.exit(_pytest.main([__file__, "-vv"]))
-
