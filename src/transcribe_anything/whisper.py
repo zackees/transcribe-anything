@@ -49,8 +49,15 @@ def get_environment() -> IsoEnv:
         content_lines.append(f'  "torch=={TENSOR_VERSION}+{CUDA_VERSION}",')
     content_lines.append("]")
 
+    # Constrain setuptools < 82 for build isolation because
+    # openai-whisper imports pkg_resources which was removed in setuptools 82.
+    content_lines.append("")
+    content_lines.append("[tool.uv]")
+    content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
+
     needs_extra_index = not IS_MAC and has_nvidia_smi()
     if needs_extra_index:
+        content_lines.append("")
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
         content_lines.append("  { index = 'pytorch-cu121' },")
@@ -60,12 +67,6 @@ def get_environment() -> IsoEnv:
         content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
         content_lines.append("explicit = true")
 
-    # if not IS_MAC and has_nvidia_smi():
-    #     deps.append(
-    #         f"torch=={TENSOR_VERSION}+{CUDA_VERSION} --extra-index-url {EXTRA_INDEX_URL}"
-    #     )
-    # else:
-    #     deps.append(f"torch=={TENSOR_VERSION}")
     content = "\n".join(content_lines)
 
     # Debug: Log the pyproject.toml content hash to track changes
