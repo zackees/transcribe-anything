@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -42,18 +43,17 @@ WHISPER_MODEL_OPTIONS = [
 
 
 def get_whisper_options() -> dict:
-    """Get whisper options.""" ""
-    if WHISPER_OPTIONS.exists():
+    """Get whisper options."""
+    if not WHISPER_OPTIONS.exists():
         whisper_options = parse_whisper_options()
-        string = json.dumps(whisper_options, indent=4)
-        WHISPER_OPTIONS.write_text(string)
+        WHISPER_OPTIONS.write_text(json.dumps(whisper_options, indent=4))
         return whisper_options
-    file_age = os.path.getmtime(WHISPER_OPTIONS)
+    file_age = time.time() - os.path.getmtime(WHISPER_OPTIONS)
     if file_age > 60 * 60 * 24 * 7:  # 1 week
         whisper_options = parse_whisper_options()
-        string = json.dumps(whisper_options, indent=4)
-        WHISPER_OPTIONS.write_text(string)
-    return whisper_options
+        WHISPER_OPTIONS.write_text(json.dumps(whisper_options, indent=4))
+        return whisper_options
+    return json.loads(WHISPER_OPTIONS.read_text())
 
 
 def parse_arguments() -> argparse.Namespace:
