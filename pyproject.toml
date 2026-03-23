@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 keywords = ["transcribe", "openai", "whisper"]
 license = { text = "BSD-3-Clause" }
 dependencies = [
-    "static-ffmpeg>=2.7",
+    "static-ffmpeg>=3.0",
     "yt-dlp>=2025.1.15",
     "appdirs>=1.4.4",
     "disklru>=1.0.7",
