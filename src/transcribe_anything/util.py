@@ -7,9 +7,12 @@ import os
 import platform
 import re
 import shutil
+import subprocess
 import sys
+from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
+from typing import Optional
 from urllib.parse import unquote
 
 PROCESS_TIMEOUT = 4 * 60 * 60
@@ -141,3 +144,105 @@ def clear_nvidia_cache() -> None:
             print("NVIDIA detection cache cleared.", file=sys.stderr)
     except OSError as e:
         print(f"Warning: Failed to clear NVIDIA cache: {e}", file=sys.stderr)
+
+
+@dataclass
+class NvidiaDriverInfo:
+    """Information parsed from nvidia-smi output."""
+
+    driver_version: str
+    cuda_version: str  # Max CUDA version supported by the driver
+
+
+_NVIDIA_DRIVER_INFO_CACHE: Optional[NvidiaDriverInfo] = None
+_NVIDIA_DRIVER_INFO_CHECKED: bool = False
+
+
+def get_nvidia_driver_info() -> Optional[NvidiaDriverInfo]:
+    """
+    Parse nvidia-smi output to get driver version and supported CUDA version.
+    Returns None if nvidia-smi is not available or output cannot be parsed.
+    Results are cached in memory.
+    """
+    global _NVIDIA_DRIVER_INFO_CACHE, _NVIDIA_DRIVER_INFO_CHECKED
+    if _NVIDIA_DRIVER_INFO_CHECKED:
+        return _NVIDIA_DRIVER_INFO_CACHE
+
+    _NVIDIA_DRIVER_INFO_CHECKED = True
+
+    if shutil.which("nvidia-smi") is None:
+        return None
+
+    try:
+        result = subprocess.run(
+            ["nvidia-smi"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return None
+
+        output = result.stdout
+
+        # Parse driver version: "Driver Version: 560.35.03"
+        driver_match = re.search(r"Driver Version:\s+([\d.]+)", output)
+        # Parse CUDA version: "CUDA Version: 13.0"
+        cuda_match = re.search(r"CUDA Version:\s+([\d.]+)", output)
+
+        if driver_match and cuda_match:
+            _NVIDIA_DRIVER_INFO_CACHE = NvidiaDriverInfo(
+                driver_version=driver_match.group(1),
+                cuda_version=cuda_match.group(1),
+            )
+            return _NVIDIA_DRIVER_INFO_CACHE
+    except (subprocess.TimeoutExpired, OSError, ValueError):
+        pass
+
+    return None
+
+
+def print_cuda_diagnostics(expected_cuda: str = "12.6") -> None:
+    """Print CUDA diagnostic information to stderr for troubleshooting."""
+    info = get_nvidia_driver_info()
+    if info is None:
+        print(
+            "CUDA Diagnostics: Could not query nvidia-smi. "
+            "Ensure NVIDIA drivers are installed and nvidia-smi is on PATH.",
+            file=sys.stderr,
+        )
+        return
+
+    print(f"CUDA Diagnostics:", file=sys.stderr)
+    print(f"  NVIDIA Driver Version: {info.driver_version}", file=sys.stderr)
+    print(f"  Driver CUDA Version:   {info.cuda_version} (max supported by driver)", file=sys.stderr)
+    print(f"  PyTorch CUDA Version:  {expected_cuda} (bundled with PyTorch wheels)", file=sys.stderr)
+
+    driver_major = int(info.cuda_version.split(".")[0])
+    expected_major = int(expected_cuda.split(".")[0])
+
+    if driver_major > expected_major:
+        print(
+            f"  NOTE: Your driver supports CUDA {info.cuda_version} but PyTorch uses CUDA {expected_cuda} wheels.",
+            file=sys.stderr,
+        )
+        print(
+            "  This should be backward-compatible, but if system CUDA libraries are on",
+            file=sys.stderr,
+        )
+        print(
+            "  LD_LIBRARY_PATH they may override PyTorch's bundled libraries and cause errors.",
+            file=sys.stderr,
+        )
+        print(
+            "  Try: unset LD_LIBRARY_PATH (or remove CUDA paths from it) and retry.",
+            file=sys.stderr,
+        )
+    elif driver_major < expected_major:
+        print(
+            f"  ERROR: Driver CUDA {info.cuda_version} is older than PyTorch's CUDA {expected_cuda}.",
+            file=sys.stderr,
+        )
+        print("  Update your NVIDIA driver to one that supports CUDA 12.6+.", file=sys.stderr)
+
+    print("  If hardware changed recently, try: transcribe-anything --clear-nvidia-cache", file=sys.stderr)

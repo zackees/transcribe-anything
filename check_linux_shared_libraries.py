@@ -1,5 +1,5 @@
-
 import ctypes
+import sys
 
 libraries = [
     "libcudnn.so.9",
@@ -12,7 +12,6 @@ libraries = [
     "libnccl.so.2",
 ]
 
-# ctypes.CDLL('libcudnn.so.9')
 errors: list[str] = []
 for lib in libraries:
     try:
@@ -21,15 +20,12 @@ for lib in libraries:
     except OSError as e:
         print(f"Failed to load {lib}: {e}")
         errors.append(lib)
-        # exit(1)
 
 if errors:
-    print(f"Errors: {errors}")
-    while True:
-        import time
-        print("Container is suspended but running, please log in and check the errors.")
-        time.sleep(20)
-    exit(1)
+    print(f"Missing CUDA shared libraries: {errors}")
+    print("Ensure nvidia-container-toolkit is installed on the host")
+    print("and run with: docker run --gpus all ...")
+    sys.exit(1)
 else:
     print("All libraries loaded successfully.")
-    exit(0)
+    sys.exit(0)

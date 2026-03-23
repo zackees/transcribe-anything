@@ -7,7 +7,9 @@ This is meant to be run under a "isolated-environment".
 
 import argparse
 import json
+import re
 import shutil
+import subprocess
 import sys
 import traceback
 import warnings
@@ -74,6 +76,42 @@ class CudaInfo:
         return self.to_json_str()
 
 
+def _print_cuda_diagnostics() -> None:
+    """Print CUDA diagnostic info by parsing nvidia-smi output."""
+    try:
+        result = subprocess.run(
+            ["nvidia-smi"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return
+        output = result.stdout
+        driver_match = re.search(r"Driver Version:\s+([\d.]+)", output)
+        cuda_match = re.search(r"CUDA Version:\s+([\d.]+)", output)
+        if driver_match and cuda_match:
+            driver_ver = driver_match.group(1)
+            cuda_ver = cuda_match.group(1)
+            sys.stderr.write(f"  NVIDIA Driver Version: {driver_ver}\n")
+            sys.stderr.write(f"  Driver CUDA Version:   {cuda_ver} (max supported by driver)\n")
+            sys.stderr.write(f"  PyTorch CUDA Version:  12.6 (bundled with PyTorch wheels)\n")
+            cuda_major = int(cuda_ver.split(".")[0])
+            if cuda_major > 12:
+                sys.stderr.write(
+                    f"  NOTE: Driver supports CUDA {cuda_ver} but PyTorch uses CUDA 12.6 wheels.\n"
+                    "  This should be backward-compatible. If system CUDA libs are on LD_LIBRARY_PATH,\n"
+                    "  they may override PyTorch's bundled libraries. Try: unset LD_LIBRARY_PATH\n"
+                )
+            elif cuda_major < 12:
+                sys.stderr.write(
+                    f"  ERROR: Driver CUDA {cuda_ver} is too old. Update NVIDIA drivers to support CUDA 12.6+.\n"
+                )
+            sys.stderr.write("  Try: transcribe-anything --clear-nvidia-cache (if hardware changed)\n")
+    except (subprocess.TimeoutExpired, OSError, ValueError):
+        pass
+
+
 def cuda_cards_available() -> CudaInfo:
     """
     Returns a CudaInfo object with information about the CUDA cards,
@@ -96,8 +134,8 @@ def cuda_cards_available() -> CudaInfo:
         try:
             count = torch.cuda.device_count()
         except Exception as e:
-            # print(f"Error getting device count: {e}")
             sys.stderr.write(f"Error getting device count: {e}\n")
+            _print_cuda_diagnostics()
             return CudaInfo(False, 0, [])
         for i in range(count):
             try:
@@ -111,11 +149,14 @@ def cuda_cards_available() -> CudaInfo:
                     )
                 )
             except Exception as e:
-                # print(f"Error getting device {i}: {e}")
                 sys.stderr.write(f"Error getting device {i}: {e}\n")
         # Sort devices by VRAM and then by number of multiprocessors in descending order
         devices.sort(key=lambda x: (x.vram, x.multiprocessors), reverse=True)
         return CudaInfo(True, len(devices), devices)
+
+    # nvidia-smi exists but torch.cuda is not available — print diagnostics
+    sys.stderr.write("WARNING: nvidia-smi found but torch.cuda.is_available() returned False\n")
+    _print_cuda_diagnostics()
     return CudaInfo(False, 0, [])
 
 
