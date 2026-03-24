@@ -14,7 +14,7 @@ def ytdlp_download(url: str, outdir: str) -> str:
     # remove all files in the directory
     for file in os.listdir(outdir):
         os.remove(os.path.join(outdir, file))
-    cmd = f'yt-dlp --no-check-certificate {url} -o "out.%(ext)s"'
+    cmd = f'yt-dlp --no-check-certificate -x {url} -o "out.%(ext)s"'
     print(f"Running:\n  {cmd}")
     subprocess.run(
         cmd,
