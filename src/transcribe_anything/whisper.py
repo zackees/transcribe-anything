@@ -19,8 +19,8 @@ HERE = Path(__file__).parent
 CUDA_AVAILABLE: Optional[bool] = None
 
 # Set the versions
-TENSOR_VERSION = "2.2.1"
-CUDA_VERSION = "cu121"
+TENSOR_VERSION = "2.7.0"
+CUDA_VERSION = "cu128"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 IS_MAC = sys.platform == "darwin"
@@ -60,10 +60,10 @@ def get_environment() -> IsoEnv:
         content_lines.append("")
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
-        content_lines.append("  { index = 'pytorch-cu121' },")
+        content_lines.append("  { index = 'pytorch-cu128' },")
         content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
-        content_lines.append('name = "pytorch-cu121"')
+        content_lines.append('name = "pytorch-cu128"')
         content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
         content_lines.append("explicit = true")
 

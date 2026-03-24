@@ -12,8 +12,8 @@ from transcribe_anything.util import has_nvidia_smi
 HERE = Path(__file__).parent
 
 # Set the versions
-TENSOR_VERSION = "2.6.0"
-CUDA_VERSION = "cu126"
+TENSOR_VERSION = "2.7.0"
+CUDA_VERSION = "cu128"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
@@ -87,13 +87,13 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     if has_nvidia:
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
-        content_lines.append("  { index = 'pytorch-cu126' },")
+        content_lines.append("  { index = 'pytorch-cu128' },")
         content_lines.append("]")
         content_lines.append("torchaudio = [")
-        content_lines.append("  { index = 'pytorch-cu126' },")
+        content_lines.append("  { index = 'pytorch-cu128' },")
         content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
-        content_lines.append('name = "pytorch-cu126"')
+        content_lines.append('name = "pytorch-cu128"')
         content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
         content_lines.append("explicit = true")
 

@@ -71,11 +71,8 @@ def get_device_id() -> str:
         return "mps"
     cuda_info = get_cuda_info()
     if not cuda_info.cuda_available:
-        print_cuda_diagnostics(expected_cuda="12.6")
-        raise ValueError(
-            "CUDA is not available. Run 'transcribe-anything --clear-nvidia-cache' if hardware changed. "
-            "See diagnostic output above for details."
-        )
+        print_cuda_diagnostics(expected_cuda="12.8")
+        raise ValueError("CUDA is not available. Run 'transcribe-anything --clear-nvidia-cache' if hardware changed. " "See diagnostic output above for details.")
     device_id = cuda_info.cuda_devices[0].device_id
     return f"{device_id}"
 

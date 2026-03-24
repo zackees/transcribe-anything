@@ -95,18 +95,16 @@ def _print_cuda_diagnostics() -> None:
             cuda_ver = cuda_match.group(1)
             sys.stderr.write(f"  NVIDIA Driver Version: {driver_ver}\n")
             sys.stderr.write(f"  Driver CUDA Version:   {cuda_ver} (max supported by driver)\n")
-            sys.stderr.write(f"  PyTorch CUDA Version:  12.6 (bundled with PyTorch wheels)\n")
+            sys.stderr.write("  PyTorch CUDA Version:  12.8 (bundled with PyTorch wheels)\n")
             cuda_major = int(cuda_ver.split(".")[0])
             if cuda_major > 12:
                 sys.stderr.write(
-                    f"  NOTE: Driver supports CUDA {cuda_ver} but PyTorch uses CUDA 12.6 wheels.\n"
+                    f"  NOTE: Driver supports CUDA {cuda_ver} but PyTorch uses CUDA 12.8 wheels.\n"
                     "  This should be backward-compatible. If system CUDA libs are on LD_LIBRARY_PATH,\n"
                     "  they may override PyTorch's bundled libraries. Try: unset LD_LIBRARY_PATH\n"
                 )
             elif cuda_major < 12:
-                sys.stderr.write(
-                    f"  ERROR: Driver CUDA {cuda_ver} is too old. Update NVIDIA drivers to support CUDA 12.6+.\n"
-                )
+                sys.stderr.write(f"  ERROR: Driver CUDA {cuda_ver} is too old. Update NVIDIA drivers to support CUDA 12.8+.\n")
             sys.stderr.write("  Try: transcribe-anything --clear-nvidia-cache (if hardware changed)\n")
     except (subprocess.TimeoutExpired, OSError, ValueError):
         pass

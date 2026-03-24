@@ -202,18 +202,17 @@ def get_nvidia_driver_info() -> Optional[NvidiaDriverInfo]:
     return None
 
 
-def print_cuda_diagnostics(expected_cuda: str = "12.6") -> None:
+def print_cuda_diagnostics(expected_cuda: str = "12.8") -> None:
     """Print CUDA diagnostic information to stderr for troubleshooting."""
     info = get_nvidia_driver_info()
     if info is None:
         print(
-            "CUDA Diagnostics: Could not query nvidia-smi. "
-            "Ensure NVIDIA drivers are installed and nvidia-smi is on PATH.",
+            "CUDA Diagnostics: Could not query nvidia-smi. " "Ensure NVIDIA drivers are installed and nvidia-smi is on PATH.",
             file=sys.stderr,
         )
         return
 
-    print(f"CUDA Diagnostics:", file=sys.stderr)
+    print("CUDA Diagnostics:", file=sys.stderr)
     print(f"  NVIDIA Driver Version: {info.driver_version}", file=sys.stderr)
     print(f"  Driver CUDA Version:   {info.cuda_version} (max supported by driver)", file=sys.stderr)
     print(f"  PyTorch CUDA Version:  {expected_cuda} (bundled with PyTorch wheels)", file=sys.stderr)
@@ -243,6 +242,6 @@ def print_cuda_diagnostics(expected_cuda: str = "12.6") -> None:
             f"  ERROR: Driver CUDA {info.cuda_version} is older than PyTorch's CUDA {expected_cuda}.",
             file=sys.stderr,
         )
-        print("  Update your NVIDIA driver to one that supports CUDA 12.6+.", file=sys.stderr)
+        print("  Update your NVIDIA driver to one that supports CUDA 12.8+.", file=sys.stderr)
 
     print("  If hardware changed recently, try: transcribe-anything --clear-nvidia-cache", file=sys.stderr)

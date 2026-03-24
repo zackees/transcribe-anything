@@ -13,9 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import importlib.util
 
-spec = importlib.util.spec_from_file_location(
-    "util_module", Path(__file__).parent.parent / "src" / "transcribe_anything" / "util.py"
-)
+spec = importlib.util.spec_from_file_location("util_module", Path(__file__).parent.parent / "src" / "transcribe_anything" / "util.py")
 assert spec is not None
 assert spec.loader is not None
 util_module = importlib.util.module_from_spec(spec)
