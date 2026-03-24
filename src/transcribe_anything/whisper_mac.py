@@ -41,6 +41,7 @@ def get_environment() -> IsoEnv:
     content_lines.append('requires-python = ">=3.10"')
     content_lines.append("dependencies = [")
     content_lines.append('  "lightning-whisper-mlx @ git+https://github.com/aj47/lightning-whisper-mlx.git",')
+    content_lines.append('  "tiktoken>=0.5.0",')
     content_lines.append('  "webvtt-py",')
     content_lines.append('  "numpy",')
     content_lines.append("]")
