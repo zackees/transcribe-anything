@@ -15,11 +15,24 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import unquote
 
+from appdirs import user_cache_dir  # type: ignore
+
 PROCESS_TIMEOUT = 4 * 60 * 60
 
 # Cache file for NVIDIA detection to ensure consistency across runs
 _NVIDIA_CACHE_FILE = Path.home() / ".transcribe_anything_nvidia_cache.json"
 _NVIDIA_DETECTION_CACHE = None
+
+
+def get_runtime_dir() -> Path:
+    """Return the writable cache directory for runtime state."""
+    cache_dir = os.environ.get("TRANSCRIBE_ANYTHING_CACHE_DIR")
+    if cache_dir:
+        runtime_dir = Path(cache_dir)
+    else:
+        runtime_dir = Path(user_cache_dir("transcribe-anything"))
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    return runtime_dir
 
 
 def is_mac_arm() -> bool:
@@ -144,6 +157,20 @@ def clear_nvidia_cache() -> None:
             print("NVIDIA detection cache cleared.", file=sys.stderr)
     except OSError as e:
         print(f"Warning: Failed to clear NVIDIA cache: {e}", file=sys.stderr)
+
+
+def get_runtime_venv_dir(name: str) -> Path:
+    """Return a writable per-backend virtualenv directory."""
+    venv_dir = get_runtime_dir() / "venv" / name
+    venv_dir.mkdir(parents=True, exist_ok=True)
+    return venv_dir
+
+
+def get_static_ffmpeg_runtime_dir() -> Path:
+    """Return a writable runtime directory for static-ffmpeg state."""
+    runtime_dir = get_runtime_dir() / "static_ffmpeg"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    return runtime_dir
 
 
 @dataclass

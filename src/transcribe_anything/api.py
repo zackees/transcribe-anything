@@ -20,12 +20,13 @@ from pathlib import Path
 from typing import Optional
 
 import static_ffmpeg  # type: ignore
+import static_ffmpeg.run as static_ffmpeg_run  # type: ignore
 from appdirs import user_config_dir  # type: ignore
 
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.logger import log_error
-from transcribe_anything.util import chop_double_extension, sanitize_filename
+from transcribe_anything.util import chop_double_extension, get_runtime_dir, get_static_ffmpeg_runtime_dir, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
 from transcribe_anything.whisper_mac import run_whisper_mac_mlx
 
@@ -196,7 +197,10 @@ def transcribe(
         Path to the output directory containing transcription files
     """
     # add the paths for any dependent tools that may rely on ffmpeg
-    static_ffmpeg.add_paths()
+    static_ffmpeg_run.LOCK_FILE = str(get_static_ffmpeg_runtime_dir() / "lock.file")
+    static_ffmpeg.add_paths(
+        download_dir=str(get_static_ffmpeg_runtime_dir() / static_ffmpeg_run.get_platform_key())
+    )
     if not os.path.isfile(url_or_file) and embed:
         raise NotImplementedError("Embedding is only supported for local files. " + "Please download the file first.")
     # cache = DiskLRUCache(CACHE_FILE, 16)
@@ -307,11 +311,11 @@ def transcribe(
             if embed:
                 assert os.path.isfile(url_or_file), f"Path {url_or_file} doesn't exist."
                 out_mp4 = os.path.join(output_dir, "out.mp4")
-                static_ffmpeg_path = shutil.which("static_ffmpeg")
-                if static_ffmpeg_path is None:
-                    raise FileNotFoundError("static_ffmpeg not found")
+                ffmpeg_path = shutil.which("ffmpeg")
+                if ffmpeg_path is None:
+                    raise FileNotFoundError("ffmpeg not found")
                 embed_ffmpeg_cmd_list = [
-                    "static_ffmpeg",
+                    ffmpeg_path,
                     "-y",
                     "-i",
                     url_or_file,

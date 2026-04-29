@@ -151,3 +151,6 @@ tests/localfile/text_video_*
 # Video files
 *.mp4
 *.wav
+
+# Nix
+result

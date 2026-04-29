@@ -7,7 +7,7 @@ from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
-from transcribe_anything.util import has_nvidia_smi
+from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
 
 HERE = Path(__file__).parent
 
@@ -59,7 +59,7 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
 
 def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     """Returns the environment."""
-    venv_dir = HERE / "venv" / "insanely_fast_whisper"
+    venv_dir = get_runtime_venv_dir("insanely_fast_whisper")
     # has_nvidia = has_nvidia_smi()
     if has_nvidia is None:
         has_nvidia = has_nvidia_smi()

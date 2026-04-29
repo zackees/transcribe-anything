@@ -20,7 +20,10 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
     tmpwav.close()
     tmpwavepath = tmpwav.name
 
-    cmd_list = ["static_ffmpeg", "-y", "-i", str(inpath)]
+    ffmpeg_path = shutil.which("ffmpeg")
+    if ffmpeg_path is None:
+        raise FileNotFoundError("No path for ffmpeg")
+    cmd_list = [ffmpeg_path, "-y", "-i", str(inpath)]
     if speech_normalization:
         cmd_list += [
             "-filter:a",
@@ -31,16 +34,16 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
     print(f"Running:\n  {cmd}")
     try:
         subprocess.run(
-            cmd,
-            shell=True,
-            check=False,
+            cmd_list,
+            shell=False,
+            check=True,
             capture_output=True,
             timeout=PROCESS_TIMEOUT,
         )
     except subprocess.CalledProcessError as exc:
         print(f"Failed to run {cmd} with error {exc}")
-        print(f"stdout: {exc.stdout}")
-        print(f"stderr: {exc.stderr}")
+        print(f"stdout: {exc.stdout.decode() if isinstance(exc.stdout, bytes) else exc.stdout}")
+        print(f"stderr: {exc.stderr.decode() if isinstance(exc.stderr, bytes) else exc.stderr}")
         raise
     os.remove(outpath)
     # os.rename(tmpwavepath, outpath)
@@ -65,11 +68,11 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
         abspath = os.path.abspath(url_or_file)
         out_wav_abs = os.path.abspath(out_wav)
         with tempfile.TemporaryDirectory() as tmpdir:
-            static_ffmpeg_path = shutil.which("static_ffmpeg")
-            if static_ffmpeg_path is None:
-                raise FileNotFoundError("No path for static_ffmpeg")
+            ffmpeg_path = shutil.which("ffmpeg")
+            if ffmpeg_path is None:
+                raise FileNotFoundError("No path for ffmpeg")
             cmd_list = [
-                static_ffmpeg_path,
+                ffmpeg_path,
                 "-y",
                 "-i",
                 str(abspath),
@@ -88,7 +91,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                     cmd_list,
                     cwd=tmpdir,
                     shell=False,
-                    check=False,
+                    check=True,
                     capture_output=True,
                     timeout=PROCESS_TIMEOUT,
                 )

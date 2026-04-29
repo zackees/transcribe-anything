@@ -15,13 +15,12 @@ import traceback
 from pathlib import Path
 
 # appdirs is used to get the cache directory
-from appdirs import user_cache_dir  # type: ignore
-
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.whisper import get_computing_device
+from transcribe_anything.util import get_runtime_dir
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
-WHISPER_OPTIONS = HERE / "WHISPER_OPTIONS.json"
+WHISPER_OPTIONS = get_runtime_dir() / "WHISPER_OPTIONS.json"
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -203,7 +202,7 @@ def main() -> int:
         print("Defaulting to large-v3 model for --device insane")
         args.model = "large-v3"
 
-    hf_token_path = Path(user_cache_dir(), "hf_token.txt")
+    hf_token_path = get_runtime_dir() / "hf_token.txt"
     if args.hf_token is None:
         args.hf_token = os.environ.get("HF_TOKEN", None)
         if args.hf_token is None and hf_token_path.exists():

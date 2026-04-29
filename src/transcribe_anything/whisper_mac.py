@@ -10,6 +10,8 @@ from typing import Any, Dict
 import webvtt  # type: ignore
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
+from transcribe_anything.util import get_runtime_venv_dir
+
 HERE = Path(__file__).parent
 
 
@@ -28,7 +30,7 @@ def get_mlx_cache_dir() -> Path:
 
 def get_environment() -> IsoEnv:
     """Returns the environment for lightning-whisper-mlx."""
-    venv_dir = HERE / "venv" / "whisper_mlx"
+    venv_dir = get_runtime_venv_dir("whisper_mlx")
     content_lines: list[str] = []
 
     content_lines.append("[build-system]")
