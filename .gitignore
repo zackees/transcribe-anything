@@ -151,3 +151,7 @@ tests/localfile/text_video_*
 # Video files
 *.mp4
 *.wav
+# RunPod integration — local-only files (never publish infrastructure pointers)
+runpod/load_secrets.sh
+runpod/secrets.conf
+runpod/.env
