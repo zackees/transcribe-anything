@@ -128,6 +128,7 @@
       <div class="bg-sun border-2 border-ink rounded-chunky shadow-pop p-6">
         <div class="font-bold uppercase tracking-wide text-sm mb-3">summary</div>
         <div id="summary-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-sm"></div>
+        <div id="obsidian-status" class="hidden mt-4 pt-4 border-t-2 border-ink/20 text-sm font-mono"></div>
       </div>
 
       <!-- Diarized transcript -->
@@ -277,6 +278,18 @@
       ].map(([k, v]) =>
         `<div><div class="text-ink/60 uppercase tracking-wide">${k}</div><div class="text-lg font-bold">${v}</div></div>`
       ).join('');
+
+      // Obsidian save status (only shown when configured + completed)
+      const obsidianStatus = $('obsidian-status');
+      if (job.obsidian_path) {
+        obsidianStatus.classList.remove('hidden');
+        obsidianStatus.innerHTML = `<span class="font-bold">📓 saved to Obsidian:</span> <span class="text-ink/70">${job.obsidian_path}</span>`;
+      } else if (job.obsidian_error) {
+        obsidianStatus.classList.remove('hidden');
+        obsidianStatus.innerHTML = `<span class="font-bold text-red-700">📓 obsidian save failed:</span> <span class="text-ink/70">${job.obsidian_error}</span>`;
+      } else {
+        obsidianStatus.classList.add('hidden');
+      }
 
       // Transcript: render speaker_json if present, else fall back to plain text
       transcriptEl.innerHTML = '';

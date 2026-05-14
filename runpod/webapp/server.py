@@ -78,6 +78,11 @@ RESOLVER_SCRIPT = _env("TRANSCRIBE_RESOLVER_SCRIPT")
 BIND_HOST = _env("TRANSCRIBE_BIND_HOST", default="127.0.0.1")
 BIND_PORT = int(_env("TRANSCRIBE_BIND_PORT", default="8050"))
 
+# Obsidian note creation — if both are set, write a markdown note per
+# completed job into the vault on a remote host.
+OBSIDIAN_HOST = _env("OBSIDIAN_HOST")                    # SSH target, e.g. user@host
+OBSIDIAN_VAULT_DIR = _env("OBSIDIAN_VAULT_DIR")          # absolute path on host, e.g. /home/.../VKJOS2025/00_Raw/Transcripts
+
 RUNPOD_BASE = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}"
 RUNPOD_HEADERS = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
 
@@ -154,6 +159,7 @@ async def health() -> dict[str, Any]:
         "endpoint_id": RUNPOD_ENDPOINT_ID,
         "resolver_configured": bool(RESOLVER_HOST and RESOLVER_SCRIPT),
         "hf_token_configured": bool(HF_TOKEN),
+        "obsidian_configured": bool(OBSIDIAN_HOST and OBSIDIAN_VAULT_DIR),
         "jobs_in_memory": len(JOBS),
     }
 
@@ -207,6 +213,120 @@ async def _runpod_status(runpod_id: str) -> dict[str, Any]:
         return r.json()
 
 
+def _slugify(s: str, max_len: int = 60) -> str:
+    """Conservative filename slug — keeps alnum + spaces, collapses runs."""
+    s = re.sub(r"[^\w\s-]+", "", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s[:max_len].strip()
+
+
+def _build_obsidian_note(job: dict[str, Any]) -> tuple[str, str]:
+    """Build (filename, markdown_body) for a completed transcription job.
+
+    Filename follows the vault convention: 'YYYY-MM-DD <title>.md'.
+    """
+    from datetime import datetime, timezone
+    result = job.get("result") or {}
+    speaker_json = result.get("speaker_json") or []
+    text = result.get("text") or ""
+
+    # Title derivation: first 60 chars of transcript text, or the URL host.
+    if text:
+        title = _slugify(text.split(".")[0]) or _slugify(text[:60])
+    else:
+        title = _slugify(job.get("input_url", "transcript").split("/")[-1] or "transcript")
+    if not title:
+        title = "transcript"
+
+    date_str = datetime.fromtimestamp(job.get("completed_at", time.time()), tz=timezone.utc).strftime("%Y-%m-%d")
+    filename = f"{date_str} {title}.md"
+
+    # Frontmatter
+    speakers = sorted({seg.get("speaker") for seg in speaker_json if isinstance(seg, dict) and seg.get("speaker")})
+    duration = 0.0
+    if speaker_json:
+        last = speaker_json[-1]
+        if isinstance(last, dict) and isinstance(last.get("timestamp"), list) and len(last["timestamp"]) >= 2:
+            duration = last["timestamp"][1] or 0.0
+    duration_str = f"{int(duration // 60)}m {int(duration % 60)}s" if duration else ""
+
+    lines: list[str] = []
+    lines.append("---")
+    lines.append("type: transcript")
+    lines.append(f"created: {date_str}")
+    lines.append(f"source_url: {job.get('input_url', '')}")
+    if job.get("resolved_url"):
+        lines.append(f"resolved_url: {job['resolved_url']}")
+    lines.append(f"runpod_job_id: {job.get('runpod_id', '')}")
+    if speakers:
+        lines.append(f"speakers: {len(speakers)}")
+        lines.append(f"speaker_labels: [{', '.join(speakers)}]")
+    if duration_str:
+        lines.append(f"duration: {duration_str}")
+    lines.append("tags: [transcript, podcast]")
+    lines.append("---")
+    lines.append("")
+    lines.append(f"# {title}")
+    lines.append("")
+    lines.append(f"**Source**: {job.get('input_url', '')}")
+    lines.append("")
+
+    # Speaker-grouped transcript
+    if speaker_json:
+        lines.append("## Transcript")
+        lines.append("")
+        for seg in speaker_json:
+            if not isinstance(seg, dict):
+                continue
+            spk = seg.get("speaker", "SPEAKER_??")
+            ts = seg.get("timestamp") or [0, 0]
+            mm = int((ts[0] or 0) // 60)
+            ss = int((ts[0] or 0) % 60)
+            ts_str = f"`[{mm:02d}:{ss:02d}]`"
+            seg_text = (seg.get("text") or "").strip()
+            lines.append(f"**{spk}** {ts_str}")
+            lines.append("")
+            lines.append(seg_text)
+            lines.append("")
+    else:
+        lines.append("## Transcript")
+        lines.append("")
+        lines.append(text or "*(no transcript text)*")
+        lines.append("")
+
+    return filename, "\n".join(lines)
+
+
+async def _write_obsidian_note(job: dict[str, Any]) -> Optional[str]:
+    """SSH to OBSIDIAN_HOST and write the note into OBSIDIAN_VAULT_DIR.
+
+    Returns the written path on success, None if Obsidian export isn't
+    configured. Raises on actual failure (caller decides what to do).
+    """
+    if not OBSIDIAN_HOST or not OBSIDIAN_VAULT_DIR:
+        return None
+    filename, body = _build_obsidian_note(job)
+    remote_path = f"{OBSIDIAN_VAULT_DIR.rstrip('/')}/{filename}"
+    # Pipe the body to ssh which writes it to the file. tee is robust
+    # (creates the dir if missing via prior mkdir).
+    cmd = [
+        "ssh", "-o", "ConnectTimeout=10", OBSIDIAN_HOST,
+        f"mkdir -p {OBSIDIAN_VAULT_DIR!r} && cat > {remote_path!r}",
+    ]
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await proc.communicate(input=body.encode("utf-8"))
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"obsidian write exited {proc.returncode}: {stderr.decode(errors='replace')[:300]}"
+        )
+    return remote_path
+
+
 async def _process_job(job_id: str) -> None:
     job = JOBS[job_id]
     try:
@@ -235,6 +355,15 @@ async def _process_job(job_id: str) -> None:
                 job["progress_message"] = "done"
                 job["result"] = d.get("output") or {}
                 job["completed_at"] = time.time()
+                # Write to Obsidian vault if configured. Best-effort: a
+                # failure here doesn't change the job result.
+                try:
+                    path = await _write_obsidian_note(job)
+                    if path:
+                        job["obsidian_path"] = path
+                        job["progress_message"] = f"saved to {path}"
+                except Exception as obs_err:
+                    job["obsidian_error"] = f"{type(obs_err).__name__}: {str(obs_err)[:200]}"
                 return
             if s in ("FAILED", "CANCELLED", "TIMED_OUT"):
                 job["status"] = "failed"
