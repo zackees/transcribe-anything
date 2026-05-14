@@ -18,9 +18,10 @@ COPY . /app
 RUN pip install --no-cache-dir -e . && \
     pip install --no-cache-dir -r runpod/requirements.txt
 
-# Pre-initialize the insane backend so cold starts don't pay the install cost.
-# GPU is unavailable during build; the init script skips shared-library checks
-# but still installs the isolated environment for use at runtime.
-RUN transcribe-anything-init-insane
+# Note: we intentionally do NOT pre-initialize the insane backend here.
+# transcribe-anything-init-insane requires a working CUDA stack to complete,
+# which is unavailable during the build (no GPU on the builder). The env is
+# initialized at handler import time on the worker instead — see handler.py.
+# Trade-off: first request on a cold worker pays ~30-60 sec env-install cost.
 
 CMD ["python", "-u", "runpod/handler.py"]

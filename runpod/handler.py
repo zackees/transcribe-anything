@@ -2,18 +2,54 @@
 
 Wraps `transcribe_anything.transcribe()` and returns transcripts plus optional
 speaker diarization JSON. Designed for `--device insane` on NVIDIA GPUs.
+
+Cold-start pre-warm: the `--device insane` backend needs an isolated Python
+env (created via iso-env). That env's installer requires a working CUDA stack,
+so it cannot be built into the Docker image on a GPU-less builder. We
+initialize it once per worker, at module import — that adds ~30-60 sec to the
+first request on each cold worker, but subsequent requests on the same worker
+are fast (within the idle-timeout window).
 """
 
 from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 import runpod
 from transcribe_anything import transcribe
+
+
+def _prewarm_insane_env() -> None:
+    """Pre-build the insane-mode isolated env on worker boot.
+
+    No-op on subsequent imports (iso-env caches the env on disk). Skipped if
+    the env var INSANE_PREWARM=0 is set (useful for CPU-only deployments).
+    """
+    if os.environ.get("INSANE_PREWARM") == "0":
+        return
+    try:
+        subprocess.run(
+            ["transcribe-anything-init-insane"],
+            check=True,
+            timeout=600,
+            stdout=sys.stderr,
+            stderr=sys.stderr,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        sys.stderr.write(
+            f"WARNING: insane env pre-warm failed ({type(exc).__name__}): {exc}\n"
+            "Insane-mode requests on this worker will likely fail; "
+            "CPU mode will still work.\n"
+        )
+
+
+_prewarm_insane_env()
 
 
 def _read_if_exists(path: Path) -> str | None:
