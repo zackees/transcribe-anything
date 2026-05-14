@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>transcribe — paste a URL, get a transcript</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mabry+Pro:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            // Gumroad-flavored palette
+            ink: '#000000',
+            paper: '#ffffff',
+            sun: '#ffc900',     // signature yellow
+            blush: '#ff90e8',   // signature pink
+            grass: '#23a094',   // accent green
+            sky: '#90a8ed',     // accent blue
+            stone: '#f4f4f0',   // warm off-white
+          },
+          boxShadow: {
+            'pop': '4px 4px 0 0 #000000',
+            'pop-sm': '2px 2px 0 0 #000000',
+            'pop-lg': '6px 6px 0 0 #000000',
+          },
+          borderRadius: {
+            'chunky': '6px',
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #fff5e6; }
+    /* Speaker color cycle — assigns a consistent color per SPEAKER_XX */
+    .speaker-0 { background: #ffc900; }
+    .speaker-1 { background: #ff90e8; }
+    .speaker-2 { background: #90a8ed; }
+    .speaker-3 { background: #23a094; color: white; }
+    .speaker-4 { background: #ffa1a1; }
+    .speaker-5 { background: #c4a0e8; }
+    .speaker-6 { background: #f0e055; }
+    .speaker-7 { background: #80d4a0; }
+    .speaker-8 { background: #ff9c54; }
+    .speaker-9 { background: #6fc3e8; }
+    .speaker-10 { background: #d4a0a0; }
+    .speaker-11 { background: #a0a060; color: white; }
+  </style>
+</head>
+<body class="text-ink min-h-screen">
+
+  <div class="max-w-4xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="inline-block bg-sun border-2 border-ink rounded-chunky shadow-pop px-4 py-2 mb-6">
+        <span class="font-bold text-xl">transcribe</span>
+      </div>
+      <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+        Paste a URL.<br>
+        Get a transcript.
+      </h1>
+      <p class="text-xl text-ink/70 max-w-2xl">
+        Speaker-attributed, timestamped, and ready to use. YouTube, Spotify, listennotes, direct MP3s — drop in whatever you have.
+      </p>
+    </header>
+
+    <!-- Submit form -->
+    <section class="bg-paper border-2 border-ink rounded-chunky shadow-pop-lg p-6 md:p-8 mb-10">
+      <form id="submit-form" class="space-y-5">
+        <div>
+          <label for="url" class="block font-bold mb-2 text-sm uppercase tracking-wide">
+            Audio URL
+          </label>
+          <input
+            type="url"
+            id="url"
+            name="url"
+            placeholder="https://lnns.co/... or https://example.com/podcast.mp3"
+            required
+            class="w-full px-4 py-3 border-2 border-ink rounded-chunky bg-stone focus:bg-paper focus:outline-none focus:shadow-pop transition-shadow font-mono text-sm"
+          />
+        </div>
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="use_resolver"
+            name="use_resolver"
+            checked
+            class="w-5 h-5 border-2 border-ink rounded-sm accent-blush"
+          />
+          <label for="use_resolver" class="text-sm">
+            <span class="font-semibold">Route through resolver</span>
+            <span class="text-ink/60">— enable for YouTube, Spotify, listennotes pages. Disable if you already have a direct audio URL.</span>
+          </label>
+        </div>
+        <button
+          type="submit"
+          id="submit-btn"
+          class="bg-blush hover:bg-sun border-2 border-ink rounded-chunky shadow-pop hover:shadow-pop-lg active:shadow-none active:translate-x-1 active:translate-y-1 font-bold px-6 py-3 transition-all text-lg"
+        >
+          Transcribe →
+        </button>
+      </form>
+    </section>
+
+    <!-- Status / progress -->
+    <section id="status-section" class="hidden bg-paper border-2 border-ink rounded-chunky shadow-pop p-6 mb-10">
+      <div class="flex items-center gap-3 mb-3">
+        <div id="status-spinner" class="w-3 h-3 bg-blush rounded-full animate-pulse"></div>
+        <span id="status-text" class="font-bold uppercase tracking-wide text-sm">submitting</span>
+      </div>
+      <div id="progress-message" class="text-ink/70 text-sm font-mono"></div>
+      <div id="elapsed-time" class="text-ink/50 text-xs font-mono mt-1"></div>
+    </section>
+
+    <!-- Result -->
+    <section id="result-section" class="hidden space-y-6">
+      <!-- Summary card -->
+      <div class="bg-sun border-2 border-ink rounded-chunky shadow-pop p-6">
+        <div class="font-bold uppercase tracking-wide text-sm mb-3">summary</div>
+        <div id="summary-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-sm"></div>
+      </div>
+
+      <!-- Diarized transcript -->
+      <div class="bg-paper border-2 border-ink rounded-chunky shadow-pop p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="font-bold uppercase tracking-wide text-sm">transcript</div>
+          <div class="flex gap-2">
+            <button data-download="text" class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.txt</button>
+            <button data-download="srt"  class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.srt</button>
+            <button data-download="vtt"  class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.vtt</button>
+            <button data-download="json" class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.json</button>
+          </div>
+        </div>
+        <div id="transcript" class="space-y-2 text-sm leading-relaxed max-h-[600px] overflow-y-auto pr-2"></div>
+      </div>
+    </section>
+
+    <!-- Error -->
+    <section id="error-section" class="hidden bg-paper border-2 border-ink rounded-chunky shadow-pop p-6 mb-10">
+      <div class="font-bold uppercase tracking-wide text-sm text-red-600 mb-2">error</div>
+      <pre id="error-message" class="font-mono text-xs whitespace-pre-wrap"></pre>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-xs text-ink/40 font-mono">
+      runs on RunPod Serverless. mesh-hosted. tailscale-only.
+    </footer>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const form = $('submit-form');
+    const submitBtn = $('submit-btn');
+    const statusSection = $('status-section');
+    const resultSection = $('result-section');
+    const errorSection = $('error-section');
+    const statusText = $('status-text');
+    const progressMessage = $('progress-message');
+    const elapsedTime = $('elapsed-time');
+    const transcriptEl = $('transcript');
+    const summaryStats = $('summary-stats');
+    const errorMessage = $('error-message');
+
+    let pollHandle = null;
+    let startTime = null;
+    let currentResult = null;
+
+    function show(el)  { el.classList.remove('hidden'); }
+    function hide(el)  { el.classList.add('hidden'); }
+    function reset() {
+      hide(statusSection); hide(resultSection); hide(errorSection);
+      transcriptEl.innerHTML = ''; summaryStats.innerHTML = '';
+      if (pollHandle) clearInterval(pollHandle);
+      currentResult = null;
+    }
+    function fmtElapsed(ms) {
+      const s = Math.floor(ms / 1000);
+      return `${Math.floor(s/60)}m ${s%60}s elapsed`;
+    }
+    function speakerColorClass(speaker) {
+      // SPEAKER_07 → speaker-7
+      const m = speaker && speaker.match(/(\d+)/);
+      if (!m) return 'speaker-0';
+      const n = parseInt(m[1], 10) % 12;
+      return `speaker-${n}`;
+    }
+    function fmtTimestamp(t) {
+      if (t === undefined || t === null) return '';
+      const s = Math.floor(t);
+      return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      reset();
+      const url = $('url').value.trim();
+      const useResolver = $('use_resolver').checked;
+      if (!url) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      show(statusSection);
+      statusText.textContent = 'submitting';
+      progressMessage.textContent = `POST /api/jobs`;
+      startTime = Date.now();
+      elapsedTime.textContent = fmtElapsed(0);
+
+      try {
+        const resp = await fetch('/api/jobs', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ url, use_resolver: useResolver }),
+        });
+        if (!resp.ok) throw new Error(`POST /api/jobs returned ${resp.status}: ${await resp.text()}`);
+        const { job_id } = await resp.json();
+        pollHandle = setInterval(() => pollOnce(job_id), 5000);
+        pollOnce(job_id);
+      } catch (err) {
+        showError(err.message || String(err));
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Transcribe →';
+      }
+    });
+
+    async function pollOnce(jobId) {
+      elapsedTime.textContent = fmtElapsed(Date.now() - startTime);
+      try {
+        const r = await fetch(`/api/jobs/${jobId}`);
+        if (!r.ok) throw new Error(`GET /api/jobs/${jobId} returned ${r.status}`);
+        const job = await r.json();
+        statusText.textContent = job.status;
+        progressMessage.textContent = job.progress_message || '';
+        if (job.status === 'completed') {
+          clearInterval(pollHandle); pollHandle = null;
+          showResult(job);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Transcribe →';
+        } else if (job.status === 'failed') {
+          clearInterval(pollHandle); pollHandle = null;
+          showError(job.error || 'unknown error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Transcribe →';
+        }
+      } catch (err) {
+        // Transient — leave polling running
+        progressMessage.textContent = `poll error: ${err.message}`;
+      }
+    }
+
+    function showResult(job) {
+      const r = job.result || {};
+      currentResult = r;
+      hide(statusSection);
+      show(resultSection);
+
+      // Summary
+      const speakerJson = r.speaker_json || [];
+      const speakers = new Set(speakerJson.map(x => x.speaker).filter(Boolean));
+      const lastTs = speakerJson.length
+        ? speakerJson[speakerJson.length - 1].timestamp?.[1] ?? 0
+        : 0;
+      summaryStats.innerHTML = [
+        ['speakers', speakers.size],
+        ['turns', speakerJson.length],
+        ['duration', fmtTimestamp(lastTs)],
+        ['chars', (r.text || '').length.toLocaleString()],
+      ].map(([k, v]) =>
+        `<div><div class="text-ink/60 uppercase tracking-wide">${k}</div><div class="text-lg font-bold">${v}</div></div>`
+      ).join('');
+
+      // Transcript: render speaker_json if present, else fall back to plain text
+      transcriptEl.innerHTML = '';
+      if (speakerJson.length > 0) {
+        for (const seg of speakerJson) {
+          const div = document.createElement('div');
+          div.className = 'flex gap-3 items-start';
+          const tag = document.createElement('span');
+          tag.className = `${speakerColorClass(seg.speaker)} border-2 border-ink rounded-chunky px-2 py-0.5 font-mono text-xs font-bold flex-shrink-0`;
+          tag.textContent = seg.speaker || 'SPEAKER_??';
+          const body = document.createElement('div');
+          body.className = 'flex-1';
+          const ts = document.createElement('span');
+          ts.className = 'text-ink/40 font-mono text-xs mr-2';
+          ts.textContent = `[${fmtTimestamp(seg.timestamp?.[0])}]`;
+          body.appendChild(ts);
+          body.appendChild(document.createTextNode(seg.text || ''));
+          div.appendChild(tag);
+          div.appendChild(body);
+          transcriptEl.appendChild(div);
+        }
+      } else {
+        const p = document.createElement('p');
+        p.className = 'whitespace-pre-wrap';
+        p.textContent = r.text || '(no transcript text)';
+        transcriptEl.appendChild(p);
+      }
+    }
+
+    function showError(msg) {
+      hide(statusSection); hide(resultSection);
+      show(errorSection);
+      errorMessage.textContent = msg;
+    }
+
+    // Download handlers
+    document.querySelectorAll('[data-download]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!currentResult) return;
+        const kind = btn.dataset.download;
+        let content, ext, mime;
+        if (kind === 'text') {
+          content = currentResult.text || ''; ext = 'txt'; mime = 'text/plain';
+        } else if (kind === 'srt') {
+          content = currentResult.srt || ''; ext = 'srt'; mime = 'application/x-subrip';
+        } else if (kind === 'vtt') {
+          content = currentResult.vtt || ''; ext = 'vtt'; mime = 'text/vtt';
+        } else if (kind === 'json') {
+          content = JSON.stringify(currentResult, null, 2); ext = 'json'; mime = 'application/json';
+        }
+        const blob = new Blob([content], {type: mime});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `transcript-${Date.now()}.${ext}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    });
+  </script>
+</body>
+</html>

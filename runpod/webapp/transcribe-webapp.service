@@ -1,0 +1,17 @@
+[Unit]
+Description=transcribe-anything webapp (FastAPI on Tailscale IP)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/transcribe-webapp
+EnvironmentFile=-/etc/transcribe-webapp.env
+ExecStart=/opt/transcribe-webapp/venv/bin/python /opt/transcribe-webapp/server.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
