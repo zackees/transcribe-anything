@@ -163,7 +163,7 @@ def main() -> int:
         url_or_file = resolve_via_remote(url_or_file)
 
     result = transcribe_remote(url_or_file, hf_token=hf_token)
-    print(json.dumps(result, indent=2, ensure_ascii=False)[:4000])
+    print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0
 
 
