@@ -7,6 +7,7 @@ Runs whisper api.
 
 import json  # type: ignore
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -267,7 +268,10 @@ def run_insanely_fast_whisper(
     # Remove the empty strings.
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = subprocess.list2cmdline(cmd_list)
-    sys.stderr.write(f"Running:\n  {cmd}\n")
+    # Mask --hf-token's value before any logging/error so the token doesn't
+    # leak into stdout, error responses, or downstream observability tools.
+    cmd_safe = re.sub(r"(--hf[-_]token)\s+\S+", r"\1 <REDACTED>", cmd)
+    sys.stderr.write(f"Running:\n  {cmd_safe}\n")
     proc = iso_env.open_proc(  # pylint: disable=consider-using-with
         cmd_list,
         shell=False,
@@ -281,7 +285,7 @@ def run_insanely_fast_whisper(
             time.sleep(0.1)
             continue
         if rtn != 0:
-            msg = f"Failed to execute {cmd}\n "
+            msg = f"Failed to execute {cmd_safe}\n "
             raise OSError(msg)
         break
     proc.wait()
