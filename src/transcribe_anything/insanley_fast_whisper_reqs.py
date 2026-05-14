@@ -84,6 +84,13 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
         content_lines.append(f'  "{dep}",')
     content_lines.append("]")
 
+    # Constrain setuptools < 82 for build isolation because
+    # openai-whisper imports pkg_resources which was removed in setuptools 82.
+    # Mirrors the same fix already present in whisper.py for the CPU env.
+    content_lines.append("")
+    content_lines.append("[tool.uv]")
+    content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
+
     if has_nvidia:
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
