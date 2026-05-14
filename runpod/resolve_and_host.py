@@ -1,0 +1,232 @@
+"""Resolve any podcast-ish URL to a direct audio URL hostable for RunPod.
+
+Designed to run on a residential-IP host (so YouTube / Spotify / paywalled
+sources don't blanket-block the request) and upload the resulting audio to a
+publicly-fetchable location that RunPod's datacenter workers can reach.
+
+Usage:
+    python3 runpod/resolve_and_host.py "<input-url>"
+    # stdout: https://voice.vgh-usa.com/audio/transcribe-<uuid>.mp3
+
+Pipeline:
+    1. Classify input URL (direct media / listennotes / yt-dlp-supported / other)
+    2. Direct media → pass through (no fetch needed; RunPod can grab it)
+    3. listennotes / lnns.co → scrape the episode page for the publisher's CDN URL
+    4. yt-dlp path → download, transcode to mp3, scp to AUDIO_HOST
+    5. Print the final public URL on stdout
+
+Environment overrides (all optional):
+    AUDIO_HOST_USER       default: root
+    AUDIO_HOST            default: 100.87.250.108           (VPS Tailscale IP)
+    AUDIO_HOST_DIR        default: /var/www/voice-audio
+    AUDIO_PUBLIC_PREFIX   default: https://voice.vgh-usa.com/audio
+    YTDLP_BIN             default: yt-dlp (prefers ~/.local/bin/yt-dlp if found)
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.parse
+import urllib.request
+import uuid
+from pathlib import Path
+
+AUDIO_HOST_USER = os.environ.get("AUDIO_HOST_USER", "root")
+AUDIO_HOST = os.environ.get("AUDIO_HOST", "100.87.250.108")
+AUDIO_HOST_DIR = os.environ.get("AUDIO_HOST_DIR", "/var/www/voice-audio")
+AUDIO_PUBLIC_PREFIX = os.environ.get("AUDIO_PUBLIC_PREFIX", "https://voice.vgh-usa.com/audio")
+
+# Prefer pipx-installed yt-dlp over the (often stale) apt one
+_LOCAL_YTDLP = Path.home() / ".local" / "bin" / "yt-dlp"
+YTDLP_BIN = os.environ.get(
+    "YTDLP_BIN",
+    str(_LOCAL_YTDLP) if _LOCAL_YTDLP.exists() else "yt-dlp",
+)
+
+DIRECT_AUDIO_CONTENT_TYPES = ("audio/", "application/octet-stream")
+LISTENNOTES_HOSTS = ("lnns.co", "www.listennotes.com", "listennotes.com")
+
+
+def log(msg: str) -> None:
+    print(f"[resolve_and_host] {msg}", file=sys.stderr)
+
+
+def classify(url: str) -> str:
+    """Pick a resolution strategy based on the URL shape (cheap heuristic)."""
+    parsed = urllib.parse.urlparse(url)
+    host = (parsed.netloc or "").lower()
+    path = parsed.path or ""
+    if host in LISTENNOTES_HOSTS:
+        return "listennotes"
+    if any(path.endswith(ext) for ext in (".mp3", ".wav", ".m4a", ".flac", ".ogg", ".opus")):
+        return "direct"
+    return "ytdlp"
+
+
+def head_content_type(url: str, timeout: int = 10) -> str | None:
+    """Best-effort Content-Type detection via HEAD (some hosts reject HEAD; fall back)."""
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.headers.get("Content-Type") or ""
+    except Exception:
+        return None
+
+
+def is_direct_audio_url(url: str) -> bool:
+    ct = head_content_type(url)
+    if not ct:
+        return False
+    return any(ct.lower().startswith(p) for p in DIRECT_AUDIO_CONTENT_TYPES)
+
+
+def resolve_listennotes(url: str) -> str:
+    """Follow lnns.co / listennotes.com redirects to the episode page, then
+    scrape for the publisher's audio URL.
+
+    Listennotes embeds the canonical audio URL in a JSON-LD AudioObject
+    `contentUrl` field in the episode page HTML.
+    """
+    log(f"resolving listennotes URL: {url}")
+    # Follow redirects to the final HTML page
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 transcribe-resolver/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        html = resp.read().decode("utf-8", errors="replace")
+
+    # 1) Try JSON-LD audio object (most reliable)
+    for match in re.finditer(
+        r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+        html,
+        flags=re.DOTALL | re.IGNORECASE,
+    ):
+        try:
+            data = json.loads(match.group(1).strip())
+        except json.JSONDecodeError:
+            continue
+        items = data if isinstance(data, list) else [data]
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            t = item.get("@type")
+            if t == "PodcastEpisode" or t == "AudioObject":
+                for key in ("contentUrl", "url", "audio"):
+                    val = item.get(key)
+                    if isinstance(val, str) and val.startswith("http"):
+                        log(f"  found JSON-LD audio URL: {val}")
+                        return val
+
+    # 2) Fallback: scan for any *.mp3 in the page (loose)
+    m = re.search(r'https?://[^\s"\'<>]+\.(?:mp3|m4a|wav|ogg)', html)
+    if m:
+        log(f"  found audio URL via mp3-scan: {m.group(0)}")
+        return m.group(0)
+
+    raise RuntimeError(
+        "Could not extract a direct audio URL from the listennotes page. "
+        "The episode may be hosted somewhere the scraper doesn't know about. "
+        "Try the underlying podcast publisher's URL directly."
+    )
+
+
+def download_with_ytdlp(url: str, out_dir: Path) -> Path:
+    """Run yt-dlp to fetch the best audio stream and convert to mp3."""
+    log(f"yt-dlp downloading: {url}")
+    out_template = str(out_dir / "audio.%(ext)s")
+    cmd = [
+        YTDLP_BIN,
+        "-x",
+        "--audio-format", "mp3",
+        "--audio-quality", "0",  # best quality
+        "--no-playlist",
+        "-o", out_template,
+        url,
+    ]
+    log(f"  running: {' '.join(cmd)}")
+    subprocess.run(cmd, check=True)
+    # yt-dlp drops audio.mp3 (or similar) in the dir
+    for cand in out_dir.glob("audio.*"):
+        if cand.suffix.lower() in (".mp3", ".m4a", ".wav", ".ogg", ".opus", ".flac"):
+            return cand
+    raise RuntimeError(f"yt-dlp succeeded but no audio file found in {out_dir}")
+
+
+def download_direct(url: str, out_dir: Path) -> Path:
+    """Download a direct media URL via curl (handles redirects, large files)."""
+    log(f"downloading direct media: {url}")
+    suffix = Path(urllib.parse.urlparse(url).path).suffix or ".mp3"
+    dest = out_dir / f"audio{suffix}"
+    subprocess.run(
+        ["curl", "-sSL", "--retry", "3", "-o", str(dest), url],
+        check=True,
+    )
+    return dest
+
+
+def upload(local_path: Path) -> str:
+    """scp the local audio file to AUDIO_HOST and return its public URL."""
+    remote_name = f"transcribe-{uuid.uuid4().hex[:12]}{local_path.suffix.lower()}"
+    remote_target = f"{AUDIO_HOST_USER}@{AUDIO_HOST}:{AUDIO_HOST_DIR}/{remote_name}"
+    log(f"scp {local_path} -> {remote_target}")
+    subprocess.run(
+        ["scp", "-q", "-o", "ConnectTimeout=10", str(local_path), remote_target],
+        check=True,
+    )
+    public_url = f"{AUDIO_PUBLIC_PREFIX}/{remote_name}"
+    return public_url
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("url", help="Input URL (Spotify, YouTube, podcast page, lnns.co, direct mp3, etc.)")
+    parser.add_argument(
+        "--passthrough-direct",
+        action="store_true",
+        help="If the URL is already direct audio, print it unchanged instead of mirroring through the audio host.",
+    )
+    args = parser.parse_args()
+
+    url = args.url.strip()
+    strategy = classify(url)
+
+    # If classify says direct, double-check via HEAD before short-circuiting.
+    if strategy == "direct" or is_direct_audio_url(url):
+        if args.passthrough_direct:
+            log(f"direct audio URL; printing unchanged")
+            print(url)
+            return 0
+        log("direct audio URL; mirroring through audio host for stable serving")
+        strategy = "direct"
+
+    with tempfile.TemporaryDirectory(prefix="transcribe-resolve-") as tmpdir:
+        out_dir = Path(tmpdir)
+        if strategy == "listennotes":
+            resolved = resolve_listennotes(url)
+            # The resolved URL is the publisher's CDN — almost always a direct mp3.
+            local_path = download_direct(resolved, out_dir)
+        elif strategy == "direct":
+            local_path = download_direct(url, out_dir)
+        else:
+            local_path = download_with_ytdlp(url, out_dir)
+
+        public_url = upload(local_path)
+        print(public_url)
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except subprocess.CalledProcessError as e:
+        log(f"subprocess failed: {e}")
+        sys.exit(1)
+    except Exception as e:
+        log(f"error: {type(e).__name__}: {e}")
+        sys.exit(2)
