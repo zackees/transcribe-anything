@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir -e . && \
     pip install --no-cache-dir -r runpod/requirements.txt
 
 # Pre-initialize the insane backend so cold starts don't pay the install cost.
-# GPU is unavailable during build; the init script skips shared-library checks.
-RUN transcribe-anything-init-insane || true
+# GPU is unavailable during build; the init script skips shared-library checks
+# but still installs the isolated environment for use at runtime.
+RUN transcribe-anything-init-insane
 
 CMD ["python", "-u", "runpod/handler.py"]

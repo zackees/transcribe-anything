@@ -90,6 +90,22 @@ python runpod/client_example.py "https://www.youtube.com/watch?v=..."
 `--flash` typically transcribes in 3–8 minutes → **~$0.04–0.24 per hour of
 audio**. Scale-to-zero means $0 when idle.
 
+## Known limitations
+
+**YouTube URLs do not work** from RunPod (or any datacenter-hosted) workers.
+YouTube aggressively rate-limits and blocks requests from datacenter IPs, so
+yt-dlp returns non-zero exit codes when invoked from the worker. Use direct
+audio URLs instead:
+
+- Podcast MP3 CDN links (Anchor, Libsyn, Megaphone, etc.) — work
+- archive.org direct downloads — work
+- Most non-YouTube media sites supported by yt-dlp — generally work
+- YouTube — does not work; pre-download locally first and pass the file URL, or
+  use a residential-IP proxy
+
+This is a YouTube infrastructure limitation, not a bug in transcribe-anything
+or this integration.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE). This directory is derivative work of
