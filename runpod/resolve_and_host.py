@@ -15,12 +15,18 @@ Pipeline:
     4. yt-dlp path → download, transcode to mp3, scp to AUDIO_HOST
     5. Print the final public URL on stdout
 
-Environment overrides (all optional):
-    AUDIO_HOST_USER       default: root
-    AUDIO_HOST            default: 100.87.250.108           (VPS Tailscale IP)
-    AUDIO_HOST_DIR        default: /var/www/voice-audio
-    AUDIO_PUBLIC_PREFIX   default: https://voice.vgh-usa.com/audio
+Required environment variables (set before invoking, e.g. via your shell
+profile or a sourced env file):
+    AUDIO_HOST_USER       SSH user on the audio-host (e.g. root)
+    AUDIO_HOST            SSH host of the audio-host (hostname or IP)
+    AUDIO_HOST_DIR        absolute path on the audio-host (e.g. /var/www/audio)
+    AUDIO_PUBLIC_PREFIX   public URL prefix that maps to AUDIO_HOST_DIR
+                          (e.g. https://audio.example.com/audio)
+Optional:
     YTDLP_BIN             default: yt-dlp (prefers ~/.local/bin/yt-dlp if found)
+
+The script will also auto-load $HOME/.vgh.env (a shell-style KEY=value file)
+if it exists, so any of the above set there are picked up transparently.
 """
 
 from __future__ import annotations
@@ -38,10 +44,44 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-AUDIO_HOST_USER = os.environ.get("AUDIO_HOST_USER", "root")
-AUDIO_HOST = os.environ.get("AUDIO_HOST", "100.87.250.108")
-AUDIO_HOST_DIR = os.environ.get("AUDIO_HOST_DIR", "/var/www/voice-audio")
-AUDIO_PUBLIC_PREFIX = os.environ.get("AUDIO_PUBLIC_PREFIX", "https://voice.vgh-usa.com/audio")
+
+def _load_env_file(path: Path) -> None:
+    """Best-effort loader for a shell-style KEY=value file. Doesn't override
+    values already in os.environ (so explicit env vars win)."""
+    if not path.is_file():
+        return
+    try:
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+    except OSError:
+        pass
+
+
+_load_env_file(Path.home() / ".vgh.env")
+
+
+def _require_env(name: str) -> str:
+    val = os.environ.get(name)
+    if not val:
+        sys.stderr.write(
+            f"error: required environment variable {name} is not set.\n"
+            f"Set it in your shell or in ~/.vgh.env. See script docstring for details.\n"
+        )
+        sys.exit(2)
+    return val
+
+
+AUDIO_HOST_USER = _require_env("AUDIO_HOST_USER")
+AUDIO_HOST = _require_env("AUDIO_HOST")
+AUDIO_HOST_DIR = _require_env("AUDIO_HOST_DIR")
+AUDIO_PUBLIC_PREFIX = _require_env("AUDIO_PUBLIC_PREFIX")
 
 # Prefer pipx-installed yt-dlp over the (often stale) apt one
 _LOCAL_YTDLP = Path.home() / ".local" / "bin" / "yt-dlp"
