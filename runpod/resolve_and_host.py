@@ -92,6 +92,7 @@ YTDLP_BIN = os.environ.get(
 
 DIRECT_AUDIO_CONTENT_TYPES = ("audio/", "application/octet-stream")
 LISTENNOTES_HOSTS = ("lnns.co", "www.listennotes.com", "listennotes.com")
+SPOTIFY_HOSTS = ("open.spotify.com", "spotify.link")
 
 
 def log(msg: str) -> None:
@@ -105,6 +106,8 @@ def classify(url: str) -> str:
     path = parsed.path or ""
     if host in LISTENNOTES_HOSTS:
         return "listennotes"
+    if host in SPOTIFY_HOSTS:
+        return "spotify"
     if any(path.endswith(ext) for ext in (".mp3", ".wav", ".m4a", ".flac", ".ogg", ".opus")):
         return "direct"
     return "ytdlp"
@@ -173,6 +176,137 @@ def resolve_listennotes(url: str) -> str:
         "The episode may be hosted somewhere the scraper doesn't know about. "
         "Try the underlying podcast publisher's URL directly."
     )
+
+
+def _fuzzy_match(target: str, candidates: list[str]) -> int | None:
+    """Return the index of the candidate that best matches target.
+
+    Uses normalized substring matching + word-overlap ratio. Returns None if
+    nothing scores above the threshold.
+    """
+    def norm(s: str) -> set[str]:
+        return {w.lower() for w in re.findall(r"\w+", s or "") if len(w) > 2}
+
+    target_words = norm(target)
+    if not target_words:
+        return None
+    best_idx, best_score = None, 0.0
+    for i, cand in enumerate(candidates):
+        cand_words = norm(cand)
+        if not cand_words:
+            continue
+        overlap = len(target_words & cand_words)
+        score = overlap / max(len(target_words), 1)
+        if score > best_score:
+            best_idx, best_score = i, score
+    return best_idx if best_score >= 0.5 else None
+
+
+def resolve_spotify(url: str) -> str:
+    """Resolve open.spotify.com episode URL to the publisher's CDN MP3.
+
+    Spotify DRMs their audio, so we can't fetch it directly. But almost every
+    podcast on Spotify also has a public RSS feed that publishes the same
+    episode. Pipeline:
+
+      1. Spotify oEmbed → episode title + show author
+      2. iTunes Search API → RSS feed URL for the show
+      3. Fetch RSS feed → find matching episode → return enclosure URL
+
+    Spotify-exclusive shows (e.g. Joe Rogan during the exclusivity window)
+    have no public feed and will fail here. That's a real Spotify limitation,
+    not a bug in the resolver.
+    """
+    log(f"resolving Spotify URL: {url}")
+
+    # Step 1: oEmbed
+    oembed_url = "https://open.spotify.com/oembed?url=" + urllib.parse.quote(url)
+    try:
+        with urllib.request.urlopen(oembed_url, timeout=15) as resp:
+            oembed = json.loads(resp.read().decode("utf-8", errors="replace"))
+    except Exception as e:
+        raise RuntimeError(f"Spotify oEmbed lookup failed: {e}")
+    episode_title = oembed.get("title") or ""
+    show_author = oembed.get("author_name") or oembed.get("provider_name") or ""
+    log(f"  oEmbed: title={episode_title!r}, author={show_author!r}")
+    if not episode_title:
+        raise RuntimeError("Spotify oEmbed returned no title — can't look up the episode")
+
+    # Step 2: iTunes Search to find the show's RSS feed
+    # Many Spotify episode titles include the show name as a prefix or suffix.
+    # We search using the show author (often the show name) first; fall back
+    # to the episode title.
+    search_term = show_author or episode_title
+    itunes_url = (
+        "https://itunes.apple.com/search?term="
+        + urllib.parse.quote(search_term)
+        + "&entity=podcast&limit=10&country=US"
+    )
+    log(f"  iTunes Search: {search_term!r}")
+    try:
+        with urllib.request.urlopen(itunes_url, timeout=15) as resp:
+            itunes = json.loads(resp.read().decode("utf-8", errors="replace"))
+    except Exception as e:
+        raise RuntimeError(f"iTunes Search API failed: {e}")
+    results = itunes.get("results") or []
+    if not results:
+        raise RuntimeError(
+            f"iTunes returned no podcast matches for {search_term!r}. "
+            "The show may be Spotify-exclusive."
+        )
+    # Pick the first result with a feedUrl (usually the right one)
+    feed_url = None
+    for r in results:
+        if r.get("feedUrl"):
+            feed_url = r["feedUrl"]
+            log(f"  matched show: {r.get('collectionName')!r} → {feed_url}")
+            break
+    if not feed_url:
+        raise RuntimeError("iTunes returned matches but none had a feedUrl")
+
+    # Step 3: Fetch RSS feed and find the matching episode
+    req = urllib.request.Request(
+        feed_url,
+        headers={"User-Agent": "Mozilla/5.0 transcribe-resolver/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            rss = resp.read().decode("utf-8", errors="replace")
+    except Exception as e:
+        raise RuntimeError(f"Failed to fetch RSS feed {feed_url}: {e}")
+
+    # Parse <item> entries. Don't bring in feedparser — the regex is enough
+    # for the title + enclosure URL we need.
+    items = re.findall(r"<item\b[^>]*>(.*?)</item>", rss, flags=re.DOTALL | re.IGNORECASE)
+    log(f"  RSS feed has {len(items)} items")
+    titles = []
+    enclosures = []
+    for item in items:
+        title_m = re.search(
+            r"<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>",
+            item, flags=re.DOTALL | re.IGNORECASE,
+        )
+        enc_m = re.search(r'<enclosure[^>]*\burl=["\']([^"\']+)["\']', item, flags=re.IGNORECASE)
+        titles.append(title_m.group(1).strip() if title_m else "")
+        enclosures.append(enc_m.group(1).strip() if enc_m else "")
+
+    idx = _fuzzy_match(episode_title, titles)
+    if idx is None:
+        log(f"  no fuzzy match for episode title — trying first item with audio")
+        for i, enc in enumerate(enclosures):
+            if enc:
+                idx = i
+                log(f"  using first audio item: {titles[i]!r}")
+                break
+    if idx is None or not enclosures[idx]:
+        raise RuntimeError(
+            f"Couldn't find episode in RSS feed. Searched for: {episode_title!r}\n"
+            f"Available titles (first 5): {titles[:5]}"
+        )
+
+    log(f"  matched episode: {titles[idx]!r}")
+    log(f"  enclosure URL: {enclosures[idx]}")
+    return enclosures[idx]
 
 
 def download_with_ytdlp(url: str, out_dir: Path) -> Path:
@@ -248,7 +382,9 @@ def main() -> int:
         out_dir = Path(tmpdir)
         if strategy == "listennotes":
             resolved = resolve_listennotes(url)
-            # The resolved URL is the publisher's CDN — almost always a direct mp3.
+            local_path = download_direct(resolved, out_dir)
+        elif strategy == "spotify":
+            resolved = resolve_spotify(url)
             local_path = download_direct(resolved, out_dir)
         elif strategy == "direct":
             local_path = download_direct(url, out_dir)
