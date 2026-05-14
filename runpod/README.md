@@ -68,10 +68,16 @@ python runpod/client_example.py "https://www.youtube.com/watch?v=..."
   "hf_token": null,
   "initial_prompt": null,
   "batch_size": 8,
-  "flash": true,
+  "flash": false,
   "timestamp": "chunk"
 }
 ```
+
+**Note on `flash`**: set to `false` by default — the upstream insane env doesn't
+ship the `flash_attn` package, so passing `flash: true` will error at runtime
+with `ImportError: FlashAttention2 has been toggled on, but it cannot be used`.
+To enable FA2, add `flash-attn` to the iso-env deps in
+`src/transcribe_anything/insanley_fast_whisper_reqs.py` and rebuild.
 
 **Output**:
 ```json

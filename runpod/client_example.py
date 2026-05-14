@@ -31,7 +31,7 @@ def transcribe_remote(
     url_or_file: str,
     *,
     model: str = "large-v3",
-    flash: bool = True,
+    flash: bool = False,
     batch_size: int = 8,
     hf_token: str | None = None,
     timeout_s: int = 1200,
