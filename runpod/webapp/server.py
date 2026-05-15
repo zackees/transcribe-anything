@@ -231,10 +231,24 @@ async def health() -> dict[str, Any]:
 # --- Pipeline --------------------------------------------------------------
 
 async def _run_resolver(input_url: str) -> str:
-    """SSH to RESOLVER_HOST and run RESOLVER_SCRIPT, returning the resolved URL."""
+    """SSH to RESOLVER_HOST and run RESOLVER_SCRIPT, returning the resolved URL.
+
+    OpenSSH joins all remote-command args into a single string for the remote
+    shell to evaluate, so any shell-special chars in input_url (?, *, $, etc.)
+    must be quoted before sending. YouTube URLs in particular contain `?v=...`
+    which zsh on the resolver host interprets as a glob and fails with
+    'no matches found'. shlex.quote() makes the URL literal on the remote side.
+    """
+    import shlex
+    remote_cmd = (
+        "python3 "
+        + shlex.quote(RESOLVER_SCRIPT)
+        + " "
+        + shlex.quote(input_url)
+    )
     cmd = [
         "ssh", "-o", "ConnectTimeout=10",
-        RESOLVER_HOST, "python3", RESOLVER_SCRIPT, input_url,
+        RESOLVER_HOST, remote_cmd,
     ]
     proc = await asyncio.create_subprocess_exec(
         *cmd,

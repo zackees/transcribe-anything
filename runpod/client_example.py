@@ -44,10 +44,15 @@ def resolve_via_remote(url: str) -> str:
     Stdout of the remote script is the public URL. Stderr from the script
     streams through to our stderr for visibility.
     """
+    import shlex
     host = _require_env("TRANSCRIBE_RESOLVER_HOST")
     script = _require_env("TRANSCRIBE_RESOLVER_SCRIPT")
     sys.stderr.write(f"[resolve] running {script} on {host} for: {url}\n")
-    cmd = ["ssh", "-o", "ConnectTimeout=10", host, "python3", script, url]
+    # Quote both args because OpenSSH joins remote-command args into a single
+    # shell string, and zsh on the remote will glob-expand unquoted `?` (the
+    # YouTube query-string delimiter), `*`, etc.
+    remote_cmd = f"python3 {shlex.quote(script)} {shlex.quote(url)}"
+    cmd = ["ssh", "-o", "ConnectTimeout=10", host, remote_cmd]
     proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
     # Pass through resolver stderr so user can see its progress
     if proc.stderr:
