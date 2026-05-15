@@ -89,10 +89,39 @@ RUNPOD_HEADERS = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
 
 # --- Job state -------------------------------------------------------------
 
-# In-memory job store. Keys: job_id (uuid). Values: dict of job state.
-# Trade-off: jobs are lost on process restart. Acceptable for v1; swap for
-# SQLite or Redis if persistence becomes important.
+# JSON-file-backed job store. In-memory dict mirrored to JOBS_FILE on every
+# state change so a service restart doesn't lose in-flight work. Single-file,
+# best-effort fsync; swap for SQLite or Redis if concurrent writes become
+# a concern.
+JOBS_FILE = Path(_env("TRANSCRIBE_JOBS_FILE", default="/var/lib/transcribe-webapp/jobs.json"))
 JOBS: dict[str, dict[str, Any]] = {}
+
+
+def _load_jobs_from_disk() -> None:
+    """Best-effort restore at startup."""
+    if not JOBS_FILE.is_file():
+        return
+    try:
+        data = json.loads(JOBS_FILE.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            JOBS.update(data)
+            sys.stderr.write(f"[startup] restored {len(JOBS)} job(s) from {JOBS_FILE}\n")
+    except Exception as e:
+        sys.stderr.write(f"[startup] could not restore JOBS from {JOBS_FILE}: {e}\n")
+
+
+def _persist_jobs() -> None:
+    """Write JOBS to disk. Atomic via write-temp-then-rename."""
+    try:
+        JOBS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = JOBS_FILE.with_suffix(JOBS_FILE.suffix + ".tmp")
+        tmp.write_text(json.dumps(JOBS, default=str), encoding="utf-8")
+        tmp.replace(JOBS_FILE)
+    except Exception as e:
+        sys.stderr.write(f"[persist] failed: {e}\n")
+
+
+_load_jobs_from_disk()
 
 
 def _mask(s: Any) -> Any:
@@ -140,6 +169,7 @@ async def submit(req: SubmitRequest) -> dict[str, str]:
         "result": None,
         "error": None,
     }
+    _persist_jobs()
     asyncio.create_task(_process_job(job_id))
     return {"job_id": job_id, "status": "submitted"}
 
@@ -462,16 +492,19 @@ async def _process_job(job_id: str) -> None:
         if job["use_resolver"]:
             job["status"] = "resolving"
             job["progress_message"] = "fetching audio through resolver host"
+            _persist_jobs()
             audio_url = await _run_resolver(audio_url)
             job["resolved_url"] = audio_url
 
         job["status"] = "submitting"
         job["progress_message"] = "submitting to RunPod"
+        _persist_jobs()
         runpod_id = await _runpod_submit(audio_url, job["model"])
         job["runpod_id"] = runpod_id
 
         job["status"] = "transcribing"
         job["progress_message"] = "RunPod is transcribing (this can take several minutes for long audio)"
+        _persist_jobs()
 
         # Poll until terminal
         for _ in range(120):  # 120 * 15s = 30 min max
@@ -492,23 +525,30 @@ async def _process_job(job_id: str) -> None:
                         job["progress_message"] = f"saved to {path}"
                 except Exception as obs_err:
                     job["obsidian_error"] = f"{type(obs_err).__name__}: {str(obs_err)[:200]}"
+                _persist_jobs()
                 return
             if s in ("FAILED", "CANCELLED", "TIMED_OUT"):
                 job["status"] = "failed"
                 job["error"] = (d.get("error") or "")[:1500]
                 job["progress_message"] = f"RunPod returned {s}"
+                _persist_jobs()
                 return
             # Update progress on intermediate states
+            prev_msg = job.get("progress_message")
             if s == "IN_PROGRESS":
                 job["progress_message"] = "RunPod worker is processing"
             elif s == "IN_QUEUE":
                 job["progress_message"] = "queued on RunPod"
+            if job.get("progress_message") != prev_msg:
+                _persist_jobs()
         # Loop exited without terminal status — give up
         job["status"] = "failed"
         job["error"] = "exceeded 30 min poll window"
+        _persist_jobs()
     except Exception as e:
         job["status"] = "failed"
         job["error"] = f"{type(e).__name__}: {str(e)[:500]}"
+        _persist_jobs()
 
 
 # --- Static frontend -------------------------------------------------------

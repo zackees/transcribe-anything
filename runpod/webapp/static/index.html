@@ -246,6 +246,17 @@
       elapsedTime.textContent = fmtElapsed(Date.now() - startTime);
       try {
         const r = await fetch(`/api/jobs/${jobId}`);
+        if (r.status === 404) {
+          // Job is gone — server restart wiped state, or job was never persisted.
+          // Stop polling and surface a clear, terminal error.
+          clearInterval(pollHandle); pollHandle = null;
+          showError(
+            `Job ${jobId} is no longer on the server. The webapp may have been restarted while the job was running. Try resubmitting the URL.`
+          );
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Transcribe →';
+          return;
+        }
         if (!r.ok) throw new Error(`GET /api/jobs/${jobId} returned ${r.status}`);
         const job = await r.json();
         statusText.textContent = job.status;
