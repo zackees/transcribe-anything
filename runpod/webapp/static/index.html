@@ -133,10 +133,17 @@
 
       <!-- Diarized transcript -->
       <div class="bg-paper border-2 border-ink rounded-chunky shadow-pop p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="font-bold uppercase tracking-wide text-sm">transcript</div>
-          <div class="flex gap-2">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div class="flex items-center gap-3">
+            <div class="font-bold uppercase tracking-wide text-sm">transcript</div>
+            <button id="toggle-expand" class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">
+              Show all
+            </button>
+          </div>
+          <div class="flex gap-2 flex-wrap">
             <button data-download="text" class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.txt</button>
+            <button data-download="md"   class="bg-stone hover:bg-blush border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.md</button>
+            <button data-download="docx" class="bg-stone hover:bg-blush border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.docx</button>
             <button data-download="srt"  class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.srt</button>
             <button data-download="vtt"  class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.vtt</button>
             <button data-download="json" class="bg-stone hover:bg-sun border-2 border-ink rounded-chunky text-xs px-3 py-1 font-semibold">.json</button>
@@ -175,6 +182,7 @@
     let pollHandle = null;
     let startTime = null;
     let currentResult = null;
+    let currentJobId = null;
 
     function show(el)  { el.classList.remove('hidden'); }
     function hide(el)  { el.classList.add('hidden'); }
@@ -224,6 +232,7 @@
         });
         if (!resp.ok) throw new Error(`POST /api/jobs returned ${resp.status}: ${await resp.text()}`);
         const { job_id } = await resp.json();
+        currentJobId = job_id;
         pollHandle = setInterval(() => pollOnce(job_id), 5000);
         pollOnce(job_id);
       } catch (err) {
@@ -325,11 +334,49 @@
       errorMessage.textContent = msg;
     }
 
+    // Show-all / Collapse toggle for the transcript scroll cap
+    const toggleExpandBtn = $('toggle-expand');
+    toggleExpandBtn.addEventListener('click', () => {
+      const expanded = transcriptEl.classList.toggle('expanded');
+      if (expanded) {
+        transcriptEl.classList.remove('max-h-[600px]', 'overflow-y-auto');
+        toggleExpandBtn.textContent = 'Collapse';
+      } else {
+        transcriptEl.classList.add('max-h-[600px]', 'overflow-y-auto');
+        toggleExpandBtn.textContent = 'Show all';
+      }
+    });
+
     // Download handlers
+    //   Client-side: text / srt / vtt / json — built from currentResult
+    //   Server-side: md / docx — fetched from /api/jobs/{id}/{kind}, requires currentJobId
     document.querySelectorAll('[data-download]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!currentResult) return;
+      btn.addEventListener('click', async () => {
         const kind = btn.dataset.download;
+        if (kind === 'md' || kind === 'docx') {
+          if (!currentJobId) return;
+          // Stream the server-side file via a temporary anchor
+          const endpoint = kind === 'md' ? 'markdown' : 'docx';
+          try {
+            const r = await fetch(`/api/jobs/${currentJobId}/${endpoint}`);
+            if (!r.ok) throw new Error(`server returned ${r.status}: ${await r.text()}`);
+            const blob = await r.blob();
+            // Filename from Content-Disposition if present, else fallback
+            const cd = r.headers.get('Content-Disposition') || '';
+            const m = cd.match(/filename="([^"]+)"/);
+            const fname = m ? m[1] : `transcript-${Date.now()}.${kind}`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fname;
+            a.click();
+            URL.revokeObjectURL(a.href);
+          } catch (err) {
+            alert(`Download failed: ${err.message}`);
+          }
+          return;
+        }
+        // Client-side downloads
+        if (!currentResult) return;
         let content, ext, mime;
         if (kind === 'text') {
           content = currentResult.text || ''; ext = 'txt'; mime = 'text/plain';

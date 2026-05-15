@@ -152,6 +152,40 @@ async def get_job(job_id: str) -> dict[str, Any]:
     return _mask(job)
 
 
+@app.get("/api/jobs/{job_id}/markdown")
+async def get_job_markdown(job_id: str):
+    """Download the completed transcript as an Obsidian-style .md file."""
+    from fastapi.responses import Response
+    job = JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "job not found")
+    if job.get("status") != "completed":
+        raise HTTPException(409, f"job not completed yet (status: {job.get('status')})")
+    filename, body = _build_obsidian_note(job)
+    return Response(
+        content=body,
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/jobs/{job_id}/docx")
+async def get_job_docx(job_id: str):
+    """Download the completed transcript as a Word .docx file."""
+    from fastapi.responses import Response
+    job = JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "job not found")
+    if job.get("status") != "completed":
+        raise HTTPException(409, f"job not completed yet (status: {job.get('status')})")
+    filename, buf = _build_docx(job)
+    return Response(
+        content=buf,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @app.get("/api/health")
 async def health() -> dict[str, Any]:
     return {
@@ -295,6 +329,100 @@ def _build_obsidian_note(job: dict[str, Any]) -> tuple[str, str]:
         lines.append("")
 
     return filename, "\n".join(lines)
+
+
+def _build_docx(job: dict[str, Any]) -> tuple[str, bytes]:
+    """Build (filename, raw_docx_bytes) for a completed job.
+
+    Real .docx (Word XML), not the HTML-pretending-to-be-doc trick. Uses
+    python-docx for proper headings, bold speaker labels, and timestamps.
+    """
+    from datetime import datetime, timezone
+    from io import BytesIO
+    from docx import Document
+    from docx.shared import Pt, RGBColor
+
+    result = job.get("result") or {}
+    speaker_json = result.get("speaker_json") or []
+    text = result.get("text") or ""
+
+    # Mirror the .md title derivation so the two files line up
+    if text:
+        title = _slugify(text.split(".")[0]) or _slugify(text[:60])
+    else:
+        title = _slugify(job.get("input_url", "transcript").split("/")[-1] or "transcript")
+    if not title:
+        title = "transcript"
+    date_str = datetime.fromtimestamp(
+        job.get("completed_at", time.time()), tz=timezone.utc
+    ).strftime("%Y-%m-%d")
+    filename = f"{date_str} {title}.docx"
+
+    doc = Document()
+    # Set a readable default font
+    style = doc.styles["Normal"]
+    style.font.name = "Calibri"
+    style.font.size = Pt(11)
+
+    doc.add_heading(title, level=0)
+
+    meta = doc.add_paragraph()
+    meta.add_run("Source: ").bold = True
+    meta.add_run(job.get("input_url", ""))
+    if job.get("resolved_url"):
+        meta.add_run("\nResolved: ").bold = True
+        meta.add_run(job["resolved_url"])
+
+    speakers = sorted({seg.get("speaker") for seg in speaker_json if isinstance(seg, dict) and seg.get("speaker")})
+    duration = 0.0
+    if speaker_json:
+        last = speaker_json[-1]
+        if isinstance(last, dict) and isinstance(last.get("timestamp"), list) and len(last["timestamp"]) >= 2:
+            duration = last["timestamp"][1] or 0.0
+
+    stats = doc.add_paragraph()
+    stats.add_run("Stats: ").bold = True
+    stats.add_run(f"{len(speakers)} speakers, {len(speaker_json)} turns")
+    if duration:
+        stats.add_run(f", {int(duration // 60)}m {int(duration % 60)}s duration")
+
+    doc.add_heading("Transcript", level=1)
+
+    if speaker_json:
+        # Color cycle that loosely matches the webapp UI palette
+        speaker_colors = [
+            RGBColor(0xCC, 0xA0, 0x00),  # darker yellow for contrast on white
+            RGBColor(0xC0, 0x4A, 0x9B),  # blush pink
+            RGBColor(0x4A, 0x6A, 0xD0),  # sky blue
+            RGBColor(0x1F, 0x80, 0x76),  # grass green
+            RGBColor(0xB0, 0x60, 0x60),  # rust
+            RGBColor(0x80, 0x60, 0xB0),  # purple
+        ]
+        speaker_color_map: dict[str, RGBColor] = {}
+        for seg in speaker_json:
+            if not isinstance(seg, dict):
+                continue
+            spk = seg.get("speaker", "SPEAKER_??")
+            if spk not in speaker_color_map:
+                speaker_color_map[spk] = speaker_colors[len(speaker_color_map) % len(speaker_colors)]
+            ts = seg.get("timestamp") or [0, 0]
+            mm, ss = int((ts[0] or 0) // 60), int((ts[0] or 0) % 60)
+            seg_text = (seg.get("text") or "").strip()
+
+            p = doc.add_paragraph()
+            spk_run = p.add_run(spk)
+            spk_run.bold = True
+            spk_run.font.color.rgb = speaker_color_map[spk]
+            ts_run = p.add_run(f"  [{mm:02d}:{ss:02d}]  ")
+            ts_run.font.size = Pt(9)
+            ts_run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+            p.add_run(seg_text)
+    else:
+        doc.add_paragraph(text or "(no transcript text)")
+
+    buf = BytesIO()
+    doc.save(buf)
+    return filename, buf.getvalue()
 
 
 async def _write_obsidian_note(job: dict[str, Any]) -> Optional[str]:
