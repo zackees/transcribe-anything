@@ -332,14 +332,38 @@ def download_with_ytdlp(url: str, out_dir: Path) -> Path:
 
 
 def download_direct(url: str, out_dir: Path) -> Path:
-    """Download a direct media URL via curl (handles redirects, large files)."""
+    """Download a direct media URL via curl (handles redirects, large files).
+
+    Uses --fail so HTTP errors (404/500/etc.) exit non-zero instead of silently
+    producing a 0-byte file. Adds a post-download size sanity check to catch
+    edge cases where curl exits 0 but the response is too small to be real
+    audio (e.g. servers that 200 with an HTML error page).
+    """
     log(f"downloading direct media: {url}")
     suffix = Path(urllib.parse.urlparse(url).path).suffix or ".mp3"
     dest = out_dir / f"audio{suffix}"
-    subprocess.run(
-        ["curl", "-sSL", "--retry", "3", "-o", str(dest), url],
-        check=True,
+    result = subprocess.run(
+        ["curl", "--fail", "--show-error", "-sSL", "--retry", "3",
+         "--max-time", "600", "-o", str(dest), url],
+        check=False,
+        capture_output=True,
+        text=True,
     )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"curl exited {result.returncode}: {result.stderr.strip()[:300]}"
+        )
+    size = dest.stat().st_size if dest.exists() else 0
+    if size < 1024:
+        # Either the URL 404'd and curl wrote nothing, or the response was an
+        # HTML error page that snuck past --fail (e.g. some CDNs 200 with
+        # text/html on missing assets).
+        raise RuntimeError(
+            f"Downloaded file is too small ({size} bytes) to be real audio. "
+            f"The episode may be unavailable at the publisher's CDN, or the "
+            f"resolver picked up a stale URL.\nURL: {url}"
+        )
+    log(f"  downloaded {size} bytes")
     return dest
 
 
