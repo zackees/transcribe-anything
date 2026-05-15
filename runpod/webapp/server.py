@@ -500,24 +500,39 @@ async def _write_obsidian_note(job: dict[str, Any]) -> Optional[str]:
 
 
 async def _process_job(job_id: str) -> None:
+    """Drive a job through resolver → RunPod submit → poll → finalize.
+
+    Resumption-aware: checks the existing job state for runpod_id and
+    resolved_url so a restart mid-flight skips already-done stages and
+    picks up the poll loop directly. Idempotent on submit failures (a
+    retry creates a new runpod job; the original may orphan but RunPod
+    scale-to-zero limits the cost).
+    """
     job = JOBS[job_id]
     try:
-        audio_url = job["input_url"]
-        if job["use_resolver"]:
+        runpod_id = job.get("runpod_id")
+        audio_url = job.get("resolved_url") or job["input_url"]
+
+        # Stage 1: resolve (skip if already resolved or runpod_id exists)
+        if not runpod_id and job["use_resolver"] and not job.get("resolved_url"):
             job["status"] = "resolving"
             job["progress_message"] = "fetching audio through resolver host"
             _persist_jobs()
             audio_url = await _run_resolver(audio_url)
             job["resolved_url"] = audio_url
 
-        job["status"] = "submitting"
-        job["progress_message"] = "submitting to RunPod"
-        _persist_jobs()
-        runpod_id = await _runpod_submit(audio_url, job["model"])
-        job["runpod_id"] = runpod_id
+        # Stage 2: submit to RunPod (skip if we already have a runpod_id)
+        if not runpod_id:
+            job["status"] = "submitting"
+            job["progress_message"] = "submitting to RunPod"
+            _persist_jobs()
+            runpod_id = await _runpod_submit(audio_url, job["model"])
+            job["runpod_id"] = runpod_id
 
+        # Stage 3: poll until terminal
         job["status"] = "transcribing"
-        job["progress_message"] = "RunPod is transcribing (this can take several minutes for long audio)"
+        if "RunPod" not in (job.get("progress_message") or ""):
+            job["progress_message"] = "RunPod is transcribing (this can take several minutes for long audio)"
         _persist_jobs()
 
         # Poll until terminal
@@ -563,6 +578,31 @@ async def _process_job(job_id: str) -> None:
         job["status"] = "failed"
         job["error"] = f"{type(e).__name__}: {str(e)[:500]}"
         _persist_jobs()
+
+
+# --- Startup hook: resume in-flight jobs after restart ---------------------
+
+# Statuses that mean the job is done. Everything else is in-flight and
+# should have its asyncio task respawned after a restart.
+_TERMINAL_STATUSES = {"completed", "failed"}
+
+
+@app.on_event("startup")
+async def _resume_in_flight_jobs() -> None:
+    """Re-spawn _process_job tasks for any restored non-terminal jobs.
+
+    _process_job is resumption-aware (checks runpod_id / resolved_url), so
+    callers can rely on a webapp restart not losing in-flight transcriptions.
+    """
+    resumed = 0
+    for job_id, job in list(JOBS.items()):
+        status = (job.get("status") or "").lower()
+        if status in _TERMINAL_STATUSES:
+            continue
+        asyncio.create_task(_process_job(job_id))
+        resumed += 1
+    if resumed:
+        sys.stderr.write(f"[startup] resumed {resumed} in-flight job(s)\n")
 
 
 # --- Static frontend -------------------------------------------------------
