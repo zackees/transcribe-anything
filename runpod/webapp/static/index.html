@@ -299,14 +299,22 @@
         `<div><div class="text-ink/60 uppercase tracking-wide">${k}</div><div class="text-lg font-bold">${v}</div></div>`
       ).join('');
 
-      // Obsidian save status (only shown when configured + completed)
+      // Obsidian + Telegram statuses (only shown when configured + completed)
       const obsidianStatus = $('obsidian-status');
+      const lines = [];
       if (job.obsidian_path) {
-        obsidianStatus.classList.remove('hidden');
-        obsidianStatus.innerHTML = `<span class="font-bold">📓 saved to Obsidian:</span> <span class="text-ink/70">${job.obsidian_path}</span>`;
+        lines.push(`<span class="font-bold">📓 saved to Obsidian:</span> <span class="text-ink/70">${job.obsidian_path}</span>`);
       } else if (job.obsidian_error) {
+        lines.push(`<span class="font-bold text-red-700">📓 obsidian save failed:</span> <span class="text-ink/70">${job.obsidian_error}</span>`);
+      }
+      if (job.telegram_notified) {
+        lines.push(`<span class="font-bold">📨 Telegram notification sent</span>`);
+      } else if (job.telegram_error) {
+        lines.push(`<span class="font-bold text-red-700">📨 Telegram send failed:</span> <span class="text-ink/70">${job.telegram_error}</span>`);
+      }
+      if (lines.length) {
         obsidianStatus.classList.remove('hidden');
-        obsidianStatus.innerHTML = `<span class="font-bold text-red-700">📓 obsidian save failed:</span> <span class="text-ink/70">${job.obsidian_error}</span>`;
+        obsidianStatus.innerHTML = lines.join('<br>');
       } else {
         obsidianStatus.classList.add('hidden');
       }

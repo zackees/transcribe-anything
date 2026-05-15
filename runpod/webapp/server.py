@@ -96,6 +96,11 @@ RUNPOD_HEADERS = {"Authorization": f"Bearer {RUNPOD_API_KEY}"}
 JOBS_FILE = Path(_env("TRANSCRIBE_JOBS_FILE", default="/var/lib/transcribe-webapp/jobs.json"))
 JOBS: dict[str, dict[str, Any]] = {}
 
+# Telegram notification on job terminal state. Both env vars come from
+# ~/.vgh.env on the host — never in the repo. Sending is best-effort.
+TELEGRAM_BOT_TOKEN = _env("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = _env("TELEGRAM_CHAT_ID")
+
 
 def _load_jobs_from_disk() -> None:
     """Best-effort restore at startup."""
@@ -224,6 +229,7 @@ async def health() -> dict[str, Any]:
         "resolver_configured": bool(RESOLVER_HOST and RESOLVER_SCRIPT),
         "hf_token_configured": bool(HF_TOKEN),
         "obsidian_configured": bool(OBSIDIAN_HOST and OBSIDIAN_VAULT_DIR),
+        "telegram_configured": bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID),
         "jobs_in_memory": len(JOBS),
     }
 
@@ -469,6 +475,67 @@ def _build_docx(job: dict[str, Any]) -> tuple[str, bytes]:
     return filename, buf.getvalue()
 
 
+async def _send_telegram(text: str) -> None:
+    """POST a message to Telegram. Best-effort — raises on failure so the
+    caller can log it, but the caller should catch and continue.
+    """
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not configured")
+    # Telegram has a 4096-char limit per message; trim safely.
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text[:4000],
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": True,
+    }
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json=payload,
+        )
+        r.raise_for_status()
+
+
+def _telegram_message_for_job(job: dict[str, Any]) -> str:
+    """Compose the human-readable Telegram message for a terminal job."""
+    status = (job.get("status") or "").lower()
+    result = job.get("result") or {}
+    speaker_json = result.get("speaker_json") or []
+    text = (result.get("text") or "").strip()
+    src = job.get("input_url", "")
+
+    if status == "completed":
+        # Speaker + duration stats
+        speakers = sorted({s.get("speaker") for s in speaker_json if isinstance(s, dict) and s.get("speaker")})
+        duration = 0.0
+        if speaker_json:
+            last = speaker_json[-1]
+            if isinstance(last, dict) and isinstance(last.get("timestamp"), list) and len(last["timestamp"]) >= 2:
+                duration = last["timestamp"][1] or 0.0
+        dur_str = f"{int(duration // 60)}m {int(duration % 60)}s" if duration else "?"
+        # 250-char preview of the transcript
+        preview = text[:250] + ("…" if len(text) > 250 else "")
+        # Markdown safe: escape underscores in URLs / paths
+        lines = [
+            f"✅ *Transcript ready* — {len(speakers)} speaker{'s' if len(speakers) != 1 else ''} · {dur_str}",
+            "",
+            f"_Source:_ {src}",
+        ]
+        if job.get("obsidian_path"):
+            lines.append(f"_Obsidian:_ `{job['obsidian_path']}`")
+        if preview:
+            lines.append("")
+            lines.append(f"> {preview}")
+        return "\n".join(lines)
+    # Failure
+    err = (job.get("error") or "").strip()
+    return (
+        f"❌ *Transcription failed*\n\n"
+        f"_Source:_ {src}\n\n"
+        f"```\n{err[:600] or 'no error message'}\n```"
+    )
+
+
 async def _write_obsidian_note(job: dict[str, Any]) -> Optional[str]:
     """SSH to OBSIDIAN_HOST and write the note into OBSIDIAN_VAULT_DIR.
 
@@ -554,12 +621,25 @@ async def _process_job(job_id: str) -> None:
                         job["progress_message"] = f"saved to {path}"
                 except Exception as obs_err:
                     job["obsidian_error"] = f"{type(obs_err).__name__}: {str(obs_err)[:200]}"
+                # Best-effort Telegram notification on success
+                if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+                    try:
+                        await _send_telegram(_telegram_message_for_job(job))
+                        job["telegram_notified"] = True
+                    except Exception as tg_err:
+                        job["telegram_error"] = f"{type(tg_err).__name__}: {str(tg_err)[:200]}"
                 _persist_jobs()
                 return
             if s in ("FAILED", "CANCELLED", "TIMED_OUT"):
                 job["status"] = "failed"
                 job["error"] = (d.get("error") or "")[:1500]
                 job["progress_message"] = f"RunPod returned {s}"
+                if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+                    try:
+                        await _send_telegram(_telegram_message_for_job(job))
+                        job["telegram_notified"] = True
+                    except Exception as tg_err:
+                        job["telegram_error"] = f"{type(tg_err).__name__}: {str(tg_err)[:200]}"
                 _persist_jobs()
                 return
             # Update progress on intermediate states
