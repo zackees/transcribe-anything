@@ -18,6 +18,7 @@ from pathlib import Path
 from appdirs import user_cache_dir  # type: ignore
 
 from transcribe_anything.parse_whisper_options import parse_whisper_options
+from transcribe_anything.util import detect_macos_x86_unsupported
 from transcribe_anything.whisper import get_computing_device
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -176,6 +177,10 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> int:
     """Main entry point for the command line tool."""
+    unsupported_msg = detect_macos_x86_unsupported()
+    if unsupported_msg is not None:
+        print(unsupported_msg, file=sys.stderr)
+        return 1
     args = parse_arguments()
     unknown = args.unknown
 

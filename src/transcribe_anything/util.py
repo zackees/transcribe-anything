@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 from urllib.parse import unquote
 
 PROCESS_TIMEOUT = 4 * 60 * 60
@@ -38,6 +38,83 @@ def is_mac_arm() -> bool:
 def is_mac() -> bool:
     """Returns True if the OS is macOS."""
     return platform.system() == "Darwin"
+
+
+def _check_rosetta_translated() -> Optional[int]:
+    """Probe ``sysctl.proc_translated`` to detect Rosetta on Apple Silicon.
+
+    Returns 1 if the current process is running under Rosetta, 0 if native,
+    or ``None`` if the answer can't be determined (sysctl missing / errored /
+    output unparseable / not on macOS).
+    """
+    try:
+        result = subprocess.run(
+            ["sysctl", "-n", "sysctl.proc_translated"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return None
+    if result.returncode != 0:
+        return None
+    try:
+        return int(result.stdout.strip())
+    except ValueError:
+        return None
+
+
+def detect_macos_x86_unsupported(
+    sys_platform: Optional[str] = None,
+    machine: Optional[str] = None,
+    rosetta_check: Optional[Callable[[], Optional[int]]] = None,
+) -> Optional[str]:
+    """Detect whether we're running an x86_64 Python on macOS.
+
+    PyTorch dropped macOS x86_64 wheels in 2.3+, so transcribe-anything's
+    whisper backend cannot install on this platform. Two failure modes hit
+    the same trap (issue #52):
+
+    * **Intel Mac** running modern macOS — fundamentally unsupported now;
+      no wheel will ever be available again upstream.
+    * **Apple Silicon Mac** with an x86_64 Python under Rosetta translation
+      (common when the user has Intel Homebrew at ``/usr/local`` instead
+      of, or in addition to, arm64 Homebrew at ``/opt/homebrew``). The fix
+      is to install an arm64-native Python.
+
+    Returns a user-facing error message if the host is in either trap, else
+    ``None``. All inputs are injectable so this can be unit-tested on
+    non-macOS hosts.
+    """
+    if sys_platform is None:
+        sys_platform = sys.platform
+    if machine is None:
+        machine = platform.machine()
+    if rosetta_check is None:
+        rosetta_check = _check_rosetta_translated
+
+    if sys_platform != "darwin":
+        return None
+    if machine != "x86_64":
+        return None
+
+    if rosetta_check() == 1:
+        return (
+            "Detected x86_64 Python running under Rosetta on Apple Silicon.\n"
+            "PyTorch no longer ships macOS x86_64 wheels, so the whisper "
+            "backend cannot install.\n"
+            "Reinstall using arm64-native Python (e.g. arm64 Homebrew at "
+            "/opt/homebrew/bin) and try again.\n"
+            "See https://github.com/zackees/transcribe-anything/issues/52"
+        )
+    return (
+        "Detected macOS on x86_64 hardware (Intel Mac).\n"
+        "PyTorch dropped macOS x86_64 wheels in 2.3+, so the whisper "
+        "backend cannot install on this platform.\n"
+        "Intel Macs are no longer supported.\n"
+        "See https://github.com/zackees/transcribe-anything/issues/52"
+    )
 
 
 def sanitize_filename(string: str) -> str:
