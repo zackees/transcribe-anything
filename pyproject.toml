@@ -16,7 +16,7 @@ dependencies = [
     "disklru>=1.0.7",
     "FileLock",
     "webvtt-py==0.4.6",
-    "uv-iso-env>=1.0.43",
+    "uv-iso-env>=1.0.44",
     "python-dotenv>=1.0.1",
 ]
 # VERSION
