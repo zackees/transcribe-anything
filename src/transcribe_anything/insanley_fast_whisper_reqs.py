@@ -26,7 +26,8 @@ def get_current_python_version() -> str:
 def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     """Generate the requirements for the generic case."""
     deps = [
-        "transformers==4.46.3",  # 4.47.X has problems with mac mps driver see fix: https://github.com/huggingface/transformers/pull/35295
+        # Whisper long-form/chunk timestamp fixes need >=4.53.0 (PRs #34537, #35750)
+        "transformers==4.55.4",
         "pyannote.audio==3.3.2",
         "openai-whisper==20240930",
         "insanely-fast-whisper==0.0.15",
@@ -89,6 +90,13 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     for dep in dep_lines:
         content_lines.append(f'  "{dep}",')
     content_lines.append("]")
+
+    # Constrain setuptools < 82 for build isolation because
+    # openai-whisper==20240930 imports pkg_resources, which was removed in
+    # setuptools 82. Mirrors the same guard in whisper.py.
+    content_lines.append("")
+    content_lines.append("[tool.uv]")
+    content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
 
     if has_nvidia:
         content_lines.append("[tool.uv.sources]")
