@@ -3,6 +3,7 @@ Parses whisper options.
 """
 
 import re
+import subprocess
 from typing import Any
 
 from transcribe_anything import logger
@@ -22,16 +23,36 @@ def _parse_item(item: str) -> tuple[str, Any]:
 
 
 def parse_whisper_options() -> dict:
-    """Parses the whisper options."""
+    """Parses the whisper options.
+
+    Notes on stream handling (issues #40 and #52):
+
+    - stderr is intentionally NOT redirected so uv's first-run download/build
+      progress flows to the terminal; capturing it makes the call look frozen.
+    - stdout is captured because we parse it.
+    - On non-zero exit we raise RuntimeError with an actionable message and
+      the captured stderr (when available) instead of a bare CalledProcessError
+      that hides the underlying cause.
+    """
     env = get_environment()
-    stdout = env.run(
+    result = env.run(
         ["whisper", "--help"],
         shell=False,
         universal_newlines=True,
         encoding="utf-8",
-        check=True,
-        capture_output=True,
-    ).stdout
+        check=False,
+        stdout=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        stderr_tail = (result.stderr or "").strip()
+        suffix = f"\nstderr:\n{stderr_tail}" if stderr_tail else ""
+        raise RuntimeError(
+            f"`whisper --help` failed with exit {result.returncode}. "
+            "This usually means the whisper environment failed to install or "
+            "the bundled whisper binary cannot run on this platform."
+            f"{suffix}"
+        )
+    stdout = result.stdout or ""
     lines = stdout.splitlines()
     data = {}
     for line in lines:
