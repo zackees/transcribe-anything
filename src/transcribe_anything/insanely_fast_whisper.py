@@ -29,6 +29,35 @@ HERE = Path(__file__).parent
 CUDA_INFO: Optional[CudaInfo] = None
 
 
+def _k2_stub_root() -> Path:
+    """Directory containing the ``k2`` stub package shipped with this project.
+
+    Adding this directory to ``PYTHONPATH`` lets the venv's Python satisfy
+    ``import k2`` (needed by ``speechbrain.integrations.k2_fsa`` on
+    speechbrain>=1.0) on platforms where the real ``k2`` is not installable
+    — notably Windows, where the upstream package ships no wheels. See
+    issue #69.
+    """
+    return HERE / "_k2_stub"
+
+
+def _prepare_subprocess_env(base_env: dict[str, str]) -> dict[str, str]:
+    """Return a copy of ``base_env`` augmented for the insane backend.
+
+    Adds the k2 stub directory to ``PYTHONPATH`` at the END so a real
+    ``k2`` installed in the venv (e.g. on Linux + CUDA where wheels
+    exist) still wins normal import resolution.
+    """
+    env = dict(base_env)
+    stub = str(_k2_stub_root())
+    existing = env.get("PYTHONPATH", "")
+    parts = [p for p in existing.split(os.pathsep) if p]
+    if stub not in parts:
+        parts.append(stub)
+    env["PYTHONPATH"] = os.pathsep.join(parts)
+    return env
+
+
 def get_cuda_info() -> CudaInfo:
     """Get the computing device."""
     global CUDA_INFO  # pylint: disable=global-statement
@@ -203,7 +232,7 @@ def run_insanely_fast_whisper(
     # ffmpeg paths have to be installed or else the backend tool will fail.
     static_ffmpeg.add_paths()
     iso_env = get_environment()
-    env = dict(os.environ.copy())
+    env = _prepare_subprocess_env(dict(os.environ))
     if sys.platform == "darwin":
         # Attempts fixed recommended for the mps machines. This seems
         # to be necessary since a recent update.
