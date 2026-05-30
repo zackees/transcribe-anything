@@ -4,12 +4,22 @@ Parses whisper options.
 
 import re
 import subprocess
+import sys
+from pathlib import Path
 from typing import Any
 
 from transcribe_anything import logger
+from transcribe_anything.whisper import HERE as _WHISPER_HERE
 from transcribe_anything.whisper import get_environment
 
 PATTERN = r"\s+\[--(.*?)\]"
+
+_WHISPER_VENV_DIR: Path = _WHISPER_HERE / "venv" / "whisper"
+
+
+def _whisper_venv_exists() -> bool:
+    """True if the whisper venv has already been built once."""
+    return _WHISPER_VENV_DIR.exists()
 
 
 def _parse_item(item: str) -> tuple[str, Any]:
@@ -33,7 +43,19 @@ def parse_whisper_options() -> dict:
     - On non-zero exit we raise RuntimeError with an actionable message and
       the captured stderr (when available) instead of a bare CalledProcessError
       that hides the underlying cause.
+
+    Banner: when the whisper venv hasn't been built yet, iso-env's install
+    step runs `uv venv` + `uv pip compile` with capture_output=True, which
+    can look frozen for several minutes during the first dependency download.
+    We print a brief notice to stderr first so the user knows to wait
+    instead of Ctrl+C-ing (issue #40).
     """
+    if not _whisper_venv_exists():
+        sys.stderr.write(
+            "[transcribe-anything] First-run install in progress; "
+            "downloading the whisper environment can take several minutes.\n"
+        )
+        sys.stderr.flush()
     env = get_environment()
     result = env.run(
         ["whisper", "--help"],
