@@ -47,6 +47,12 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     if has_nvidia:
         content_lines.append(f"torch=={TENSOR_CUDA_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_CUDA_VERSION}")
+        # torch 2.7.0+cu128 dlopens libcusparseLt.so.0 at import on Linux; the
+        # lib is NOT bundled with the torch wheel. nvidia-cusparselt-cu12 ships
+        # it. Without this dep, `import torch` raises ImportError and the
+        # insane backend silently falls back to CPU (see issue #35).
+        if sys.platform.startswith("linux"):
+            content_lines.append("nvidia-cusparselt-cu12")
     else:
         content_lines.append(f"torch=={TENSOR_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_VERSION}")
