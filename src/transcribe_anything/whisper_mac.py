@@ -26,11 +26,14 @@ def get_mlx_cache_dir() -> Path:
     return cache_dir
 
 
-def get_environment() -> IsoEnv:
-    """Returns the environment for lightning-whisper-mlx."""
-    venv_dir = HERE / "venv" / "whisper_mlx"
-    content_lines: list[str] = []
+def _make_pyproject_toml_content() -> str:
+    """Build the pyproject.toml string for the lightning-whisper-mlx venv.
 
+    Do NOT pin tiktoken here: lightning-whisper-mlx==0.0.10 hard-pins
+    tiktoken==0.3.3, so any extra tiktoken constraint makes the resolver
+    fail. See issues #66 and #67.
+    """
+    content_lines: list[str] = []
     content_lines.append("[build-system]")
     content_lines.append('requires = ["setuptools", "wheel"]')
     content_lines.append('build-backend = "setuptools.build_meta"')
@@ -41,11 +44,16 @@ def get_environment() -> IsoEnv:
     content_lines.append('requires-python = ">=3.10"')
     content_lines.append("dependencies = [")
     content_lines.append('  "lightning-whisper-mlx @ git+https://github.com/aj47/lightning-whisper-mlx.git",')
-    content_lines.append('  "tiktoken>=0.5.0",')
     content_lines.append('  "webvtt-py",')
     content_lines.append('  "numpy",')
     content_lines.append("]")
-    content = "\n".join(content_lines)
+    return "\n".join(content_lines)
+
+
+def get_environment() -> IsoEnv:
+    """Returns the environment for lightning-whisper-mlx."""
+    venv_dir = HERE / "venv" / "whisper_mlx"
+    content = _make_pyproject_toml_content()
 
     # Debug: Log the pyproject.toml content hash to track changes
     # content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()[:8]
