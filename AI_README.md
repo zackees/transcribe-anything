@@ -7,8 +7,8 @@ This document provides a comprehensive technical analysis of the `transcribe-any
 **transcribe-anything** is a Python CLI tool and library that provides a unified interface for transcribing audio/video content using multiple Whisper AI backends. It's designed for ease of use while supporting advanced features like GPU acceleration, speaker diarization, and multi-platform optimization.
 
 ### Key Features
-- Multiple Whisper backends: CPU, CUDA, "insane" (GPU-accelerated), and MLX (Mac Apple Silicon)
-- Speaker diarization with `speaker.json` output
+- Multiple Whisper backends: CPU, CUDA, "insane" (GPU-accelerated), WhisperX, and MLX (Mac Apple Silicon)
+- Speaker diarization with `speaker.json` output on supported backends
 - Support for local files and online URLs (YouTube, Rumble, etc.)
 - Subtitle embedding into video files
 - Custom vocabulary support via initial prompts
@@ -60,7 +60,17 @@ The project uses an **isolated environment pattern** via `uv-iso-env` to manage 
   - Flash Attention 2 support
   - Generates `speaker.json` files
 
-### 3. MLX Backend (`whisper_mac.py`)
+### 3. WhisperX Backend (`--device whisperx`)
+- **Environment**: Isolated backend environment
+- **Dependencies**: WhisperX, faster-whisper/CTranslate2, PyTorch; pyannote.audio when diarization is enabled
+- **Use Case**: Forced alignment, word timing, word highlighting, VAD controls, and speaker diarization
+- **Key Features**:
+  - Additive backend; does not replace `--device insane`
+  - Supports `--compute_type`, `--batch_size`, `--vad_method`, and `--chunk_size`
+  - Optional diarization via `--diarize`, `--hf_token`, `--min_speakers`, and `--max_speakers`
+  - Can generate `speaker.json` when diarization output is available
+
+### 4. MLX Backend (`whisper_mac.py`)
 - **Environment**: `src/transcribe_anything/venv/whisper_mlx/`
 - **Dependencies**: `lightning-whisper-mlx` (via Git)
 - **Use Case**: Apple Silicon optimization
@@ -79,6 +89,7 @@ The project uses an **isolated environment pattern** via `uv-iso-env` to manage 
 ### Backend Modules
 - `whisper.py`: Standard Whisper with CUDA detection
 - `insanely_fast_whisper.py`: High-performance GPU backend
+- WhisperX backend: Alignment, VAD, and diarization backend for `--device whisperx`
 - `whisper_mac.py`: Apple Silicon optimized backend
 - `cuda_available.py`: GPU capability detection
 
@@ -105,6 +116,7 @@ class Device(Enum):
     CPU = "cpu"
     CUDA = "cuda" 
     INSANE = "insane"
+    WHISPERX = "whisperx"
     MLX = "mlx"
 ```
 
@@ -167,7 +179,7 @@ bash test  # Uses pytest with verbose output
 3. **Add CLI Support**
    ```python
    # In _cmd.py parse_arguments()
-   choices = [None, "cpu", "cuda", "insane", "my_backend"]
+   choices = [None, "cpu", "cuda", "insane", "mlx", "whisperx", "my_backend"]
    ```
 
 4. **Integrate in API**
@@ -233,6 +245,7 @@ Each backend dynamically generates its `pyproject.toml` based on:
 - **CPU**: Slowest, most compatible
 - **CUDA**: Medium speed, requires NVIDIA GPU
 - **Insane**: Fastest GPU mode, high memory usage
+- **WhisperX**: GPU-oriented alignment/diarization backend; tune `--batch_size` and `--compute_type`
 - **MLX**: Optimized for Apple Silicon
 
 ### Memory Management
@@ -248,7 +261,7 @@ Each backend dynamically generates its `pyproject.toml` based on:
 - **Path Validation**: Absolute path handling in backends
 
 ### Token Management
-- **HuggingFace Tokens**: Cached securely for speaker diarization
+- **HuggingFace Tokens**: Cached securely for speaker diarization in supported backends
 - **Environment Variables**: Support for `HF_TOKEN` env var
 
 ## Docker and Containerization
@@ -315,4 +328,4 @@ Each backend dynamically generates its `pyproject.toml` based on:
 - **Hardware-Specific**: GPU tests conditional on hardware availability
 - **Isolation**: Each test should clean up after itself
 
-This documentation should provide AI agents with comprehensive understanding needed to successfully modify, extend, or debug the transcribe-anything codebase. 
+This documentation should provide AI agents with comprehensive understanding needed to successfully modify, extend, or debug the transcribe-anything codebase.

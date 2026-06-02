@@ -2,11 +2,9 @@ name: MacOS_Tests
 
 on:
     push:
-        branches:
-        - master
+        branches: [ main, master ]
     pull_request_target:
-      branches:
-        - master
+      branches: [ main, master ]
 
 jobs:
   test:

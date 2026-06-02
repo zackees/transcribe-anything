@@ -1,0 +1,38 @@
+name: WhisperX_Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  whisperx-unit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Configure pip caching
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-whisperx-pip-${{ hashFiles('pyproject.toml', 'requirements.testing.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-whisperx-pip-
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install -r requirements.testing.txt
+          python -m pip install build
+      - name: Build wheel
+        run: python -m build --wheel
+      - name: Run focused WhisperX unit tests
+        run: pytest -q tests/test_whisperx_reqs.py tests/test_whisperx_cmd_arg.py tests/test_whisperx_json_to_srt_txt.py

@@ -17,7 +17,7 @@ import tempfile
 import warnings
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import static_ffmpeg  # type: ignore
 from appdirs import user_config_dir  # type: ignore
@@ -28,6 +28,8 @@ from transcribe_anything.logger import log_error
 from transcribe_anything.util import chop_double_extension, sanitize_filename
 from transcribe_anything.whisper import get_computing_device, run_whisper
 from transcribe_anything.whisper_mac import run_whisper_mac_mlx
+
+run_whisperx: Any = None
 
 DISABLED_WARNINGS = [
     ".*set_audio_backend has been deprecated.*",
@@ -52,6 +54,7 @@ class Device(Enum):
     CPU = "cpu"
     CUDA = "cuda"
     INSANE = "insane"
+    WHISPERX = "whisperx"
     MLX = "mlx"
 
     def __str__(self) -> str:
@@ -69,6 +72,8 @@ class Device(Enum):
             return Device.CUDA
         if device == "insane":
             return Device.INSANE
+        if device == "whisperx":
+            return Device.WHISPERX
         if device == "mlx":
             if sys.platform != "darwin":
                 raise ValueError("MLX is only supported on macOS.")
@@ -184,7 +189,7 @@ def transcribe(
         model: Whisper model to use (tiny, small, medium, large, etc.)
         task: Task to perform (transcribe or translate)
         language: Language of the audio (auto-detected if None)
-        device: Device to use (cuda, cpu, insane, mlx)
+        device: Device to use (cuda, cpu, insane, whisperx, mlx)
         embed: Whether to embed subtitles into video file
         hugging_face_token: Token for speaker diarization
         other_args: Additional arguments to pass to Whisper backend
@@ -238,6 +243,10 @@ def transcribe(
             print("#####################################")
             print("####### INSANE GPU MODE! ############")
             print("#####################################")
+        elif device_enum == Device.WHISPERX:
+            print("#####################################")
+            print("######### WHISPERX MODE! ############")
+            print("#####################################")
         elif device_enum == Device.CPU:
             print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
         elif device_enum == Device.MLX:
@@ -247,7 +256,7 @@ def transcribe(
         else:
             raise ValueError(f"Unknown device {device}")
         print(f"Using device {device}")
-        model_str = f"{model}" if model else ""
+        model_str = f"{model}" if model else ("small" if device_enum == Device.WHISPERX else "")
         task_str = f"{task}" if task else "transcribe"
         language_str = f"{language}" if language else ""
 
@@ -262,6 +271,25 @@ def transcribe(
         with tempfile.TemporaryDirectory() as tmpdir:
             if device_enum == Device.INSANE:
                 run_insanely_fast_whisper(
+                    input_wav=Path(tmp_wav),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    task=task_str,
+                    language=language_str,
+                    hugging_face_token=hugging_face_token,
+                    other_args=other_args,
+                )
+            elif device_enum == Device.WHISPERX:
+                global run_whisperx
+
+                if run_whisperx is None:
+                    from transcribe_anything.whisperx import (
+                        run_whisperx as _run_whisperx,
+                    )
+
+                    run_whisperx = _run_whisperx
+
+                run_whisperx(
                     input_wav=Path(tmp_wav),
                     model=model_str,
                     output_dir=Path(tmpdir),
