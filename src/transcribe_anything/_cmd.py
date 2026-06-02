@@ -42,6 +42,42 @@ WHISPER_MODEL_OPTIONS = [
     "distil-whisper/distil-large-v2",
 ]
 
+WHISPERX_VALUE_ARGS = [
+    ("compute_type", "--compute_type"),
+    ("min_speakers", "--min_speakers"),
+    ("max_speakers", "--max_speakers"),
+    ("align_model", "--align_model"),
+    ("vad_method", "--vad_method"),
+    ("chunk_size", "--chunk_size"),
+]
+
+WHISPERX_FLAG_ARGS = [
+    ("diarize", "--diarize"),
+    ("no_align", "--no_align"),
+    ("highlight_words", "--highlight_words"),
+]
+
+
+def route_whisperx_args(args: argparse.Namespace, unknown: list[str]) -> None:
+    """Append WhisperX-only CLI args to unknown when the WhisperX backend is selected."""
+    use_whisperx = args.device == "whisperx"
+    for attr, option in WHISPERX_VALUE_ARGS:
+        value = getattr(args, attr)
+        if value is None:
+            continue
+        if use_whisperx:
+            unknown.extend([option, str(value)])
+        else:
+            print(f"{option} only works with --device whisperx. Ignoring {option}")
+
+    for attr, option in WHISPERX_FLAG_ARGS:
+        if not getattr(args, attr):
+            continue
+        if use_whisperx:
+            unknown.append(option)
+        else:
+            print(f"{option} only works with --device whisperx. Ignoring {option}")
+
 
 def get_whisper_options() -> dict:
     """Get whisper options."""
@@ -101,7 +137,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         choices=[None] + whisper_options["language"],
     )
-    choices = [None, "cpu", "cuda", "insane"]
+    choices = [None, "cpu", "cuda", "insane", "whisperx"]
     if platform.system() == "Darwin":
         choices.extend(["mlx", "mps"])  # mps for backward compatibility
     parser.add_argument(
@@ -129,6 +165,54 @@ def parse_arguments() -> argparse.Namespace:
         "--timestamp",
         help=("Whisper supports both chunked as well as word level timestamps. (default: chunk)." + " Only works for --device insane."),
         choices=["chunk", "word"],
+        default=None,
+    )
+    parser.add_argument(
+        "--compute_type",
+        help="WhisperX compute type. Only works for --device whisperx.",
+        default=None,
+    )
+    parser.add_argument(
+        "--diarize",
+        help="Enable WhisperX speaker diarization. Only works for --device whisperx.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--min_speakers",
+        help="Minimum speaker count for WhisperX diarization. Only works for --device whisperx.",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--max_speakers",
+        help="Maximum speaker count for WhisperX diarization. Only works for --device whisperx.",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--align_model",
+        help="WhisperX alignment model to use. Only works for --device whisperx.",
+        default=None,
+    )
+    parser.add_argument(
+        "--no_align",
+        help="Disable WhisperX forced alignment. Only works for --device whisperx.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--highlight_words",
+        help="Enable WhisperX word highlighting in subtitle output. Only works for --device whisperx.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--vad_method",
+        help="WhisperX VAD method. Only works for --device whisperx.",
+        default=None,
+    )
+    parser.add_argument(
+        "--chunk_size",
+        help="WhisperX chunk size. Only works for --device whisperx.",
+        type=int,
         default=None,
     )
     parser.add_argument(
@@ -235,6 +319,8 @@ def main() -> int:
             # unknown.append(f"--timestamp {args.timestamp}")
             unknown.append("--timestamp")
             unknown.append(args.timestamp)
+
+    route_whisperx_args(args, unknown)
 
     # Add initial_prompt to other_args if specified
     if args.initial_prompt:

@@ -42,7 +42,7 @@ This document outlines the architecture for adding live transcription support to
 - Producer: Audio capture thread
 - Consumer: Transcription thread
 - Use existing faster-whisper backend for speed
-- Support for all device types: cpu, cuda, insane, mlx
+- Support for all device types: cpu, cuda, insane, whisperx, mlx
 
 #### 4. Hotkey Handler (`hotkey.py`)
 - Global hotkey listener (default: configurable, e.g., Ctrl+Shift+T)
@@ -156,7 +156,7 @@ LiveTranscriptionConfig:
 - Use faster-whisper backend by default
 - Implement chunk-based processing (process while recording)
 - Use VAD to avoid processing silence
-- Support all existing device modes (cpu, cuda, insane, mlx)
+- Support all existing device modes (cpu, cuda, insane, whisperx, mlx)
 
 #### Challenge 4: Hotkey Conflicts
 **Solution**:
@@ -389,6 +389,7 @@ class LatencyMonitor:
 | **CPU Only** | 800-2000ms | model=tiny, workers=1 |
 | **NVIDIA GTX 1060+** | 400-800ms | model=base, workers=2, device=cuda |
 | **NVIDIA RTX 3060+** | 200-500ms | model=small, workers=3, device=insane |
+| **NVIDIA RTX 3060+ (WhisperX)** | 250-700ms | model=small, workers=2, device=whisperx, compute_type=float16 |
 | **Apple M1/M2** | 300-600ms | model=base, workers=2, device=mlx |
 | **Apple M3/M4** | 200-400ms | model=small, workers=3, device=mlx |
 
@@ -418,7 +419,7 @@ from transcribe_anything import StreamingTranscriber
 # Low-latency streaming transcriber
 transcriber = StreamingTranscriber(
     model="base",
-    device="cuda",
+    device="cuda",  # cpu, cuda, insane, whisperx, mlx
     latency_mode="low",  # ultra, low, balanced, quality
     callback=lambda text: print(f">> {text}", end="", flush=True)
 )
@@ -453,6 +454,7 @@ transcribe-anything --live --hotkey "ctrl+alt+r" --output live_transcript.txt
 
 # With specific device
 transcribe-anything --live --device insane --model large-v3
+transcribe-anything --live --device whisperx --model small --compute_type float16
 
 # With custom VAD settings
 transcribe-anything --live --vad-threshold 0.6 --silence-duration 1000
@@ -466,7 +468,7 @@ from transcribe_anything import LiveTranscriber
 # Create transcriber
 transcriber = LiveTranscriber(
     model="base",
-    device="cuda",
+    device="cuda",  # cpu, cuda, insane, whisperx, mlx
     hotkey="ctrl+shift+t",
     output_file="transcript.txt"
 )
@@ -484,7 +486,7 @@ transcriber.stop()
 ## Next Steps
 
 1. Implement basic audio capture and VAD
-2. Integrate with existing Whisper backends
+2. Integrate with existing Whisper backends, including additive WhisperX support
 3. Add hotkey support
 4. Create comprehensive tests
 5. Update documentation

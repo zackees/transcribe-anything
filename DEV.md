@@ -13,6 +13,8 @@ Useful scripts:
 
 This project is unique in that complex dependencies for the AI models are siloed away via an `uv-iso-env` pyproject.toml file for each backend.
 
+WhisperX is an additional backend exposed as `--device whisperx`; it does not replace `--device insane`.
+
 If you end up down this rabbit hole implementing a feature and want to test a backend, it's actually easy.
 
 Install the program and then see where a `.venv` is created for the backend you are
