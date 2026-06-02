@@ -44,6 +44,7 @@ def _capture_whisper_pyproject(has_nvidia: bool) -> str:
         patch("transcribe_anything.whisper.IsoEnvArgs", FakeIsoEnvArgs),
         patch("transcribe_anything.whisper.IsoEnv", FakeIsoEnv),
         patch("transcribe_anything.whisper.has_nvidia_smi", return_value=has_nvidia),
+        patch("transcribe_anything.whisper.IS_MAC", False),
     ):
         from transcribe_anything.whisper import get_environment
 
