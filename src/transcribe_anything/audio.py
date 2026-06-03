@@ -20,27 +20,32 @@ def _convert_to_wav(inpath: str, outpath: str, speech_normalization: bool = Fals
     tmpwav.close()
     tmpwavepath = tmpwav.name
 
-    cmd_list = ["static_ffmpeg", "-y", "-i", str(inpath)]
+    static_ffmpeg_path = shutil.which("static_ffmpeg")
+    if static_ffmpeg_path is None:
+        raise FileNotFoundError("No path for static_ffmpeg")
+    cmd_list = [static_ffmpeg_path, "-y", "-i", str(inpath)]
     if speech_normalization:
         cmd_list += [
             "-filter:a",
             "speechnorm=e=12.5:r=0.00001:l=1",
         ]
     cmd_list += ["-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", str(tmpwavepath)]
-    cmd = subprocess.list2cmdline(cmd_list)
-    print(f"Running:\n  {cmd}")
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    print(f"Running:\n  {cmd_str}")
     try:
         subprocess.run(
-            cmd,
-            shell=True,
-            check=False,
+            cmd_list,
+            shell=False,
+            check=True,
             capture_output=True,
             timeout=PROCESS_TIMEOUT,
         )
     except subprocess.CalledProcessError as exc:
-        print(f"Failed to run {cmd} with error {exc}")
-        print(f"stdout: {exc.stdout}")
-        print(f"stderr: {exc.stderr}")
+        print(f"Failed to run {cmd_str} with error {exc}")
+        stdout = exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout
+        stderr = exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr
+        print(f"stdout: {stdout}")
+        print(f"stderr: {stderr}")
         raise
     os.remove(outpath)
     # os.rename(tmpwavepath, outpath)
