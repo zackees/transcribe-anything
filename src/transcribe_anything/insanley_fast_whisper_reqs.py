@@ -12,7 +12,7 @@ from transcribe_anything.flash_attention_wheels import (
     SUPPORTED_PYTHON_TAG,
     get_flash_attention_wheel,
 )
-from transcribe_anything.util import has_nvidia_smi
+from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
 
 HERE = Path(__file__).parent
 
@@ -135,7 +135,7 @@ def get_environment(has_nvidia: bool | None = None, flash: bool = False) -> IsoE
         has_nvidia = has_nvidia_smi()
     flash = _use_shared_flash_backend(has_nvidia=has_nvidia, flash=flash)
     env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
-    venv_dir = HERE / "venv" / env_name
+    venv_dir = get_runtime_venv_dir(env_name)
     content = build_pyproject_toml(has_nvidia=has_nvidia, flash=flash)
     build_info = PyProjectToml(content)
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)

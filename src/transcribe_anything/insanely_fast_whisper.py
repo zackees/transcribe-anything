@@ -19,12 +19,13 @@ from pathlib import Path
 from typing import Any, Optional
 
 import static_ffmpeg  # type: ignore
+import static_ffmpeg.run as static_ffmpeg_run  # type: ignore
 import webvtt  # type: ignore
 
 from transcribe_anything.cuda_available import CudaInfo
 from transcribe_anything.generate_speaker_json import generate_speaker_json
 from transcribe_anything.insanley_fast_whisper_reqs import get_environment
-from transcribe_anything.util import print_cuda_diagnostics
+from transcribe_anything.util import get_static_ffmpeg_runtime_dir, print_cuda_diagnostics
 
 HERE = Path(__file__).parent
 CUDA_INFO: Optional[CudaInfo] = None
@@ -390,7 +391,9 @@ def run_insanely_fast_whisper(
 ) -> None:
     """Runs insanely fast whisper."""
     # ffmpeg paths have to be installed or else the backend tool will fail.
-    static_ffmpeg.add_paths()
+    ffmpeg_cache = get_static_ffmpeg_runtime_dir()
+    static_ffmpeg_run.LOCK_FILE = str(ffmpeg_cache / "lock.file")
+    static_ffmpeg.add_paths(download_dir=str(ffmpeg_cache / static_ffmpeg_run.get_platform_key()))
     iso_env = get_environment(flash=flash)
     backend_args = _prepare_insane_args(other_args, force_flash=flash)
     if flash:

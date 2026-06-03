@@ -14,11 +14,12 @@ from pathlib import Path
 from typing import Any
 
 import static_ffmpeg  # type: ignore
+import static_ffmpeg.run as static_ffmpeg_run  # type: ignore
 import webvtt  # type: ignore
 
 from transcribe_anything.generate_speaker_json import Chunk
 from transcribe_anything.generate_speaker_json import reduce as reduce_speaker_chunks
-from transcribe_anything.util import has_nvidia_smi
+from transcribe_anything.util import get_static_ffmpeg_runtime_dir, has_nvidia_smi
 from transcribe_anything.whisperx_reqs import get_environment
 
 HERE = Path(__file__).parent
@@ -434,7 +435,9 @@ def run_whisperx(  # pylint: disable=too-many-arguments
     other_args: list[str] | None = None,
 ) -> None:
     """Run WhisperX through its isolated environment."""
-    static_ffmpeg.add_paths()
+    ffmpeg_cache = get_static_ffmpeg_runtime_dir()
+    static_ffmpeg_run.LOCK_FILE = str(ffmpeg_cache / "lock.file")
+    static_ffmpeg.add_paths(download_dir=str(ffmpeg_cache / static_ffmpeg_run.get_platform_key()))
     iso_env = get_environment()
     passthrough_args, arg_hf_token = _parse_other_args(other_args)
     hf_token = hugging_face_token or arg_hf_token

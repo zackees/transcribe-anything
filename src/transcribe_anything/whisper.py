@@ -10,7 +10,7 @@ from typing import Optional
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
-from transcribe_anything.util import has_nvidia_smi
+from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
 
 # from isolated_environment import isolated_environment  # type: ignore
 
@@ -28,7 +28,7 @@ IS_MAC = sys.platform == "darwin"
 
 def get_environment() -> IsoEnv:
     """Returns the environment."""
-    venv_dir = HERE / "venv" / "whisper"
+    venv_dir = get_runtime_venv_dir("whisper")
     needs_extra_index = not IS_MAC and has_nvidia_smi()
     content_lines: list[str] = []
 
