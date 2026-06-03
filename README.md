@@ -242,6 +242,10 @@ Mac:
 
 - Use `--device mlx`
 
+# Cloud / Serverless (no local GPU)
+
+Don't have a local NVIDIA GPU? Community member [@victorkjung](https://github.com/victorkjung) maintains a turnkey [RunPod Serverless deployment](https://github.com/victorkjung/transcribe-anything/tree/runpod-integration/runpod) of `transcribe-anything` that runs `--device insane` on per-second-billed GPU minutes that scale to zero. It ships a Dockerfile, RunPod handler, reference Python client, and an optional self-hosted webapp. This is a third-party fork, not an official deployment — issues and support live in that repo.
+
 # Advanced Options and Backend-Specific Arguments
 
 ## Quick Reference
