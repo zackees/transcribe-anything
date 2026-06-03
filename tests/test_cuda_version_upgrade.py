@@ -328,6 +328,18 @@ class TestDockerfileConsistency(unittest.TestCase):
         self.assertNotIn("2.6.0", text)
         self.assertNotIn("2.2.1", text)
 
+    def test_dockerfile_backend_prebuild_is_opt_in(self):
+        dockerfile = PROJECT_ROOT / "Dockerfile"
+        if not dockerfile.exists():
+            self.skipTest("Dockerfile not found")
+        text = dockerfile.read_text(encoding="utf-8")
+        self.assertIn("ARG PREBUILD_BACKENDS=none", text)
+        self.assertIn('case "$PREBUILD_BACKENDS"', text)
+        self.assertIn("transcribe-anything-init-insane", text)
+        self.assertIn("transcribe-anything-init-insane-flash", text)
+        self.assertIn("rm -rf /root/.cache/pip /root/.cache/uv /tmp/uv-cache", text)
+        self.assertNotIn("RUN transcribe-anything-init-insane\n", text)
+
 
 # ===========================================================================
 # 6. PyTorch wheel index URL is reachable
