@@ -19,7 +19,6 @@ from appdirs import user_cache_dir  # type: ignore
 
 from transcribe_anything.parse_whisper_options import parse_whisper_options
 from transcribe_anything.util import detect_macos_x86_unsupported
-from transcribe_anything.whisper import get_computing_device
 
 HERE = Path(os.path.abspath(os.path.dirname(__file__)))
 WHISPER_OPTIONS = HERE / "WHISPER_OPTIONS.json"
@@ -98,8 +97,7 @@ def get_whisper_options() -> dict:
 def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
     whisper_options = get_whisper_options()
-    device = get_computing_device()
-    help_str = f'transcribe_anything is using a "{device}" device.' " Any unrecognized args are assumed to be for whisper" " ai and will be passed as is to whisper ai."
+    help_str = "Any unrecognized args are assumed to be for the selected whisper backend and will be passed through."
     parser = argparse.ArgumentParser(description=help_str)
     parser.add_argument(
         "url_or_file",

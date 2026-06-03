@@ -2,12 +2,16 @@
 Requirements for the insanely fast whisper.
 """
 
+import os
 import sys
 from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
-from transcribe_anything.flash_attention_wheels import SUPPORTED_PYTHON_TAG, get_flash_attention_wheel
+from transcribe_anything.flash_attention_wheels import (
+    SUPPORTED_PYTHON_TAG,
+    get_flash_attention_wheel,
+)
 from transcribe_anything.util import has_nvidia_smi
 
 HERE = Path(__file__).parent
@@ -20,6 +24,7 @@ EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 PYTHON_VERSION = "==3.11.*"
 INSANE_ENV_NAME = "insanely_fast_whisper"
 INSANE_FLASH_ENV_NAME = "insanely_fast_whisper_flash"
+SHARED_INSANE_BACKEND_ENV_VAR = "TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND"
 
 
 def get_current_python_version() -> str:
@@ -116,12 +121,21 @@ def build_pyproject_toml(has_nvidia: bool, flash: bool = False) -> str:
     return "\n".join(content_lines)
 
 
+def _use_shared_flash_backend(has_nvidia: bool, flash: bool) -> bool:
+    """Return True when normal insane should reuse the flash-capable env."""
+    if flash:
+        return True
+    value = os.environ.get(SHARED_INSANE_BACKEND_ENV_VAR, "").strip().lower()
+    return has_nvidia and value in {"1", "true", "yes", "y", "on", "flash", "insane-flash"}
+
+
 def get_environment(has_nvidia: bool | None = None, flash: bool = False) -> IsoEnv:
     """Returns the isolated insane or insane-flash environment."""
-    env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
-    venv_dir = HERE / "venv" / env_name
     if has_nvidia is None:
         has_nvidia = has_nvidia_smi()
+    flash = _use_shared_flash_backend(has_nvidia=has_nvidia, flash=flash)
+    env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
+    venv_dir = HERE / "venv" / env_name
     content = build_pyproject_toml(has_nvidia=has_nvidia, flash=flash)
     build_info = PyProjectToml(content)
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)

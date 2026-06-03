@@ -115,3 +115,69 @@ def test_get_environment_uses_dedicated_flash_venv() -> None:
     assert venv_path.name == "insanely_fast_whisper_flash"
     assert "venv" in venv_path.parts
     assert "flash-attn @" in captured["content"]
+
+
+def test_shared_insane_backend_env_var_reuses_flash_venv(monkeypatch: pytest.MonkeyPatch) -> None:
+    import transcribe_anything.insanley_fast_whisper_reqs as reqs
+    from transcribe_anything import flash_attention_wheels
+
+    captured: dict[str, Any] = {}
+
+    class FakePyProjectToml:
+        def __init__(self, content: str) -> None:
+            captured["content"] = content
+
+    class FakeIsoEnvArgs:
+        def __init__(self, venv_path: Path, build_info: Any) -> None:
+            captured["venv_path"] = venv_path
+            self.venv_path = venv_path
+            self.build_info = build_info
+
+    class FakeIsoEnv:
+        def __init__(self, args: Any) -> None:
+            self.args = args
+
+    monkeypatch.setenv("TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND", "flash")
+    with (
+        mock.patch.object(reqs, "PyProjectToml", FakePyProjectToml),
+        mock.patch.object(reqs, "IsoEnvArgs", FakeIsoEnvArgs),
+        mock.patch.object(reqs, "IsoEnv", FakeIsoEnv),
+        mock.patch.object(flash_attention_wheels.platform, "system", return_value="Windows"),
+        mock.patch.object(flash_attention_wheels.platform, "machine", return_value="AMD64"),
+        mock.patch.object(flash_attention_wheels, "current_python_tag", return_value="cp311"),
+    ):
+        reqs.get_environment(has_nvidia=True, flash=False)
+
+    assert Path(captured["venv_path"]).name == "insanely_fast_whisper_flash"
+    assert "flash-attn @" in captured["content"]
+
+
+def test_shared_insane_backend_env_var_does_not_force_flash_without_nvidia(monkeypatch: pytest.MonkeyPatch) -> None:
+    import transcribe_anything.insanley_fast_whisper_reqs as reqs
+
+    captured: dict[str, Any] = {}
+
+    class FakePyProjectToml:
+        def __init__(self, content: str) -> None:
+            captured["content"] = content
+
+    class FakeIsoEnvArgs:
+        def __init__(self, venv_path: Path, build_info: Any) -> None:
+            captured["venv_path"] = venv_path
+            self.venv_path = venv_path
+            self.build_info = build_info
+
+    class FakeIsoEnv:
+        def __init__(self, args: Any) -> None:
+            self.args = args
+
+    monkeypatch.setenv("TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND", "flash")
+    with (
+        mock.patch.object(reqs, "PyProjectToml", FakePyProjectToml),
+        mock.patch.object(reqs, "IsoEnvArgs", FakeIsoEnvArgs),
+        mock.patch.object(reqs, "IsoEnv", FakeIsoEnv),
+    ):
+        reqs.get_environment(has_nvidia=False, flash=False)
+
+    assert Path(captured["venv_path"]).name == "insanely_fast_whisper"
+    assert "flash-attn" not in captured["content"]

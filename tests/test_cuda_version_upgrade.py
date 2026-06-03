@@ -316,7 +316,7 @@ class TestDockerfileConsistency(unittest.TestCase):
         if not dockerfile.exists():
             self.skipTest("Dockerfile not found")
         text = dockerfile.read_text(encoding="utf-8")
-        self.assertIn("pytorch/pytorch:2.7.0-cuda12.8", text)
+        self.assertIn("nvidia/cuda:12.8.0-base-ubuntu22.04", text)
 
     def test_dockerfile_no_old_base_images(self):
         dockerfile = PROJECT_ROOT / "Dockerfile"
@@ -325,20 +325,29 @@ class TestDockerfileConsistency(unittest.TestCase):
         text = dockerfile.read_text(encoding="utf-8")
         self.assertNotIn("cuda12.6", text)
         self.assertNotIn("cuda12.1", text)
+        self.assertNotIn("pytorch/pytorch", text)
         self.assertNotIn("2.6.0", text)
         self.assertNotIn("2.2.1", text)
 
-    def test_dockerfile_backend_prebuild_is_opt_in(self):
+    def test_dockerfile_uses_shared_prebuilt_insane_backend(self):
         dockerfile = PROJECT_ROOT / "Dockerfile"
         if not dockerfile.exists():
             self.skipTest("Dockerfile not found")
         text = dockerfile.read_text(encoding="utf-8")
-        self.assertIn("ARG PREBUILD_BACKENDS=none", text)
+        self.assertIn("TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND=flash", text)
+        self.assertIn("ARG PREBUILD_BACKENDS=both", text)
         self.assertIn('case "$PREBUILD_BACKENDS"', text)
-        self.assertIn("transcribe-anything-init-insane", text)
         self.assertIn("transcribe-anything-init-insane-flash", text)
+        self.assertNotIn("transcribe-anything-init-insane;", text)
         self.assertIn("rm -rf /root/.cache/pip /root/.cache/uv /tmp/uv-cache", text)
-        self.assertNotIn("RUN transcribe-anything-init-insane\n", text)
+
+    def test_entrypoint_uses_nvidia_smi_for_gpu_detection(self):
+        entrypoint = PROJECT_ROOT / "entrypoint.sh"
+        if not entrypoint.exists():
+            self.skipTest("entrypoint.sh not found")
+        text = entrypoint.read_text(encoding="utf-8")
+        self.assertIn("nvidia-smi -L", text)
+        self.assertNotIn("[ -e /dev/nvidia0 ]", text)
 
 
 # ===========================================================================
