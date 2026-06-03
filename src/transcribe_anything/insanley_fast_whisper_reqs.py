@@ -7,6 +7,7 @@ from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
+from transcribe_anything.flash_attention_wheels import SUPPORTED_PYTHON_TAG, get_flash_attention_wheel
 from transcribe_anything.util import has_nvidia_smi
 
 HERE = Path(__file__).parent
@@ -16,6 +17,9 @@ TENSOR_VERSION = "2.7.0"
 CUDA_VERSION = "cu128"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+PYTHON_VERSION = "==3.11.*"
+INSANE_ENV_NAME = "insanely_fast_whisper"
+INSANE_FLASH_ENV_NAME = "insanely_fast_whisper_flash"
 
 
 def get_current_python_version() -> str:
@@ -64,17 +68,15 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     return content_lines
 
 
-def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
-    """Returns the environment."""
-    venv_dir = HERE / "venv" / "insanely_fast_whisper"
-    # has_nvidia = has_nvidia_smi()
-    if has_nvidia is None:
-        has_nvidia = has_nvidia_smi()
-    # We used to use pip to compile args, but it was hurting developement so now
-    # we always use the generic requirements.
+def build_pyproject_toml(has_nvidia: bool, flash: bool = False) -> str:
+    """Build the uv pyproject content for the isolated insane backend env."""
     dep_lines = _get_reqs_generic(has_nvidia)
+    if flash:
+        wheel = get_flash_attention_wheel(has_nvidia=has_nvidia, python_tag=SUPPORTED_PYTHON_TAG)
+        dep_lines.append(wheel.requirement)
     # filter out empty lines
     dep_lines = [line.strip() for line in dep_lines if line.strip()]
+
     content_lines: list[str] = []
 
     content_lines.append("[build-system]")
@@ -85,7 +87,7 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     content_lines.append("[project]")
     content_lines.append('name = "project"')
     content_lines.append('version = "0.1.0"')
-    content_lines.append('requires-python = "==3.11.*"')
+    content_lines.append(f'requires-python = "{PYTHON_VERSION}"')
     content_lines.append("dependencies = [")
     for dep in dep_lines:
         content_lines.append(f'  "{dep}",')
@@ -111,8 +113,16 @@ def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
         content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
         content_lines.append("explicit = true")
 
-    content = "\n".join(content_lines)
+    return "\n".join(content_lines)
 
+
+def get_environment(has_nvidia: bool | None = None, flash: bool = False) -> IsoEnv:
+    """Returns the isolated insane or insane-flash environment."""
+    env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
+    venv_dir = HERE / "venv" / env_name
+    if has_nvidia is None:
+        has_nvidia = has_nvidia_smi()
+    content = build_pyproject_toml(has_nvidia=has_nvidia, flash=flash)
     build_info = PyProjectToml(content)
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)
     env = IsoEnv(args)

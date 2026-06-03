@@ -27,6 +27,18 @@ Over 800+⭐'s because this program this app just works! Works great for windows
 - **99.9% uptime SLA** with enterprise-grade security (SOC 2, HIPAA, ISO 27001)
 - **One API for all meeting platforms** — no platform-specific integrations required
 
+### New in 4.0! (planned)
+
+**Guaranteed FlashAttention backend for CUDA users.**
+
+The new `--device insane-flash` backend keeps normal `--device insane` unchanged, but creates a separate isolated environment with pinned FlashAttention wheels. On supported NVIDIA CUDA platforms it forces the upstream insanely-fast-whisper `--flash True` path, verifies `flash_attn` and the compiled CUDA extension before transcription starts, and fails early with platform diagnostics when no controlled wheel is available.
+
+Supported first-pass wheel targets are Windows x86_64, Linux x86_64, and Linux aarch64 on Python 3.11 with `torch==2.7.0+cu128` and `flash-attn==2.8.3`. macOS is not supported for `insane-flash`; Apple Silicon users should use `--device mlx`.
+
+```bash
+transcribe-anything video.mp4 --device insane-flash --batch-size 8
+```
+
 ### New in 3.2!
 
 **Turbo Mac acceleration using the new [lightning-whisper-mlx](https://github.com/mustafaaljadery/lightning-whisper-mlx) backend.**
@@ -67,7 +79,7 @@ You can pull the docker image like so:
 
 ## About
 
-Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. All whisper backends are executed in an isolated environment. GPU acceleration is _automatic_, using the _blazingly_ fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. WhisperX is also available with `--device whisperx` for alignment, diarization, and word highlighting; it is additive and does not replace `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
+Easiest whisper implementation to install and use. Just install with `pip install transcribe-anything`. All whisper backends are executed in an isolated environment. GPU acceleration is _automatic_, using the _blazingly_ fast [insanely-fast-whisper](https://github.com/Vaibhavs10/insanely-fast-whisper) as the backend for `--device insane`. CUDA users can choose `--device insane-flash` for a separate FlashAttention2-backed insane environment with pinned wheel artifacts. WhisperX is also available with `--device whisperx` for alignment, diarization, and word highlighting; it is additive and does not replace `--device insane`. This is the only tool to optionally produces a `speaker.json` file, representing speaker-assigned text that has been de-chunkified.
 
 Hardware acceleration on Windows/Linux `--device insane`
 
@@ -90,12 +102,15 @@ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
 # GPU accelerated (Windows/Linux)
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
 
+# GPU accelerated with guaranteed FlashAttention2 where supported
+transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane-flash
+
 # Mac Apple Silicon accelerated
 transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
 
 # Advanced options (see Advanced Options section below for full details)
 transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
-transcribe-anything video.mp4 --device insane --batch-size 8 --flash True
+transcribe-anything video.mp4 --device insane-flash --batch-size 8
 ```
 
 _python api_
@@ -118,7 +133,7 @@ def transcribe(
     model: Optional[str] = None,              # tiny,small,medium,large
     task: Optional[str] = None,               # transcribe or translate
     language: Optional[str] = None,           # auto detected if none, "en" for english...
-    device: Optional[str] = None,             # cuda,cpu,insane,mlx,whisperx
+    device: Optional[str] = None,             # cuda,cpu,insane,insane-flash,mlx,whisperx
     embed: bool = False,                      # Produces a video.mp4 with the subtitles burned in.
     hugging_face_token: Optional[str] = None, # For diarization/speaker.json on supported backends
     other_args: Optional[list[str]] = None,   # Other args to be passed to to the whisper backend
@@ -143,6 +158,12 @@ Large batch sizes require more significant amounts of Nvidia GPU Ram. For a 12 G
 If you pass in `--device insane` on a cuda platform then this tool will use this state of the art version of whisper: https://github.com/Vaibhavs10/insanely-fast-whisper, which is MUCH faster and has a pipeline for speaker identification (diarization) using the `--hf_token` option.
 
 Compatible with Python 3.10 and above. Backends use an isolated environment with pinned requirements and python version.
+
+Use `--device insane-flash` when you specifically want the FlashAttention2 path. It uses a separate isolated environment (`venv/insanely_fast_whisper_flash`) with pinned `flash-attn==2.8.3` wheel artifacts for supported CUDA tuples, injects `--flash True`, and verifies FlashAttention before transcription starts. Normal `--device insane` remains the default SDPA path and does not require `flash-attn`.
+
+`insane-flash` currently supports controlled wheel candidates for Windows x86_64, Linux x86_64, and Linux aarch64 on Python 3.11 with `torch==2.7.0+cu128`. macOS is unsupported for this CUDA backend; use `--device mlx` on Apple Silicon.
+
+To prebuild the flash environment, run `transcribe-anything-init-insane-flash`.
 
 #### Speaker.json
 
@@ -218,11 +239,12 @@ Mac:
 | Backend | Device Flag | Key Arguments | Best For |
 |---------|-------------|---------------|----------|
 | **MLX** | `--device mlx` | `--batch_size`, `--verbose`, `--initial_prompt` | Mac Apple Silicon |
-| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--flash`, `--timestamp` | Windows/Linux GPU |
+| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--timestamp` | Windows/Linux GPU |
+| **Insane Flash** | `--device insane-flash` | `--batch-size`, `--hf_token`, `--timestamp` | CUDA GPU with verified FlashAttention2 |
 | **WhisperX** | `--device whisperx` | `--compute_type`, `--diarize`, `--batch_size`, `--align_model` | Alignment, diarization, word timing |
 | **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
 
-> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. CPU backend supports the full range of standard OpenAI Whisper arguments.
+> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. `insane-flash` is the same backend family with verified FlashAttention2 dependencies. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. CPU backend supports the full range of standard OpenAI Whisper arguments.
 
 ## Custom Prompts and Vocabulary
 
@@ -349,7 +371,7 @@ transcribe-anything video.mp4 --device insane --timestamp word   # word-level
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `--batch-size` | int | 24 | Batch size for processing. Critical for GPU memory management |
-| `--flash` | bool | false | Use Flash Attention 2 for faster processing |
+| `--flash` | bool | false | Upstream pass-through flag. Prefer `--device insane-flash` for guaranteed FlashAttention2 setup |
 | `--timestamp` | choice | chunk | Timestamp granularity: "chunk" or "word" |
 | `--hf_token` | string | None | HuggingFace token for speaker diarization |
 | `--num-speakers` | int | None | Exact number of speakers (cannot use with min/max) |
@@ -357,7 +379,7 @@ transcribe-anything video.mp4 --device insane --timestamp word   # word-level
 | `--max-speakers` | int | None | Maximum number of speakers |
 | `--diarization_model` | string | pyannote/speaker-diarization | Diarization model to use |
 
-> **Note:** The insanely-fast-whisper backend uses a different architecture than standard OpenAI Whisper. It does NOT support standard whisper arguments like `--temperature`, `--beam_size`, `--best_of`, etc. These are specific to the OpenAI implementation.
+> **Note:** The insanely-fast-whisper backend uses a different architecture than standard OpenAI Whisper. It does NOT support standard whisper arguments like `--temperature`, `--beam_size`, `--best_of`, etc. These are specific to the OpenAI implementation. Use `--device insane-flash` instead of manually adding `--flash True` when you need FlashAttention2 to be installed and verified.
 
 ## WhisperX Backend Arguments (--device whisperx)
 
@@ -437,8 +459,12 @@ transcribe-anything video.mp4 --device cpu --threads 4 --clip_timestamps "0,30"
 - Recommended for 8GB GPU: 4-8
 - Recommended for 12GB GPU: 8-12
 - Recommended for 24GB GPU: 16-24
-- Use `--flash True` for better memory efficiency
 - Start low and increase if no OOM errors
+
+**Insane Flash (`--device insane-flash`):**
+- Start with `--batch-size 4` or `--batch-size 8` on 8-12GB GPUs
+- Increase batch size only after verifying SRT timing and memory stability
+- Requires a supported CUDA FlashAttention wheel tuple; unsupported hosts fail before transcription
 
 **WhisperX Backend (`--device whisperx`):**
 - Start with `--batch_size 8` on smaller GPUs
@@ -484,8 +510,8 @@ transcribe-anything video.mp4 --device insane
 # Insane mode with custom batch size (important for GPU memory)
 transcribe-anything video.mp4 --device insane --batch-size 8
 
-# Insane mode with Flash Attention 2 for speed
-transcribe-anything video.mp4 --device insane --batch-size 12 --flash True
+# Insane Flash mode with verified FlashAttention2
+transcribe-anything video.mp4 --device insane-flash --batch-size 8
 
 # Insane mode with speaker diarization
 transcribe-anything video.mp4 --device insane --hf_token your_huggingface_token
@@ -494,7 +520,7 @@ transcribe-anything video.mp4 --device insane --hf_token your_huggingface_token
 transcribe-anything video.mp4 --device insane --timestamp word --hf_token your_token --num-speakers 3
 
 # High-performance setup with all optimizations
-transcribe-anything video.mp4 --device insane --batch-size 16 --flash True --timestamp word
+transcribe-anything video.mp4 --device insane-flash --batch-size 12 --timestamp word
 ```
 
 ### WhisperX Backend

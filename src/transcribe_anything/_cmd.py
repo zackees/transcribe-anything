@@ -57,6 +57,8 @@ WHISPERX_FLAG_ARGS = [
     ("highlight_words", "--highlight_words"),
 ]
 
+INSANE_DEVICES = {"insane", "insane-flash"}
+
 
 def route_whisperx_args(args: argparse.Namespace, unknown: list[str]) -> None:
     """Append WhisperX-only CLI args to unknown when the WhisperX backend is selected."""
@@ -137,7 +139,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         choices=[None] + whisper_options["language"],
     )
-    choices = [None, "cpu", "cuda", "insane", "whisperx"]
+    choices = [None, "cpu", "cuda", "insane", "insane-flash", "whisperx"]
     if platform.system() == "Darwin":
         choices.extend(["mlx", "mps"])  # mps for backward compatibility
     parser.add_argument(
@@ -158,12 +160,12 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--diarization_model",
-        help=("Name of the pretrained model/ checkpoint to perform diarization." + " (default: pyannote/speaker-diarization). Only works for --device insane."),
+        help=("Name of the pretrained model/ checkpoint to perform diarization." + " (default: pyannote/speaker-diarization). Only works for --device insane/insane-flash."),
         default="pyannote/speaker-diarization-3.1",
     )
     parser.add_argument(
         "--timestamp",
-        help=("Whisper supports both chunked as well as word level timestamps. (default: chunk)." + " Only works for --device insane."),
+        help=("Whisper supports both chunked as well as word level timestamps. (default: chunk)." + " Only works for --device insane/insane-flash."),
         choices=["chunk", "word"],
         default=None,
     )
@@ -288,8 +290,8 @@ def main() -> int:
     elif args.model == "large":
         print("Defaulting to large-v3 model for --model large," + " use --model large-legacy for the old model")
         args.model = "large-v3"
-    elif args.model is None and args.device == "insane":
-        print("Defaulting to large-v3 model for --device insane")
+    elif args.model is None and args.device in INSANE_DEVICES:
+        print(f"Defaulting to large-v3 model for --device {args.device}")
         args.model = "large-v3"
 
     hf_token_path = Path(user_cache_dir(), "hf_token.txt")
@@ -306,15 +308,15 @@ def main() -> int:
 
     # For now, just stuff --diarization_model and --timestamp into unknown
     if args.diarization_model:
-        if args.device != "insane":
-            print("--diarization_model only works with --device insane. Ignoring --diarization_model")
+        if args.device not in INSANE_DEVICES:
+            print("--diarization_model only works with --device insane/insane-flash. Ignoring --diarization_model")
         else:
             unknown.append("--diarization_model")
             unknown.append(args.diarization_model)
 
     if args.timestamp:
-        if args.device != "insane":
-            print("--timestamp only works with --device insane. Ignoring --timestamp")
+        if args.device not in INSANE_DEVICES:
+            print("--timestamp only works with --device insane/insane-flash. Ignoring --timestamp")
         else:
             # unknown.append(f"--timestamp {args.timestamp}")
             unknown.append("--timestamp")

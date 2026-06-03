@@ -66,4 +66,5 @@ members = ["tmp"]
 transcribe_anything = "transcribe_anything._cmd:main"
 transcribe-anything = "transcribe_anything._cmd:main"
 transcribe-anything-init-insane = "transcribe_anything.cli_init_insane:main"
+transcribe-anything-init-insane-flash = "transcribe_anything.cli_init_insane_flash:main"
 transcribe-anything-init-whisperx = "transcribe_anything.cli_init_whisperx:main"
