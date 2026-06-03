@@ -68,8 +68,7 @@ def test_cli_parser_accepts_whisperx_options_and_preserves_unknown_backend_args(
     ]
     with mock.patch.object(sys, "argv", argv):
         with mock.patch.object(_cmd, "get_whisper_options", return_value=WHISPER_OPTIONS):
-            with mock.patch.object(_cmd, "get_computing_device", return_value="cpu"):
-                args = _cmd.parse_arguments()
+            args = _cmd.parse_arguments()
 
     assert args.device == "whisperx"
     assert args.model == "tiny"
@@ -107,9 +106,8 @@ def test_cli_main_routes_whisperx_to_api_and_forwards_backend_args() -> None:
     ]
     with mock.patch.object(sys, "argv", argv):
         with mock.patch.object(_cmd, "get_whisper_options", return_value=WHISPER_OPTIONS):
-            with mock.patch.object(_cmd, "get_computing_device", return_value="cpu"):
-                with mock.patch.object(api, "transcribe", fake_transcribe):
-                    assert _cmd.main() == 0
+            with mock.patch.object(api, "transcribe", fake_transcribe):
+                assert _cmd.main() == 0
 
     assert len(calls) == 1
     assert calls[0]["device"] == "whisperx"

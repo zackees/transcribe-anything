@@ -218,20 +218,14 @@ pip install transcribe-anything
 
 # Docker
 
-We have a GPU accelerated [Dockerfile](Dockerfile). The default image is intentionally lean: it installs the front end and CUDA runtime, but builds isolated backend environments on first use instead of baking several GB of backend packages into every image. If you want a prebuilt backend image for faster cold starts, use `PREBUILD_BACKENDS`.
+We have a GPU accelerated [Dockerfile](Dockerfile). The default image prebuilds both CUDA insane backends, but avoids duplicating their full dependency stacks: `--device insane` and `--device insane-flash` share one FlashAttention-capable backend environment inside Docker. If you want the smallest possible image and can tolerate first-run backend setup, use `PREBUILD_BACKENDS=none`.
 
 ```bash
-# Lean default image
+# Prebuilt Docker image for --device insane and --device insane-flash
 docker build -t transcribe-anything .
 
-# Prebuild normal insanely-fast-whisper backend
-docker build --build-arg PREBUILD_BACKENDS=insane -t transcribe-anything:insane-prebuilt .
-
-# Prebuild FlashAttention backend; this is intentionally opt-in because it is large
-docker build --build-arg PREBUILD_BACKENDS=insane-flash -t transcribe-anything:insane-flash-prebuilt .
-
-# Prebuild both CUDA insane backends
-docker build --build-arg PREBUILD_BACKENDS=both -t transcribe-anything:cuda-prebuilt .
+# Lean image; backend envs are built on first use
+docker build --build-arg PREBUILD_BACKENDS=none -t transcribe-anything:lean .
 ```
 
 If you have extremely large batches of data you'd like to convert all at once then consider using the sister project [transcribe-everything](https://github.com/zackees/transcribe-everything) which operates on entire remote paths hierarchies.

@@ -51,13 +51,26 @@ def test_cli_parser_accepts_insane_flash_and_preserves_backend_args() -> None:
     with (
         mock.patch.object(sys, "argv", argv),
         mock.patch.object(_cmd, "get_whisper_options", return_value=WHISPER_OPTIONS),
-        mock.patch.object(_cmd, "get_computing_device", return_value="cpu"),
     ):
         args = _cmd.parse_arguments()
 
     assert args.device == "insane-flash"
     assert args.timestamp == "word"
     assert args.unknown == ["--batch-size", "2"]
+
+
+def test_cli_parser_does_not_probe_standard_whisper_env_for_explicit_device() -> None:
+    from transcribe_anything import _cmd
+
+    argv = ["transcribe-anything", "sample.wav", "--device", "insane", "--model", "tiny"]
+    with (
+        mock.patch.object(sys, "argv", argv),
+        mock.patch.object(_cmd, "get_whisper_options", return_value=WHISPER_OPTIONS),
+        mock.patch("transcribe_anything.whisper.get_computing_device", side_effect=AssertionError("should not probe standard whisper env")),
+    ):
+        args = _cmd.parse_arguments()
+
+    assert args.device == "insane"
 
 
 def test_cli_main_routes_insane_flash_to_api_and_forwards_insane_args(tmp_path: Path) -> None:
@@ -86,7 +99,6 @@ def test_cli_main_routes_insane_flash_to_api_and_forwards_insane_args(tmp_path: 
     with (
         mock.patch.object(sys, "argv", argv),
         mock.patch.object(_cmd, "get_whisper_options", return_value=WHISPER_OPTIONS),
-        mock.patch.object(_cmd, "get_computing_device", return_value="cpu"),
         mock.patch.object(_cmd, "user_cache_dir", return_value=str(tmp_path)),
         mock.patch.dict("os.environ", {}, clear=True),
         mock.patch.object(api, "transcribe", fake_transcribe),

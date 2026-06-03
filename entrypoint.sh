@@ -3,20 +3,27 @@
 # GPU-accelerated transcribe-anything launcher
 # Configures CUDA library paths and validates shared libraries
 
-# Configure CUDA library paths for conda-installed NVIDIA packages
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cuda_runtime/lib:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cuda_runtime/lib64:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cudnn/lib:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/cusparselt/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cuda_cupti/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cusparse/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cufft/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/curand/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/cublas/lib/:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/opt/conda/lib/python3.11/site-packages/nvidia/nccl/lib/:${LD_LIBRARY_PATH}
+# Configure CUDA library paths for the NVIDIA base image and prebuilt backend
+# environments. The torch CUDA wheels install most runtime libraries under the
+# backend venv's site-packages/nvidia/*/lib directories.
+prepend_ld_path() {
+    if [ -d "$1" ]; then
+        export LD_LIBRARY_PATH="$1:${LD_LIBRARY_PATH}"
+    fi
+}
 
-# Validate CUDA shared libraries (only if GPU device is present)
-if [ -e /dev/nvidia0 ]; then
+prepend_ld_path /usr/local/cuda/lib64
+for site_packages in /app/src/transcribe_anything/venv/*/.venv/lib/python*/site-packages; do
+    if [ -d "$site_packages" ]; then
+        prepend_ld_path "$site_packages/torch/lib"
+        for lib_dir in "$site_packages"/nvidia/*/lib "$site_packages"/nvidia/*/lib64 "$site_packages"/cusparselt/lib; do
+            prepend_ld_path "$lib_dir"
+        done
+    fi
+done
+
+# Validate CUDA shared libraries (only if GPU access is present)
+if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
     if python3 check_linux_shared_libraries.py; then
         echo "OK: CUDA shared libraries validated"
     else
@@ -24,7 +31,7 @@ if [ -e /dev/nvidia0 ]; then
         echo "Ensure container was started with: docker run --gpus all ..."
     fi
 else
-    echo "NOTE: No GPU device detected (/dev/nvidia0). Running in CPU-only mode."
+    echo "NOTE: No NVIDIA GPU detected by nvidia-smi. Running in CPU-only mode."
 fi
 
 # Exit early if only checking libraries

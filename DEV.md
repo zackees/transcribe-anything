@@ -19,6 +19,8 @@ WhisperX is an additional backend exposed as `--device whisperx`; it does not re
 
 The flash dependency is intentionally pinned by direct wheel URL plus sha256 in `src/transcribe_anything/flash_attention_wheels.py`. Do not replace it with an unpinned PyPI `flash-attn` source dependency; unsupported tuples should fail early or get a new checked manifest entry after GPU validation.
 
+Docker sets `TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND=flash` so `--device insane` and `--device insane-flash` reuse the same flash-capable backend env. This avoids baking two full torch/CUDA dependency trees into the image. Do not enable that variable for normal local installs unless you intentionally want `--device insane` to carry the FlashAttention dependency too.
+
 If you end up down this rabbit hole implementing a feature and want to test a backend, it's actually easy.
 
 Install the program and then see where a `.venv` is created for the backend you are
