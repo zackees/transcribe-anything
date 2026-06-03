@@ -15,11 +15,45 @@ from pathlib import Path
 from typing import Callable, Optional
 from urllib.parse import unquote
 
+from appdirs import user_cache_dir  # type: ignore
+
 PROCESS_TIMEOUT = 4 * 60 * 60
 
 # Cache file for NVIDIA detection to ensure consistency across runs
 _NVIDIA_CACHE_FILE = Path.home() / ".transcribe_anything_nvidia_cache.json"
 _NVIDIA_DETECTION_CACHE = None
+
+
+def get_runtime_dir() -> Path:
+    """Return the writable cache directory used for backend venvs and static_ffmpeg.
+
+    Backends used to keep their iso-env venvs alongside the installed
+    Python source (``<package>/venv/<backend>``), which breaks under any
+    install where the package landed in a read-only location: Nix store,
+    OS-package install (e.g. /usr/lib), multi-user shared install,
+    pip --target with a read-only mount, baked-into-container installs.
+
+    Override the location with the ``TRANSCRIBE_ANYTHING_CACHE_DIR`` env
+    var; otherwise fall back to the standard per-user cache directory.
+    """
+    override = os.environ.get("TRANSCRIBE_ANYTHING_CACHE_DIR")
+    runtime_dir = Path(override) if override else Path(user_cache_dir("transcribe-anything"))
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    return runtime_dir
+
+
+def get_runtime_venv_dir(name: str) -> Path:
+    """Return a writable per-backend virtualenv directory under :func:`get_runtime_dir`."""
+    venv_dir = get_runtime_dir() / "venv" / name
+    venv_dir.mkdir(parents=True, exist_ok=True)
+    return venv_dir
+
+
+def get_static_ffmpeg_runtime_dir() -> Path:
+    """Return the writable directory used for the static_ffmpeg download + lock file."""
+    ffmpeg_dir = get_runtime_dir() / "static_ffmpeg"
+    ffmpeg_dir.mkdir(parents=True, exist_ok=True)
+    return ffmpeg_dir
 
 
 def is_mac_arm() -> bool:

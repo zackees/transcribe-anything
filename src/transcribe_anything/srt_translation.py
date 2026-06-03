@@ -17,7 +17,7 @@ WRAP_SRT_PY = HERE / "srt_wrap.py"
 
 def get_environment() -> IsoEnv:
     """Returns the environment."""
-    venv_path = HERE / "venv" / "srttranslator"
+    venv_path = get_runtime_venv_dir("srttranslator")
     reqs_text = "\n".join(["srtranslator==0.3.9", "requests==2.28.1", "urllib3==1.26.13"])
     reqs = Requirements(
         reqs_text,

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
-from transcribe_anything.util import has_nvidia_smi
+from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
 
 HERE = Path(__file__).parent
 
@@ -80,7 +80,7 @@ def build_pyproject_toml(has_nvidia: bool) -> str:
 
 def get_environment(has_nvidia: bool | None = None) -> IsoEnv:
     """Returns the isolated WhisperX environment."""
-    venv_dir = HERE / "venv" / "whisperx"
+    venv_dir = get_runtime_venv_dir("whisperx")
     if has_nvidia is None:
         has_nvidia = has_nvidia_smi()
     build_info = PyProjectToml(build_pyproject_toml(has_nvidia))

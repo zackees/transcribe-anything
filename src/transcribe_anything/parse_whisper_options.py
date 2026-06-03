@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Any
 
 from transcribe_anything import logger
-from transcribe_anything.whisper import HERE as _WHISPER_HERE
+from transcribe_anything.util import get_runtime_venv_dir
 from transcribe_anything.whisper import get_environment
 
 PATTERN = r"\s+\[--(.*?)\]"
 
-_WHISPER_VENV_DIR: Path = _WHISPER_HERE / "venv" / "whisper"
+_WHISPER_VENV_DIR: Path = get_runtime_venv_dir("whisper")
 
 
 def _whisper_venv_exists() -> bool:
