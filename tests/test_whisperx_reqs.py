@@ -18,6 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 HEAVY_BACKEND_DEPS = {
     "ctranslate2",
+    "flash-attn",
     "faster-whisper",
     "pyannote.audio",
     "torch",

@@ -29,9 +29,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -43,6 +45,7 @@ ASSETS = HERE.parent / "src" / "transcribe_anything" / "assets"
 SAMPLE_MP3 = ASSETS / "sample.mp3"
 
 CAN_RUN_TEST = has_nvidia_smi() and not is_mac() and SAMPLE_MP3.is_file()
+RUN_INSANE_FLASH_TEST = os.environ.get("TRANSCRIBE_ANYTHING_TEST_INSANE_FLASH", "").strip().lower() in {"1", "true", "yes", "on"}
 
 # Number of loops of the ~10 s sample.mp3 to concatenate. Four copies
 # put us well past the 30-s chunk boundary that triggers the upstream bug.
@@ -124,6 +127,15 @@ def _last_end_timestamp_from_insane_json(path: Path) -> float:
     raise AssertionError(f"no closed-end chunk in insane out.json: {chunks}")
 
 
+def _last_end_timestamp_from_srt(path: Path) -> float:
+    text = path.read_text(encoding="utf-8")
+    matches = re.findall(r"-->\s+(\d{2}):(\d{2}):(\d{2}),(\d{3})", text)
+    if not matches:
+        raise AssertionError(f"No SRT timestamp end found in {path}:\n{text}")
+    hours, minutes, seconds, millis = matches[-1]
+    return (float(hours) * 3600.0) + (float(minutes) * 60.0) + float(seconds) + (float(millis) / 1000.0)
+
+
 @unittest.skipUnless(CAN_RUN_TEST, "Requires NVIDIA (not on Mac) and bundled sample.mp3")
 class LongformTimestampAgreementTester(unittest.TestCase):
     """Pin down that the two backends agree on the end of long audio."""
@@ -142,17 +154,21 @@ class LongformTimestampAgreementTester(unittest.TestCase):
 
             cuda_out = workdir / "out_cuda"
             insane_out = workdir / "out_insane"
+            insane_flash_out = workdir / "out_insane_flash"
+            runtimes: dict[str, float] = {}
 
             # Clean before each backend run in case a previous attempt
             # left stale artifacts.
             shutil.rmtree(cuda_out, ignore_errors=True)
             shutil.rmtree(insane_out, ignore_errors=True)
+            shutil.rmtree(insane_flash_out, ignore_errors=True)
 
             # Use the public transcribe() API rather than the low-level
             # run_whisper / run_insanely_fast_whisper helpers, because
             # transcribe() handles the per-backend output-file renaming
             # (openai-whisper writes <input_stem>.json; transcribe()
             # renames everything to out.json/out.srt/etc.).
+            start = time.perf_counter()
             transcribe(
                 url_or_file=str(long_wav),
                 output_dir=str(cuda_out),
@@ -161,6 +177,9 @@ class LongformTimestampAgreementTester(unittest.TestCase):
                 language="en",
                 device="cuda",
             )
+            runtimes["cuda"] = time.perf_counter() - start
+
+            start = time.perf_counter()
             transcribe(
                 url_or_file=str(long_wav),
                 output_dir=str(insane_out),
@@ -169,9 +188,12 @@ class LongformTimestampAgreementTester(unittest.TestCase):
                 language="en",
                 device="insane",
             )
+            runtimes["insane"] = time.perf_counter() - start
 
             cuda_last = _last_end_timestamp_from_whisper_json(cuda_out / "out.json")
             insane_last = _last_end_timestamp_from_insane_json(insane_out / "out.json")
+            cuda_srt_last = _last_end_timestamp_from_srt(cuda_out / "out.srt")
+            insane_srt_last = _last_end_timestamp_from_srt(insane_out / "out.srt")
 
             # Each backend's last timestamp should bracket the true duration.
             self.assertGreaterEqual(
@@ -210,6 +232,49 @@ class LongformTimestampAgreementTester(unittest.TestCase):
                     "decoding offset bug is back; verify transformers>=4.53.0 is actually installed."
                 ),
             )
+            self.assertAlmostEqual(cuda_last, cuda_srt_last, delta=LAST_TIMESTAMP_TOLERANCE_S)
+            self.assertAlmostEqual(insane_last, insane_srt_last, delta=LAST_TIMESTAMP_TOLERANCE_S)
+
+            if RUN_INSANE_FLASH_TEST:
+                start = time.perf_counter()
+                transcribe(
+                    url_or_file=str(long_wav),
+                    output_dir=str(insane_flash_out),
+                    model="tiny",
+                    task="transcribe",
+                    language="en",
+                    device="insane-flash",
+                )
+                runtimes["insane-flash"] = time.perf_counter() - start
+
+                insane_flash_last = _last_end_timestamp_from_insane_json(insane_flash_out / "out.json")
+                insane_flash_srt_last = _last_end_timestamp_from_srt(insane_flash_out / "out.srt")
+
+                self.assertGreaterEqual(
+                    insane_flash_last,
+                    wav_duration - WAV_DURATION_LOWER_SLACK_S,
+                    msg=f"insane-flash last={insane_flash_last:.2f}s far below wav_duration={wav_duration:.2f}s",
+                )
+                self.assertLessEqual(
+                    insane_flash_last,
+                    wav_duration + WAV_DURATION_UPPER_SLACK_S,
+                    msg=f"insane-flash last={insane_flash_last:.2f}s overshot wav_duration={wav_duration:.2f}s",
+                )
+                self.assertAlmostEqual(
+                    cuda_last,
+                    insane_flash_last,
+                    delta=LAST_TIMESTAMP_TOLERANCE_S,
+                    msg=(f"cuda last={cuda_last:.2f}s vs insane-flash last={insane_flash_last:.2f}s " f"differ by more than {LAST_TIMESTAMP_TOLERANCE_S}s"),
+                )
+                self.assertAlmostEqual(
+                    insane_last,
+                    insane_flash_last,
+                    delta=LAST_TIMESTAMP_TOLERANCE_S,
+                    msg=(f"insane last={insane_last:.2f}s vs insane-flash last={insane_flash_last:.2f}s " f"differ by more than {LAST_TIMESTAMP_TOLERANCE_S}s"),
+                )
+                self.assertAlmostEqual(insane_flash_last, insane_flash_srt_last, delta=LAST_TIMESTAMP_TOLERANCE_S)
+
+            print("Long-form backend runtimes:", {name: round(value, 2) for name, value in runtimes.items()})
 
 
 if __name__ == "__main__":

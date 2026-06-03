@@ -27,6 +27,83 @@ from transcribe_anything.util import print_cuda_diagnostics
 
 HERE = Path(__file__).parent
 CUDA_INFO: Optional[CudaInfo] = None
+FLASH_ATTENTION_VERIFIED = False
+
+_TRUE_VALUES = {"1", "true", "t", "yes", "y", "on"}
+_FALSE_VALUES = {"0", "false", "f", "no", "n", "off"}
+
+FLASH_ATTENTION_PROBE_CODE = r"""
+import json
+import platform
+import sys
+
+result = {
+    "python": sys.version.split()[0],
+    "platform": platform.platform(),
+}
+
+try:
+    import torch
+
+    result["torch_version"] = torch.__version__
+    result["torch_cuda"] = torch.version.cuda
+    result["cuda_available"] = bool(torch.cuda.is_available())
+    if not torch.cuda.is_available():
+        raise RuntimeError("torch.cuda.is_available() returned False")
+
+    capability = torch.cuda.get_device_capability(0)
+    result["gpu_name"] = torch.cuda.get_device_name(0)
+    result["gpu_capability"] = f"sm_{capability[0]}{capability[1]}"
+    if capability[0] < 8:
+        raise RuntimeError("FlashAttention-2 CUDA requires NVIDIA Ampere or newer (SM80+)")
+
+    import flash_attn
+    import flash_attn_2_cuda  # noqa: F401
+
+    result["flash_attn_version"] = getattr(flash_attn, "__version__", "unknown")
+    result["flash_attn_2_cuda"] = True
+
+    from transformers import AutoModelForSpeechSeq2Seq, WhisperConfig
+    from transformers.utils import is_flash_attn_2_available
+
+    result["transformers_flash_attn_2_available"] = bool(is_flash_attn_2_available())
+    if not result["transformers_flash_attn_2_available"]:
+        raise RuntimeError("Transformers reports FlashAttention2 as unavailable")
+
+    config = WhisperConfig(
+        vocab_size=64,
+        d_model=16,
+        encoder_layers=1,
+        decoder_layers=1,
+        encoder_attention_heads=2,
+        decoder_attention_heads=2,
+        encoder_ffn_dim=32,
+        decoder_ffn_dim=32,
+        num_mel_bins=80,
+        max_source_positions=16,
+        max_target_positions=16,
+        pad_token_id=0,
+        bos_token_id=1,
+        eos_token_id=2,
+        decoder_start_token_id=1,
+    )
+    model = AutoModelForSpeechSeq2Seq.from_config(
+        config,
+        attn_implementation="flash_attention_2",
+        torch_dtype=torch.float16,
+    ).to("cuda")
+    result["whisper_attn_implementation"] = getattr(model.config, "_attn_implementation", None)
+    if result["whisper_attn_implementation"] != "flash_attention_2":
+        raise RuntimeError(
+            "Whisper model did not select flash_attention_2; "
+            f"got {result['whisper_attn_implementation']!r}"
+        )
+    print(json.dumps(result, sort_keys=True))
+except Exception as exc:
+    result["error"] = repr(exc)
+    print(json.dumps(result, sort_keys=True), file=sys.stderr)
+    raise
+"""
 
 
 def _k2_stub_root() -> Path:
@@ -56,6 +133,87 @@ def _prepare_subprocess_env(base_env: dict[str, str]) -> dict[str, str]:
         parts.append(stub)
     env["PYTHONPATH"] = os.pathsep.join(parts)
     return env
+
+
+def _split_flag_value(arg: str) -> tuple[str, str | None]:
+    """Split --flag=value args while preserving plain flags."""
+    if arg.startswith("--") and "=" in arg:
+        flag, value = arg.split("=", 1)
+        return flag, value
+    return arg, None
+
+
+def _bool_arg_value(value: str | None) -> bool:
+    """Normalize a CLI boolean value."""
+    if value is None:
+        return True
+    normalized = value.strip().lower()
+    if normalized in _TRUE_VALUES:
+        return True
+    if normalized in _FALSE_VALUES:
+        return False
+    raise ValueError(f"Expected a boolean value for --flash, got {value!r}")
+
+
+def _prepare_insane_args(other_args: list[str] | None, *, force_flash: bool) -> list[str]:
+    """Return backend args, forcing --flash True for the insane-flash backend."""
+    args = [str(arg) for arg in (other_args or [])]
+    if not force_flash:
+        return args
+
+    prepared: list[str] = []
+    index = 0
+    saw_flash = False
+    while index < len(args):
+        raw_arg = args[index]
+        flag, explicit_value = _split_flag_value(raw_arg)
+        if flag != "--flash":
+            prepared.append(raw_arg)
+            index += 1
+            continue
+
+        saw_flash = True
+        if explicit_value is not None:
+            value = explicit_value
+            index += 1
+        elif index + 1 < len(args) and not args[index + 1].startswith("-"):
+            value = args[index + 1]
+            index += 2
+        else:
+            value = None
+            index += 1
+        if not _bool_arg_value(value):
+            raise ValueError("--device insane-flash requires FlashAttention; remove '--flash False' or use --device insane.")
+
+    if saw_flash:
+        sys.stderr.write("Normalizing --flash True for --device insane-flash.\n")
+    prepared.extend(["--flash", "True"])
+    return prepared
+
+
+def verify_flash_attention_available(iso_env: Any) -> None:
+    """Verify that the flash env can import and select FlashAttention2."""
+    global FLASH_ATTENTION_VERIFIED  # pylint: disable=global-statement
+    if FLASH_ATTENTION_VERIFIED:
+        return
+
+    result = iso_env.run(
+        ["python", "-c", FLASH_ATTENTION_PROBE_CODE],
+        shell=False,
+        universal_newlines=True,
+        encoding="utf-8",
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stdout = (result.stdout or "").strip()
+    stderr = (result.stderr or "").strip()
+    if result.returncode != 0:
+        details = "\n".join(part for part in [stdout, stderr] if part)
+        raise RuntimeError(f"insane-flash FlashAttention capability probe failed:\n{details}")
+    if stdout:
+        sys.stderr.write(f"insane-flash FlashAttention probe passed: {stdout}\n")
+    FLASH_ATTENTION_VERIFIED = True
 
 
 def get_cuda_info() -> CudaInfo:
@@ -227,11 +385,15 @@ def run_insanely_fast_whisper(
     language: str,
     hugging_face_token: str | None = None,
     other_args: list[str] | None = None,
+    flash: bool = False,
 ) -> None:
     """Runs insanely fast whisper."""
     # ffmpeg paths have to be installed or else the backend tool will fail.
     static_ffmpeg.add_paths()
-    iso_env = get_environment()
+    iso_env = get_environment(flash=flash)
+    backend_args = _prepare_insane_args(other_args, force_flash=flash)
+    if flash:
+        verify_flash_attention_available(iso_env)
     env = _prepare_subprocess_env(dict(os.environ))
     if sys.platform == "darwin":
         # Attempts fixed recommended for the mps machines. This seems
@@ -271,28 +433,28 @@ def run_insanely_fast_whisper(
     if hugging_face_token:
         cmd_list += ["--hf-token", hugging_face_token]
         # remove --hf-token from other_args if it's there.
-        if other_args and "--hf-token" in other_args:
-            idx = other_args.index("--hf-token")
+        if "--hf-token" in backend_args:
+            idx = backend_args.index("--hf-token")
             idx2 = idx + 1
-            other_args.pop(idx2)
-            other_args.pop(idx)
+            backend_args.pop(idx2)
+            backend_args.pop(idx)
     if language:
         cmd_list += ["--language", language]
 
     batch_size: int | None = None
-    if other_args:
+    if backend_args:
         # Check if the other_args contains --batch-size and remove it.
-        if "--batch-size" in other_args:
-            idx = other_args.index("--batch-size")
+        if "--batch-size" in backend_args:
+            idx = backend_args.index("--batch-size")
             idx2 = idx + 1
-            batch_size = int(other_args[idx2])
-            other_args.pop(idx2)
-            other_args.pop(idx)
+            batch_size = int(backend_args[idx2])
+            backend_args.pop(idx2)
+            backend_args.pop(idx)
     batch_size = get_batch_size() or batch_size
     if batch_size is not None:
         cmd_list += ["--batch-size", f"{batch_size}"]
-    if other_args:
-        cmd_list.extend(other_args)
+    if backend_args:
+        cmd_list.extend(backend_args)
     # Remove the empty strings.
     cmd_list = [x.strip() for x in cmd_list if x.strip()]
     cmd = subprocess.list2cmdline(cmd_list)

@@ -42,7 +42,7 @@ This document outlines the architecture for adding live transcription support to
 - Producer: Audio capture thread
 - Consumer: Transcription thread
 - Use existing faster-whisper backend for speed
-- Support for all device types: cpu, cuda, insane, whisperx, mlx
+- Support for all device types: cpu, cuda, insane, insane-flash, whisperx, mlx
 
 #### 4. Hotkey Handler (`hotkey.py`)
 - Global hotkey listener (default: configurable, e.g., Ctrl+Shift+T)
@@ -156,7 +156,7 @@ LiveTranscriptionConfig:
 - Use faster-whisper backend by default
 - Implement chunk-based processing (process while recording)
 - Use VAD to avoid processing silence
-- Support all existing device modes (cpu, cuda, insane, whisperx, mlx)
+- Support all existing device modes (cpu, cuda, insane, insane-flash, whisperx, mlx)
 
 #### Challenge 4: Hotkey Conflicts
 **Solution**:
@@ -419,7 +419,7 @@ from transcribe_anything import StreamingTranscriber
 # Low-latency streaming transcriber
 transcriber = StreamingTranscriber(
     model="base",
-    device="cuda",  # cpu, cuda, insane, whisperx, mlx
+    device="cuda",  # cpu, cuda, insane, insane-flash, whisperx, mlx
     latency_mode="low",  # ultra, low, balanced, quality
     callback=lambda text: print(f">> {text}", end="", flush=True)
 )
@@ -468,7 +468,7 @@ from transcribe_anything import LiveTranscriber
 # Create transcriber
 transcriber = LiveTranscriber(
     model="base",
-    device="cuda",  # cpu, cuda, insane, whisperx, mlx
+    device="cuda",  # cpu, cuda, insane, insane-flash, whisperx, mlx
     hotkey="ctrl+shift+t",
     output_file="transcript.txt"
 )
