@@ -26,7 +26,11 @@ from appdirs import user_config_dir  # type: ignore
 from transcribe_anything.audio import fetch_audio
 from transcribe_anything.insanely_fast_whisper import run_insanely_fast_whisper
 from transcribe_anything.logger import log_error
-from transcribe_anything.util import chop_double_extension, get_static_ffmpeg_runtime_dir, sanitize_filename
+from transcribe_anything.util import (
+    chop_double_extension,
+    get_static_ffmpeg_runtime_dir,
+    sanitize_filename,
+)
 from transcribe_anything.whisper import get_computing_device, run_whisper
 from transcribe_anything.whisper_mac import run_whisper_mac_mlx
 

@@ -575,7 +575,7 @@ wheels = [
 
 [[package]]
 name = "transcribe-anything"
-version = "3.2.10"
+version = "4.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "appdirs" },

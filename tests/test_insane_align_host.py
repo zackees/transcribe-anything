@@ -45,6 +45,7 @@ def test_apply_forced_alignment_passes_through_when_env_build_fails(monkeypatch)
 
 def test_apply_forced_alignment_passes_through_when_runner_crashes(monkeypatch) -> None:
     """A non-zero exit from the alignment runner must NOT propagate as an exception."""
+
     class FakeEnv:
         def run(self, *args, **kwargs):
             raise subprocess.CalledProcessError(returncode=1, cmd=args[0])

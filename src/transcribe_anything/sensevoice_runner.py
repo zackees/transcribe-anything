@@ -83,7 +83,9 @@ def main() -> int:
     # FunASR + ModelScope are imported inside main() so that --help works
     # without pulling them in.
     from funasr import AutoModel  # type: ignore
-    from funasr.utils.postprocess_utils import rich_transcription_postprocess  # type: ignore
+    from funasr.utils.postprocess_utils import (
+        rich_transcription_postprocess,  # type: ignore
+    )
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

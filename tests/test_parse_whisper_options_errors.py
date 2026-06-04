@@ -58,8 +58,7 @@ class ParseWhisperOptionsDiagnosticsTester(unittest.TestCase):
         self.assertNotEqual(
             kwargs.get("stderr"),
             subprocess.PIPE,
-            msg="parse_whisper_options must not redirect stderr to a PIPE; "
-            "uv first-run progress would be hidden (issue #40).",
+            msg="parse_whisper_options must not redirect stderr to a PIPE; " "uv first-run progress would be hidden (issue #40).",
         )
         self.assertFalse(
             kwargs.get("capture_output", False),
@@ -67,10 +66,7 @@ class ParseWhisperOptionsDiagnosticsTester(unittest.TestCase):
         )
 
     def test_happy_path_parses_options(self) -> None:
-        sample_stdout = (
-            "usage: whisper [-h] [--model {tiny,base}] [--language LANG]\n"
-            "  [--task {transcribe,translate}]\n"
-        )
+        sample_stdout = "usage: whisper [-h] [--model {tiny,base}] [--language LANG]\n" "  [--task {transcribe,translate}]\n"
         fake_env = _fake_env(returncode=0, stdout=sample_stdout, stderr="")
         with mock.patch.object(pwo_module, "get_environment", return_value=fake_env):
             data = pwo_module.parse_whisper_options()

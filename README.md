@@ -27,17 +27,77 @@ Over 800+⭐'s because this program this app just works! Works great for windows
 - **99.9% uptime SLA** with enterprise-grade security (SOC 2, HIPAA, ISO 27001)
 - **One API for all meeting platforms** — no platform-specific integrations required
 
-### New in 4.0! (planned)
+### New in 4.0! 🎉
 
-**Guaranteed FlashAttention backend for CUDA users.**
+**Three new backends, phoneme-precise word-level timestamps for the fast path, and read-only installs.** This is the biggest release since the `--device insane` debut. If you ran 3.2 and squinted at end-of-audio timestamps, this is the one to upgrade to.
 
-The new `--device insane-flash` backend keeps normal `--device insane` unchanged, but creates a separate isolated environment with pinned FlashAttention wheels. On supported NVIDIA CUDA platforms it forces the upstream insanely-fast-whisper `--flash True` path, verifies `flash_attn` and the compiled CUDA extension before transcription starts, and fails early with platform diagnostics when no controlled wheel is available.
+#### 🚀 `--device insane-flash` — guaranteed FlashAttention2 on CUDA
 
-Supported first-pass wheel targets are Windows x86_64, Linux x86_64, and Linux aarch64 on Python 3.11 with `torch==2.7.0+cu128` and `flash-attn==2.8.3`. macOS is not supported for `insane-flash`; Apple Silicon users should use `--device mlx`.
+Same blazing `insanely-fast-whisper` model path as `--device insane`, but in a separate isolated environment with **pinned FlashAttention2 wheels** for Windows x86_64, Linux x86_64, and Linux aarch64 (Python 3.11, `torch==2.7.0+cu128`, `flash-attn==2.8.3`). It verifies `flash_attn` and the compiled CUDA extension *before* transcription starts and fails early with platform diagnostics when no controlled wheel is available. No more sad-path silent fallbacks.
 
 ```bash
 transcribe-anything video.mp4 --device insane-flash --batch-size 8
 ```
+
+#### 🎯 `--align` — phoneme-precise word-level timestamps on `--device insane` / `--device insane-flash`
+
+The HF-pipeline timestamp drift on long audio is **over**. Add `--align` and the transcript gets a WhisperX wav2vec2 forced-alignment post-pass: every chunk grows a `words: [{word, start, end, score}]` array and segment timestamps tighten to first/last-word boundaries. `out.srt` and `out.vtt` inherit the tightened bounds for free. Reuses the WhisperX iso-env, so no new deps in the insane env. Best-effort by design — unsupported language, env build failure, or runner crash falls back to the original output with a stderr warning, never breaks transcription.
+
+```bash
+# Phoneme-precise timestamps on the fast path:
+transcribe-anything video.mp4 --device insane --align
+transcribe-anything video.mp4 --device insane-flash --align
+
+# Force a specific wav2vec2 aligner for languages outside the 41 defaults:
+transcribe-anything video.mp4 --device insane --align --align_model facebook/wav2vec2-large-960h-lv60-self
+```
+
+#### 🎙️ `--device whisperx` — alignment + diarization + word timing as a first-class backend
+
+[WhisperX](https://github.com/m-bain/whisperX) is now bundled as a parallel, additive backend (it does **not** replace `--device insane`). Built-in VAD chunking, wav2vec2 forced alignment, and pyannote diarization — all from one CLI. Use it when you want word-level timestamps and per-speaker labels from a single backend invocation.
+
+```bash
+transcribe-anything video.mp4 --device whisperx --diarize --hf_token <hf_xxxx>
+```
+
+Supports `--compute_type`, `--min_speakers` / `--max_speakers`, `--align_model`, `--no_align`, `--highlight_words`, `--vad_method`, `--chunk_size`.
+
+#### 🌐 `--device sensevoice` — multilingual non-autoregressive, ~5x faster at comparable WER
+
+New isolated-env backend wrapping FunASR's `iic/SenseVoiceSmall` model. **Non-autoregressive** — ~5x faster than `whisper-large-v3` at comparable word-error rate. Multilingual out of the box (`auto`/`zh`/`en`/`yue`/`ja`/`ko`/`nospeech`), built-in `fsmn-vad`, emotion detection, and event-tag postprocessing. Speaker diarization via `cam++` is opt-in with `--diarize`. Models pull from ModelScope by default; pass `--hub hf` for HuggingFace.
+
+```bash
+transcribe-anything video.mp4 --device sensevoice
+transcribe-anything video.mp4 --device sensevoice --diarize --language zh
+```
+
+#### 📦 Read-only installs work now
+
+Backend iso-env venvs and the bundled `static_ffmpeg` binary moved from inside the package directory (`<site-packages>/transcribe_anything/venv/...`) to the user cache directory (`<user_cache_dir>/transcribe-anything/...`). That unblocks Nix-store installs, OS-package installs, multi-user shared installs, baked-into-container installs, and `pip install --target` with a read-only mount. Override the location with `TRANSCRIBE_ANYTHING_CACHE_DIR=/somewhere/writable`.
+
+> **One-time cost on upgrade:** existing 3.2 installs have a venv cache at the *old* path. Those caches are orphaned by this move, so the first run of each backend after upgrade re-downloads its dependencies (~10 GB for `--device insane`). No data loss — just the install-time wheel fetch, once.
+
+#### ❄️ Native Nix flake — community contribution
+
+```bash
+nix run github:zackees/transcribe-anything -- <url-or-file> --device insane
+nix shell github:zackees/transcribe-anything
+nix build .#transcribe-anything
+```
+
+A complete [uv2nix](https://github.com/pyproject-nix/uv2nix)-based Nix flake is now part of the repo, contributed by community member [@eeedean](https://github.com/eeedean) (#68 → #104). One-line install for any Linux / macOS / NixOS user with Nix flakes enabled, the wrapper script puts `ffmpeg` and `uv` on PATH automatically, and the dev shell (`nix develop`) gives you an editable install with `yt-dlp` pre-installed. Pairs perfectly with the read-only-install support above — backend iso-envs land in your user cache, not the immutable Nix store.
+
+#### ☁️ Cloud / Serverless (no local GPU)
+
+If you don't have a local NVIDIA GPU, community member [@victorkjung](https://github.com/victorkjung) maintains a turnkey [RunPod Serverless deployment](https://github.com/victorkjung/transcribe-anything/tree/runpod-integration/runpod). Per-second-billed GPU minutes that scale to zero. See the [Cloud / Serverless](#cloud--serverless-no-local-gpu) section below.
+
+#### 🔒 Security fix
+
+`--hf-token` no longer leaks into stderr or the `OSError("Failed to execute ...")` traceback when the insane backend's subprocess fails. If you ran 3.2 on RunPod, Modal, or any other serverless host that surfaces stdout/stderr or exception messages in job-status APIs, **rotate your HuggingFace token** — older runs may have logged it. Going forward, the token is masked in both the `Running:` banner and the failure traceback. The subprocess itself still receives the real token.
+
+#### 🙏 Thanks
+
+`--device insane-flash`, `--device whisperx`, and the long-form timestamp regression suite were driven by community feedback through the issue tracker. `--device sensevoice` is wired up against FunASR ([FunAudioLLM/SenseVoice](https://github.com/FunAudioLLM/SenseVoice)). `--align` reuses the wav2vec2 forced-alignment work from [m-bain/whisperX](https://github.com/m-bain/whisperX). Special thanks to [@aj47](https://github.com/aj47) for the MLX backend, [@victorkjung](https://github.com/victorkjung) for the RunPod Serverless deployment fork, and everyone who filed issues and PRs since 3.2.
 
 ### New in 3.2!
 

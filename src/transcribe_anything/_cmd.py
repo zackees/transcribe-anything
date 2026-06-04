@@ -62,9 +62,7 @@ INSANE_DEVICES = {"insane", "insane-flash"}
 def route_whisperx_args(args: argparse.Namespace, unknown: list[str]) -> None:
     """Append WhisperX-only CLI args to unknown when the WhisperX backend is selected."""
     use_whisperx = args.device == "whisperx"
-    align_for_insane = (
-        bool(getattr(args, "align", False)) and args.device in INSANE_DEVICES
-    )
+    align_for_insane = bool(getattr(args, "align", False)) and args.device in INSANE_DEVICES
     for attr, option in WHISPERX_VALUE_ARGS:
         value = getattr(args, attr)
         if value is None:

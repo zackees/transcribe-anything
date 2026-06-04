@@ -95,9 +95,7 @@ def run_sensevoice(  # pylint: disable=too-many-arguments,too-many-locals
     passthrough, language_override = _extract_flag_value(passthrough, "--language")
 
     if passthrough:
-        sys.stderr.write(
-            "Warning: ignoring unsupported SenseVoice args: " + " ".join(passthrough) + "\n"
-        )
+        sys.stderr.write("Warning: ignoring unsupported SenseVoice args: " + " ".join(passthrough) + "\n")
 
     env = dict(os.environ)
     env["PYTHONIOENCODING"] = "utf-8"

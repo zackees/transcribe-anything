@@ -149,10 +149,7 @@ def main() -> int:
 
     language = (args.language or "").strip()
     if args.align_model is None and not _supported_language(language):
-        sys.stderr.write(
-            f"insane_align: language={language!r} has no default WhisperX alignment "
-            "model; pass --align-model <hf-model-id> to force one. Skipping alignment.\n"
-        )
+        sys.stderr.write(f"insane_align: language={language!r} has no default WhisperX alignment " "model; pass --align-model <hf-model-id> to force one. Skipping alignment.\n")
         out_json.write_text(json.dumps(src_data, indent=2), encoding="utf-8")
         return 0
 
