@@ -9,9 +9,9 @@
 ![image](https://github.com/zackees/transcribe-anything/assets/6856673/94bdd1fe-3225-438a-ac1b-09c81f1d4108)
 
 
-### USES WHISPER AI
+### Every Whisper variant under one app! Easist install ever! Mac/Linux/Win
 
-Over 800+⭐'s because this program this app just works! Works great for windows and mac. This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
+Over 1200+⭐'s because this program just works! Works great for windows and mac. This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
 
