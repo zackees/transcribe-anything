@@ -200,6 +200,8 @@ def transcribe(
     hugging_face_token: Optional[str] = None,
     other_args: Optional[list[str]] = None,
     initial_prompt: Optional[str] = None,
+    align: bool = False,
+    align_model: Optional[str] = None,
 ) -> str:
     """
     Runs the transcription program.
@@ -217,6 +219,16 @@ def transcribe(
         initial_prompt: Initial prompt to provide context for transcription.
                        Useful for custom vocabulary, names, or domain-specific terms.
                        Example: "The speaker discusses AI, machine learning, and neural networks."
+        align: Run WhisperX wav2vec2 forced-alignment post-pass on the
+               transcript to replace HF Whisper's coarse segment timestamps
+               with phoneme-precise word-level timing. Only applies to
+               ``--device insane`` and ``--device insane-flash``; ignored
+               otherwise. Best-effort: unsupported language or env build
+               failure leaves the original output untouched.
+        align_model: Override the wav2vec2 model id used by alignment.
+                     Defaults to WhisperX's per-language defaults; pass a
+                     HuggingFace wav2vec2 model id to use a language that
+                     isn't in those defaults.
 
     Returns:
         Path to the output directory containing transcription files
@@ -308,6 +320,8 @@ def transcribe(
                     hugging_face_token=hugging_face_token,
                     other_args=other_args,
                     flash=device_enum == Device.INSANE_FLASH,
+                    align=align,
+                    align_model=align_model,
                 )
             elif device_enum == Device.WHISPERX:
                 global run_whisperx

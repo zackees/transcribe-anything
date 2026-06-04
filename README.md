@@ -253,13 +253,13 @@ Don't have a local NVIDIA GPU? Community member [@victorkjung](https://github.co
 | Backend | Device Flag | Key Arguments | Best For |
 |---------|-------------|---------------|----------|
 | **MLX** | `--device mlx` | `--batch_size`, `--verbose`, `--initial_prompt` | Mac Apple Silicon |
-| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--timestamp` | Windows/Linux GPU |
-| **Insane Flash** | `--device insane-flash` | `--batch-size`, `--hf_token`, `--timestamp` | CUDA GPU with verified FlashAttention2 |
+| **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--timestamp`, `--align` | Windows/Linux GPU |
+| **Insane Flash** | `--device insane-flash` | `--batch-size`, `--hf_token`, `--timestamp`, `--align` | CUDA GPU with verified FlashAttention2 |
 | **WhisperX** | `--device whisperx` | `--compute_type`, `--diarize`, `--batch_size`, `--align_model` | Alignment, diarization, word timing |
 | **SenseVoice** | `--device sensevoice` | `--diarize`, `--language`, `--hub` | FunASR/SenseVoice; multilingual (zh/en/yue/ja/ko), built-in VAD + emotion |
 | **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
 
-> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. `insane-flash` is the same backend family with verified FlashAttention2 dependencies. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. SenseVoice wraps FunASR's `iic/SenseVoiceSmall` model — multilingual (zh/en/yue/ja/ko), non-autoregressive, with built-in VAD; diarization (cam++) is opt-in via `--diarize`. Models download from ModelScope by default; pass `--hub hf` to use HuggingFace instead. CPU backend supports the full range of standard OpenAI Whisper arguments.
+> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. `insane-flash` is the same backend family with verified FlashAttention2 dependencies. Both insane backends accept an opt-in `--align` flag that runs a WhisperX wav2vec2 forced-alignment post-pass on the transcript, replacing the HF pipeline's segment-level timestamps with phoneme-precise word-level timing (per-word `{word, start, end, score}` data in `out.json`, tightened segment bounds in `out.srt` / `out.vtt`). It reuses the WhisperX iso-env, so no new deps land in the insane env. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. SenseVoice wraps FunASR's `iic/SenseVoiceSmall` model — multilingual (zh/en/yue/ja/ko), non-autoregressive, with built-in VAD; diarization (cam++) is opt-in via `--diarize`. Models download from ModelScope by default; pass `--hub hf` to use HuggingFace instead. CPU backend supports the full range of standard OpenAI Whisper arguments.
 
 ## Custom Prompts and Vocabulary
 
@@ -738,6 +738,10 @@ The real reason behind `transcribe-anything`'s surprising popularity comes from 
 
 # Versions
 
+- 4.0.0 (planned): Adds an optional WhisperX backend, enabled with `--device whisperx`. This backend runs in its own isolated environment and does not replace `--device insane`.
+  - WhisperX supports forced alignment, VAD, word-level timing, word highlighting, and optional speaker diarization with `--diarize --hf_token`.
+  - Output is normalized to the existing `out.srt`, `out.vtt`, `out.txt`, and `out.json` contract, with `speaker.json` emitted when speaker labels are available.
+  - CUDA timing comparison on `tests/localfile/video.wav`: standard `--device cuda` produced 2 coarse SRT cues, while WhisperX running on CUDA produced 4 phrase-level cues and 20 word segments. The normalized transcript text matched, and both final SRT timestamps landed within 1s of the 10.027s audio duration. Use WhisperX when finer subtitle timing or alignment metadata is more important than the fastest transcription path.
 - 3.0.7: Insane whisperer mode no longer prints out the srt file during transcription completion.
 - 3.0.6: MacOS MLX mode fixed/improved
   - PR: https://github.com/zackees/transcribe-anything/pull/39

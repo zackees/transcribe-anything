@@ -388,8 +388,18 @@ def run_insanely_fast_whisper(
     hugging_face_token: str | None = None,
     other_args: list[str] | None = None,
     flash: bool = False,
+    align: bool = False,
+    align_model: str | None = None,
 ) -> None:
-    """Runs insanely fast whisper."""
+    """Runs insanely fast whisper.
+
+    When ``align`` is true, runs WhisperX's wav2vec2 forced-alignment pass
+    on the transcript to replace HF Whisper's segment-level timestamps
+    with phoneme-precise word-level timestamps. Reuses the WhisperX
+    iso-env (no new deps in the insane env). Best-effort: unsupported
+    language or env-build failure logs a warning and leaves the original
+    output untouched.
+    """
     # ffmpeg paths have to be installed or else the backend tool will fail.
     ffmpeg_cache = get_static_ffmpeg_runtime_dir()
     static_ffmpeg_run.LOCK_FILE = str(ffmpeg_cache / "lock.file")
@@ -487,6 +497,18 @@ def run_insanely_fast_whisper(
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)
     trim_text_chunks(json_data)
+
+    if align:
+        from transcribe_anything.insane_align import apply_forced_alignment
+
+        json_data = apply_forced_alignment(
+            json_data,
+            input_wav=input_wav,
+            language=language,
+            align_model=align_model,
+        )
+        trim_text_chunks(json_data)
+
     json_data_str = json.dumps(json_data, indent=2)
 
     if hugging_face_token:

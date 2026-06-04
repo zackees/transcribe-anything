@@ -141,7 +141,7 @@ def test_api_routes_device_whisperx_to_whisperx_backend(monkeypatch: pytest.Monk
     def fail_backend(*_args: Any, **_kwargs: Any) -> None:
         raise AssertionError("device='whisperx' should not route to another backend")
 
-    monkeypatch.setattr(api.static_ffmpeg, "add_paths", lambda: None)
+    monkeypatch.setattr(api.static_ffmpeg, "add_paths", lambda *args, **kwargs: None)
     monkeypatch.setattr(api, "make_temp_wav", lambda: str(temp_wav))
     monkeypatch.setattr(api, "fetch_audio", fake_fetch_audio)
     monkeypatch.setattr(api, "run_whisperx", fake_run_whisperx, raising=False)
@@ -212,7 +212,7 @@ def test_run_whisperx_uses_isolated_env_and_forwards_backend_args(monkeypatch: p
 
     fake_env = FakeEnv()
     monkeypatch.setattr(whisperx, "get_environment", lambda: fake_env)
-    monkeypatch.setattr(whisperx.static_ffmpeg, "add_paths", lambda: None)
+    monkeypatch.setattr(whisperx.static_ffmpeg, "add_paths", lambda *args, **kwargs: None)
 
     whisperx.run_whisperx(
         input_wav=input_wav,
