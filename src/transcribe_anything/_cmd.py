@@ -62,12 +62,19 @@ INSANE_DEVICES = {"insane", "insane-flash"}
 def route_whisperx_args(args: argparse.Namespace, unknown: list[str]) -> None:
     """Append WhisperX-only CLI args to unknown when the WhisperX backend is selected."""
     use_whisperx = args.device == "whisperx"
+    align_for_insane = (
+        bool(getattr(args, "align", False)) and args.device in INSANE_DEVICES
+    )
     for attr, option in WHISPERX_VALUE_ARGS:
         value = getattr(args, attr)
         if value is None:
             continue
         if use_whisperx:
             unknown.extend([option, str(value)])
+        elif attr == "align_model" and align_for_insane:
+            # --align_model is also consumed by the insane --align post-pass;
+            # the host plumbs args.align_model through transcribe().
+            continue
         else:
             print(f"{option} only works with --device whisperx. Ignoring {option}")
 
@@ -191,12 +198,27 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--align_model",
-        help="WhisperX alignment model to use. Only works for --device whisperx.",
+        help=(
+            "Alignment model to use. Wav2vec2 model id for forced alignment. "
+            "Applies to --device whisperx (always on by default) and to "
+            "--device insane / --device insane-flash when --align is passed."
+        ),
         default=None,
     )
     parser.add_argument(
         "--no_align",
         help="Disable WhisperX forced alignment. Only works for --device whisperx.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--align",
+        help=(
+            "Run a WhisperX wav2vec2 forced-alignment post-pass on the transcript "
+            "to replace HF Whisper's segment-level timestamps with phoneme-precise "
+            "word-level timing. Only applies to --device insane and --device "
+            "insane-flash (WhisperX already aligns by default). Reuses the WhisperX "
+            "iso-env, so no new deps land in the insane env."
+        ),
         action="store_true",
     )
     parser.add_argument(
@@ -320,6 +342,12 @@ def main() -> int:
             unknown.append("--timestamp")
             unknown.append(args.timestamp)
 
+    align = bool(getattr(args, "align", False))
+    align_model = getattr(args, "align_model", None)
+    if align and args.device not in INSANE_DEVICES:
+        print("--align only works with --device insane/insane-flash. Ignoring --align")
+        align = False
+
     route_whisperx_args(args, unknown)
 
     # Add initial_prompt to other_args if specified
@@ -345,6 +373,8 @@ def main() -> int:
             embed=args.embed,
             hugging_face_token=args.hf_token,
             other_args=unknown,
+            align=align,
+            align_model=align_model if align else None,
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
