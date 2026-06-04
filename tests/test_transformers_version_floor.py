@@ -19,7 +19,6 @@ import unittest
 
 from transcribe_anything.insanley_fast_whisper_reqs import _get_reqs_generic
 
-
 TRANSFORMERS_LINE = re.compile(r"^transformers==(?P<v>\d+\.\d+\.\d+)$")
 MIN_VERSION = (4, 53, 0)
 

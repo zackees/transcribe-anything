@@ -9,6 +9,7 @@ language-support guard.
 from __future__ import annotations
 
 import copy
+from typing import Any
 
 from transcribe_anything.insane_align_runner import (
     _convert_chunks_to_segments,
@@ -25,7 +26,7 @@ def test_convert_chunks_strips_text_whitespace() -> None:
 
 
 def test_convert_chunks_skips_none_timestamps() -> None:
-    chunks = [
+    chunks: list[dict[str, Any]] = [
         {"timestamp": [0.0, 1.0], "text": "kept"},
         {"timestamp": [None, None], "text": "dropped"},
         {"timestamp": [1.0, None], "text": "also dropped"},
@@ -63,7 +64,7 @@ def test_convert_chunks_drops_unparseable_timestamps() -> None:
 
 def test_convert_chunks_preserves_source_index_for_back_merge() -> None:
     """index_map must map align-result -> original chunk index, skipping over None-timestamp chunks."""
-    chunks = [
+    chunks: list[dict[str, Any]] = [
         {"timestamp": [None, None], "text": "skip"},
         {"timestamp": [0.0, 1.0], "text": "keep first"},
         {"timestamp": [None, None], "text": "skip"},
@@ -75,10 +76,14 @@ def test_convert_chunks_preserves_source_index_for_back_merge() -> None:
 
 def test_merge_alignment_tightens_segment_timestamps_to_word_boundaries() -> None:
     chunks = [{"timestamp": [0.0, 5.0], "text": "hello world"}]
-    aligned = [{"words": [
-        {"word": "hello", "start": 0.1, "end": 0.6, "score": 0.95},
-        {"word": "world", "start": 0.8, "end": 1.4, "score": 0.91},
-    ]}]
+    aligned = [
+        {
+            "words": [
+                {"word": "hello", "start": 0.1, "end": 0.6, "score": 0.95},
+                {"word": "world", "start": 0.8, "end": 1.4, "score": 0.91},
+            ]
+        }
+    ]
     _merge_alignment_into_chunks(chunks, aligned, [0])
     assert chunks[0]["timestamp"] == [0.1, 1.4]
     assert len(chunks[0]["words"]) == 2
@@ -86,11 +91,15 @@ def test_merge_alignment_tightens_segment_timestamps_to_word_boundaries() -> Non
 
 def test_merge_alignment_keeps_words_with_missing_timing() -> None:
     """whisperx emits None for words it couldn't phoneme-align (e.g. numerals)."""
-    chunks = [{"timestamp": [0.0, 5.0], "text": "ten apples"}]
-    aligned = [{"words": [
-        {"word": "ten", "start": None, "end": None, "score": None},
-        {"word": "apples", "start": 0.5, "end": 1.3, "score": 0.94},
-    ]}]
+    chunks: list[dict[str, Any]] = [{"timestamp": [0.0, 5.0], "text": "ten apples"}]
+    aligned: list[dict[str, Any]] = [
+        {
+            "words": [
+                {"word": "ten", "start": None, "end": None, "score": None},
+                {"word": "apples", "start": 0.5, "end": 1.3, "score": 0.94},
+            ]
+        }
+    ]
     _merge_alignment_into_chunks(chunks, aligned, [0])
     assert chunks[0]["timestamp"] == [0.5, 1.3]
     assert len(chunks[0]["words"]) == 2

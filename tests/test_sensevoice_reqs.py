@@ -36,10 +36,7 @@ def test_top_level_dependencies_do_not_leak_sensevoice_stack() -> None:
     dep_names = {_package_name(dep) for dep in deps}
 
     leaked = sorted(HEAVY_BACKEND_DEPS.intersection(dep_names))
-    assert leaked == [], (
-        "SenseVoice backend dependencies belong in sensevoice_reqs.py, "
-        f"not pyproject.toml: {leaked}"
-    )
+    assert leaked == [], "SenseVoice backend dependencies belong in sensevoice_reqs.py, " f"not pyproject.toml: {leaked}"
 
 
 def test_sensevoice_reqs_include_pinned_backend_stack() -> None:

@@ -51,10 +51,7 @@ def parse_whisper_options() -> dict:
     instead of Ctrl+C-ing (issue #40).
     """
     if not _whisper_venv_exists():
-        sys.stderr.write(
-            "[transcribe-anything] First-run install in progress; "
-            "downloading the whisper environment can take several minutes.\n"
-        )
+        sys.stderr.write("[transcribe-anything] First-run install in progress; " "downloading the whisper environment can take several minutes.\n")
         sys.stderr.flush()
     env = get_environment()
     result = env.run(

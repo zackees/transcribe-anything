@@ -25,7 +25,10 @@ import webvtt  # type: ignore
 from transcribe_anything.cuda_available import CudaInfo
 from transcribe_anything.generate_speaker_json import generate_speaker_json
 from transcribe_anything.insanley_fast_whisper_reqs import get_environment
-from transcribe_anything.util import get_static_ffmpeg_runtime_dir, print_cuda_diagnostics
+from transcribe_anything.util import (
+    get_static_ffmpeg_runtime_dir,
+    print_cuda_diagnostics,
+)
 
 HERE = Path(__file__).parent
 CUDA_INFO: Optional[CudaInfo] = None

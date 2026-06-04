@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import Any
 
 from transcribe_anything.util import has_nvidia_smi
-from transcribe_anything.whisperx_reqs import get_environment as get_whisperx_environment
+from transcribe_anything.whisperx_reqs import (
+    get_environment as get_whisperx_environment,
+)
 
 HERE = Path(__file__).parent
 RUNNER = HERE / "insane_align_runner.py"
@@ -105,9 +107,7 @@ def apply_forced_alignment(
                 text=True,
             )
         except subprocess.CalledProcessError as exc:
-            sys.stderr.write(
-                f"insane_align: runner failed (exit {exc.returncode}); leaving timestamps unaligned\n"
-            )
+            sys.stderr.write(f"insane_align: runner failed (exit {exc.returncode}); leaving timestamps unaligned\n")
             return json_data
         except Exception as exc:  # pragma: no cover - belt-and-suspenders
             sys.stderr.write(f"insane_align: unexpected runner failure: {exc}; leaving timestamps unaligned\n")

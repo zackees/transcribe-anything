@@ -16,7 +16,6 @@ import unittest
 
 from transcribe_anything.whisper_mac import _make_pyproject_toml_content
 
-
 # Matches any tiktoken requirement line, whether pinned, lower-bounded,
 # upper-bounded, or anything in between.
 TIKTOKEN_REQ = re.compile(r'"\s*tiktoken\s*(?P<op>[<>=!~][^"]*)?\s*"')
