@@ -8,6 +8,8 @@ from pathlib import Path
 
 from iso_env import IsoEnv, IsoEnvArgs, Requirements  # type: ignore
 
+from transcribe_anything.util import get_runtime_venv_dir
+
 # from isolated_environment import isolated_environment  # type: ignore
 
 
