@@ -138,7 +138,6 @@ transcribe_anything/WHISPER_OPTIONS.json
 !.aider.conf.yml
 !.aiderignore
 activate
-uv.lock
 
 # MLX model files (downloaded at runtime)
 mlx_models/
@@ -151,3 +150,6 @@ tests/localfile/text_video_*
 # Video files
 *.mp4
 *.wav
+
+# Nix build artifact (symlink produced by `nix build`)
+result
