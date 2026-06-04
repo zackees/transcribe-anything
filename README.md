@@ -256,9 +256,10 @@ Don't have a local NVIDIA GPU? Community member [@victorkjung](https://github.co
 | **Insanely Fast** | `--device insane` | `--batch-size`, `--hf_token`, `--timestamp` | Windows/Linux GPU |
 | **Insane Flash** | `--device insane-flash` | `--batch-size`, `--hf_token`, `--timestamp` | CUDA GPU with verified FlashAttention2 |
 | **WhisperX** | `--device whisperx` | `--compute_type`, `--diarize`, `--batch_size`, `--align_model` | Alignment, diarization, word timing |
+| **SenseVoice** | `--device sensevoice` | `--diarize`, `--language`, `--hub` | FunASR/SenseVoice; multilingual (zh/en/yue/ja/ko), built-in VAD + emotion |
 | **CPU** | `--device cpu` | Standard whisper args | Universal compatibility |
 
-> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. `insane-flash` is the same backend family with verified FlashAttention2 dependencies. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. CPU backend supports the full range of standard OpenAI Whisper arguments.
+> **Note:** Each backend has different capabilities. MLX is optimized for Apple Silicon with a focused feature set. Insanely Fast uses a transformer-based architecture with specific options. `insane-flash` is the same backend family with verified FlashAttention2 dependencies. WhisperX is an additive backend for alignment and diarization, not a replacement for `--device insane`. SenseVoice wraps FunASR's `iic/SenseVoiceSmall` model — multilingual (zh/en/yue/ja/ko), non-autoregressive, with built-in VAD; diarization (cam++) is opt-in via `--diarize`. Models download from ModelScope by default; pass `--hub hf` to use HuggingFace instead. CPU backend supports the full range of standard OpenAI Whisper arguments.
 
 ## Custom Prompts and Vocabulary
 

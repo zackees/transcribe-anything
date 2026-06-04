@@ -31,6 +31,7 @@ from transcribe_anything.whisper import get_computing_device, run_whisper
 from transcribe_anything.whisper_mac import run_whisper_mac_mlx
 
 run_whisperx: Any = None
+run_sensevoice: Any = None
 
 DISABLED_WARNINGS = [
     ".*set_audio_backend has been deprecated.*",
@@ -70,6 +71,7 @@ class Device(Enum):
     INSANE = "insane"
     INSANE_FLASH = "insane-flash"
     WHISPERX = "whisperx"
+    SENSEVOICE = "sensevoice"
     MLX = "mlx"
 
     def __str__(self) -> str:
@@ -91,6 +93,8 @@ class Device(Enum):
             return Device.INSANE_FLASH
         if device == "whisperx":
             return Device.WHISPERX
+        if device == "sensevoice":
+            return Device.SENSEVOICE
         if device == "mlx":
             if sys.platform != "darwin":
                 raise ValueError("MLX is only supported on macOS.")
@@ -268,6 +272,10 @@ def transcribe(
             print("#####################################")
             print("######### WHISPERX MODE! ############")
             print("#####################################")
+        elif device_enum == Device.SENSEVOICE:
+            print("#####################################")
+            print("######## SENSEVOICE MODE! ###########")
+            print("#####################################")
         elif device_enum == Device.CPU:
             print("WARNING: NOT using GPU acceleration, using 10x slower CPU instead.")
         elif device_enum == Device.MLX:
@@ -312,6 +320,25 @@ def transcribe(
                     run_whisperx = _run_whisperx
 
                 run_whisperx(
+                    input_wav=Path(tmp_wav),
+                    model=model_str,
+                    output_dir=Path(tmpdir),
+                    task=task_str,
+                    language=language_str,
+                    hugging_face_token=hugging_face_token,
+                    other_args=other_args,
+                )
+            elif device_enum == Device.SENSEVOICE:
+                global run_sensevoice
+
+                if run_sensevoice is None:
+                    from transcribe_anything.sensevoice import (
+                        run_sensevoice as _run_sensevoice,
+                    )
+
+                    run_sensevoice = _run_sensevoice
+
+                run_sensevoice(
                     input_wav=Path(tmp_wav),
                     model=model_str,
                     output_dir=Path(tmpdir),
