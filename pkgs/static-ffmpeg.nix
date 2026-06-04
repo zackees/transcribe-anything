@@ -1,0 +1,3 @@
+{ pythonSet }:
+
+pythonSet."static-ffmpeg"
