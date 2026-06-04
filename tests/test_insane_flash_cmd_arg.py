@@ -136,7 +136,7 @@ def test_api_routes_device_insane_flash_to_insane_backend_with_flash(monkeypatch
     def fail_backend(*_args: Any, **_kwargs: Any) -> None:
         raise AssertionError("device='insane-flash' should route only to the insane backend")
 
-    monkeypatch.setattr(api.static_ffmpeg, "add_paths", lambda: None)
+    monkeypatch.setattr(api.static_ffmpeg, "add_paths", lambda *args, **kwargs: None)
     monkeypatch.setattr(api, "make_temp_wav", lambda: str(temp_wav))
     monkeypatch.setattr(api, "fetch_audio", fake_fetch_audio)
     monkeypatch.setattr(api, "run_insanely_fast_whisper", fake_run_insane)
@@ -217,7 +217,7 @@ def test_run_insanely_fast_whisper_uses_flash_env_and_forces_flash_arg(monkeypat
         env_calls.append(flash)
         return fake_env
 
-    monkeypatch.setattr(insane.static_ffmpeg, "add_paths", lambda: None)
+    monkeypatch.setattr(insane.static_ffmpeg, "add_paths", lambda *args, **kwargs: None)
     monkeypatch.setattr(insane, "get_environment", fake_get_environment)
     monkeypatch.setattr(insane, "verify_flash_attention_available", lambda _env: None)
     monkeypatch.setattr(insane, "get_device_id", lambda: "0")
