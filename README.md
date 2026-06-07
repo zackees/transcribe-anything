@@ -116,7 +116,7 @@ This is a communinity contribution by https://github.com/aj47. On behalf of all 
 
 ```bash
 # Mac accelerated back-end
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --device mlx
 ```
 
 Special thank
@@ -157,16 +157,16 @@ The new version now has state of the art speed in transcriptions, thanks to the 
 pip install transcribe-anything
 
 # Basic usage - CPU mode (works everywhere, slower)
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 # GPU accelerated (Windows/Linux)
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --device insane
 
 # GPU accelerated with guaranteed FlashAttention2 where supported
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device insane-flash
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --device insane-flash
 
 # Mac Apple Silicon accelerated
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ --device mlx
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --device mlx
 
 # Advanced options (see Advanced Options section below for full details)
 transcribe-anything video.mp4 --device mlx --batch_size 16 --verbose
@@ -552,7 +552,7 @@ transcribe-anything video.mp4 --device cpu --threads 4 --clip_timestamps "0,30"
 
 ```bash
 # Basic transcription
-transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 # Local file
 transcribe-anything video.mp4
@@ -661,7 +661,7 @@ The daemon **locks the backend, HF token, and prefetch policy at startup**. Per-
 transcribe-anything video.mp4 --remote http://127.0.0.1:8765
 
 # Talk to a public daemon with auth
-transcribe-anything https://youtu.be/... \
+transcribe-anything "https://youtu.be/..." \
   --remote https://transcribe.example.com \
   --token "$TRANSCRIBE_ANYTHING_TOKEN"
 
@@ -716,6 +716,33 @@ If you prefer nginx, `examples/nginx.serve.conf` is a drop-in fragment with the 
 - **In-process mode** — `pip install 'transcribe-anything[server]'` + `transcribe-anything serve --no-iso-env` skips the iso-env build and runs the daemon directly in your venv. Faster for dev / containers that already have FastAPI installed.
 
 ## Troubleshooting Common Issues
+
+### `zsh: no matches found: https://...`
+
+If you see this on macOS (or any host where zsh is the default shell):
+
+```
+$ transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+zsh: no matches found: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+…that's the shell, not `transcribe-anything`. zsh treats `?` and `*` in unquoted arguments as filename globs, and by default refuses to run the command if the glob matches nothing (its `NOMATCH` option). The CLI never sees the URL — the shell stops first. Fix any of these ways:
+
+```bash
+# 1. Quote the URL (recommended — works in every shell).
+transcribe-anything "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+
+# 2. Or prefix with `noglob` (zsh-specific, one-shot).
+noglob transcribe-anything https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+# 3. Or disable nomatch globally for the session.
+setopt +o nomatch
+
+# 4. Or escape the special characters by hand.
+transcribe-anything https://www.youtube.com/watch\?v=dQw4w9WgXcQ
+```
+
+Every URL example in this README uses option 1.
 
 ### Out of Memory Errors
 
