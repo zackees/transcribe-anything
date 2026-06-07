@@ -89,6 +89,14 @@ class ServerConfig:
     # services.
     allow_webhooks: bool = False
     webhook_timeout_seconds: float = 10.0
+    # Realtime streaming (#122). v1 ships the WebSocket protocol skeleton
+    # plus a pluggable streaming_fn; the production faster-whisper backend
+    # is a follow-up PR. `allow_stream=False` keeps the endpoint closed for
+    # daemons that don't need it (the canned fallback streaming_fn is for
+    # tests/dev only and shouldn't be exposed by default).
+    allow_stream: bool = False
+    max_stream_duration_seconds: int = 60 * 60
+    stream_decode_interval_ms: int = 200
 
     def requires_auth(self) -> bool:
         return not _is_loopback(self.host)
@@ -429,6 +437,117 @@ class WarmupRunner:
     @property
     def error(self) -> Optional[str]:
         return self._error
+
+
+# ----------------------------------------------------------------------
+# Realtime streaming (#122).
+#
+# This module owns the FastAPI-free skeleton: the ``StreamSession``
+# serializer (one in-flight WS connection per daemon) and the pluggable
+# ``StreamingTranscribeFn`` protocol. The actual WebSocket route lives in
+# ``server_app.py`` so this module stays importable without FastAPI.
+#
+# The faster-whisper backend (acceptance criterion #1 in #122) is
+# *deliberately* not in this PR — it needs its own iso-env, model-load
+# warmup, GPU benchmarking, and tests against a real WAV. This PR ships
+# the protocol + plumbing so that the real backend can be dropped in
+# behind the same ``streaming_fn`` interface in a follow-up.
+# ----------------------------------------------------------------------
+
+
+# Wire-protocol close codes (private 4000-4999 range per RFC 6455).
+WS_CLOSE_UNAUTHORIZED = 4401
+WS_CLOSE_BUSY = 4429  # another stream is already in-flight
+WS_CLOSE_DURATION_EXCEEDED = 4408
+WS_CLOSE_INTERNAL = 4499
+WS_CLOSE_NOT_ALLOWED = 4403  # daemon was not started with --allow-stream
+
+
+class StreamCancelled(Exception):
+    """Raised inside a streaming backend when the session is asked to abort."""
+
+
+class StreamSession:
+    """Serializes the one-streaming-connection-per-daemon invariant.
+
+    Use as a context manager from the WebSocket handler. ``acquire()``
+    returns False if another session is already live; the handler then
+    closes the new connection with :data:`WS_CLOSE_BUSY`.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._active: bool = False
+        self._cancel = threading.Event()
+        self._started_at: Optional[float] = None
+
+    def acquire(self) -> bool:
+        with self._lock:
+            if self._active:
+                return False
+            self._active = True
+            self._cancel.clear()
+            self._started_at = time.time()
+            return True
+
+    def release(self) -> None:
+        with self._lock:
+            self._active = False
+            self._started_at = None
+
+    def cancel(self) -> None:
+        """Signal the backend to abort at the next safe point."""
+        self._cancel.set()
+
+    @property
+    def is_active(self) -> bool:
+        with self._lock:
+            return self._active
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self._cancel.is_set()
+
+    @property
+    def runtime_seconds(self) -> Optional[float]:
+        with self._lock:
+            if self._started_at is None:
+                return None
+            return time.time() - self._started_at
+
+
+def _canned_streaming_fn(audio_iter: Any, *, session: StreamSession, **_kwargs: Any):
+    """Stand-in streaming backend.
+
+    Yields a fixed scripted sequence of ``partial`` / ``final`` events,
+    decoupled from the audio bytes (we just drain them to keep the
+    socket flowing). Useful for tests and for end-to-end protocol
+    validation in dev environments without a GPU.
+
+    Real backends will replace this via ``create_app(streaming_fn=...)``.
+    They are expected to honor :attr:`StreamSession.is_cancelled` between
+    chunks and raise :class:`StreamCancelled` to abort cleanly.
+    """
+    scripted = [
+        ("partial", "the", 1),
+        ("partial", "the quick", 2),
+        ("final", "the quick brown fox", 3),
+        ("partial", "jumps", 4),
+        ("final", "jumps over the lazy dog", 5),
+    ]
+    # Drain a few audio frames so the socket exercises both directions.
+    drained = 0
+    iterator = iter(audio_iter)
+    for kind, text, rev in scripted:
+        if session.is_cancelled:
+            raise StreamCancelled("stream cancelled by client")
+        try:
+            next(iterator)
+            drained += 1
+        except StopIteration:
+            pass
+        yield {"type": kind, "text": text, "rev": rev}
+    yield {"type": "metrics", "audio_frames_received": drained}
 
 
 def _make_silent_wav(duration_seconds: float = 1.0, sample_rate: int = 16000) -> Path:

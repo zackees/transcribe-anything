@@ -80,6 +80,23 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         default=10.0,
         help="per-attempt timeout (seconds) for webhook POSTs. Default 10s.",
     )
+    parser.add_argument(
+        "--allow-stream",
+        action="store_true",
+        help="enable WS /v1/stream for realtime transcription (#122). v1 ships the protocol skeleton with a canned backend; real backends land in a follow-up PR.",
+    )
+    parser.add_argument(
+        "--max-stream-duration",
+        type=int,
+        default=60 * 60,
+        help="hard cap on a single streaming session (seconds). Default 3600.",
+    )
+    parser.add_argument(
+        "--stream-decode-interval-ms",
+        type=int,
+        default=200,
+        help="cadence at which the streaming backend emits partial events (ms). Default 200.",
+    )
     parser.add_argument("--hf-token", default=None, help="HuggingFace token (never echoed to clients)")
     parser.add_argument(
         "--prefetch",
@@ -158,6 +175,9 @@ def _config_from_args(args: argparse.Namespace) -> "ServerConfig":  # type: igno
         shutdown_grace_seconds=args.shutdown_grace,
         allow_webhooks=bool(args.allow_webhooks),
         webhook_timeout_seconds=args.webhook_timeout,
+        allow_stream=bool(args.allow_stream),
+        max_stream_duration_seconds=args.max_stream_duration,
+        stream_decode_interval_ms=args.stream_decode_interval_ms,
     )
 
 

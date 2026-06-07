@@ -33,6 +33,11 @@ _SERVER_DEPS = [
     "uvicorn>=0.27.0,<1.0.0",
     "python-multipart>=0.0.9",
     "httpx>=0.27.0",
+    # WS /v1/stream (#122) — FastAPI/Starlette dispatches WebSocket via
+    # the ``websockets`` library; uvicorn's [standard] extra also pulls
+    # it in, but the iso-env declares it explicitly so dev/test envs
+    # (--no-iso-env) don't have to guess.
+    "websockets>=12.0",
     # Mirror of the host base deps so `import transcribe_anything.*` works
     # against the host source via PYTHONPATH.
     "static-ffmpeg>=3.0",
