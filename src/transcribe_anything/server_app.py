@@ -130,6 +130,31 @@ def create_app(
             return JSONResponse({"status": "warming"}, status_code=503)
         return JSONResponse({"status": "ready"})
 
+    @app.get("/metrics")
+    def metrics(_: None = Depends(_auth_dep)) -> Response:
+        snap = store.snapshot_metrics()
+        lines: list = [
+            "# HELP transcribe_anything_jobs_total Lifetime job count by terminal status.",
+            "# TYPE transcribe_anything_jobs_total counter",
+        ]
+        for status, n in snap["counts_lifetime"].items():
+            lines.append(f'transcribe_anything_jobs_total{{status="{status}"}} {n}')
+        lines.extend(
+            [
+                "# HELP transcribe_anything_jobs_in_flight Currently-running jobs.",
+                "# TYPE transcribe_anything_jobs_in_flight gauge",
+                f"transcribe_anything_jobs_in_flight {snap['in_flight']}",
+                "# HELP transcribe_anything_queue_depth Jobs currently queued.",
+                "# TYPE transcribe_anything_queue_depth gauge",
+                f"transcribe_anything_queue_depth {snap['queued_now']}",
+                "# HELP transcribe_anything_queue_capacity Configured --max-queue.",
+                "# TYPE transcribe_anything_queue_capacity gauge",
+                f"transcribe_anything_queue_capacity {snap['queue_capacity']}",
+            ]
+        )
+        body = "\n".join(lines) + "\n"
+        return Response(content=body, media_type="text/plain; version=0.0.4")
+
     @app.get("/v1/capabilities")
     def capabilities(_: None = Depends(_auth_dep)) -> dict:
         warmup_state: Optional[dict] = None

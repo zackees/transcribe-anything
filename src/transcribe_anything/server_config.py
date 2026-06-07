@@ -83,6 +83,12 @@ class ServerConfig:
     artifact_ttl_seconds: int = 3600
     job_root: Optional[str] = None
     shutdown_grace_seconds: int = 60
+    # Allow clients to register an outbound HTTP webhook on job completion.
+    # Off by default — the daemon must explicitly opt in via --allow-webhooks
+    # because outbound HTTP can be abused as a stepping stone to internal
+    # services.
+    allow_webhooks: bool = False
+    webhook_timeout_seconds: float = 10.0
 
     def requires_auth(self) -> bool:
         return not _is_loopback(self.host)
@@ -171,6 +177,13 @@ def validate_request_options(options: dict, config: ServerConfig) -> dict:
                 raise SettingsViolation(f"batch_size={requested} exceeds daemon limit {config.max_batch_size}")
             cleaned["batch_size"] = requested
             continue
+        if key == "webhook_url":
+            if not config.allow_webhooks:
+                raise SettingsViolation("daemon does not permit webhook callbacks (start with --allow-webhooks)")
+            if not isinstance(value, str) or not (value.startswith("http://") or value.startswith("https://")):
+                raise SettingsViolation(f"webhook_url must be an http(s) URL, got {value!r}")
+            cleaned["webhook_url"] = value
+            continue
         cleaned[key] = value
     return cleaned
 
@@ -218,6 +231,9 @@ class JobStore:
         self._queue: Queue = Queue(maxsize=config.max_queue)
         self._stop = threading.Event()
         self._worker: Optional[threading.Thread] = None
+        # Lifetime job-status counters for /metrics. Keys mirror JobStatus
+        # values; we count terminal transitions, not intermediate states.
+        self._counts: dict = {s.value: 0 for s in JobStatus}
 
     def start(self) -> None:
         if self._worker is not None:
@@ -247,6 +263,7 @@ class JobStore:
         )
         with self._lock:
             self._jobs[job_id] = job
+            self._counts[JobStatus.QUEUED.value] += 1
         try:
             self._queue.put_nowait(job_id)
         except Full as exc:
@@ -254,6 +271,19 @@ class JobStore:
                 self._jobs.pop(job_id, None)
             raise QueueFull("transcription queue is full") from exc
         return job
+
+    def snapshot_metrics(self) -> dict:
+        """Counters + gauges for the /metrics endpoint."""
+        with self._lock:
+            in_flight = sum(1 for j in self._jobs.values() if j.status == JobStatus.RUNNING)
+            queued = sum(1 for j in self._jobs.values() if j.status == JobStatus.QUEUED)
+            counts = dict(self._counts)
+        return {
+            "counts_lifetime": counts,
+            "in_flight": in_flight,
+            "queued_now": queued,
+            "queue_capacity": self.config.max_queue,
+        }
 
     def get(self, job_id: str) -> Optional[Job]:
         with self._lock:
@@ -294,6 +324,7 @@ class JobStore:
         with self._lock:
             job.status = JobStatus.RUNNING
             job.started_at = time.time()
+            self._counts[JobStatus.RUNNING.value] += 1
         request = job.request
         try:
             self.transcribe_fn(
@@ -314,6 +345,7 @@ class JobStore:
                 job.status = JobStatus.COMPLETED
                 job.completed_at = time.time()
                 job.artifacts = artifacts
+                self._counts[JobStatus.COMPLETED.value] += 1
         except Exception as exc:  # pylint: disable=broad-except
             tb = traceback.format_exc()
             redacted = _redact_secrets(f"{exc}\n{tb}", self.config.hf_token)
@@ -321,6 +353,29 @@ class JobStore:
                 job.status = JobStatus.FAILED
                 job.completed_at = time.time()
                 job.error = redacted
+                self._counts[JobStatus.FAILED.value] += 1
+        # Webhook fires after the job reaches a terminal state regardless of
+        # outcome. Fire-and-forget on a daemon thread: a slow / wedged
+        # webhook receiver MUST NOT delay the next job picking up the GPU.
+        webhook_url = request.get("webhook_url")
+        if webhook_url:
+            t = threading.Thread(target=self._fire_webhook, args=(job, webhook_url), name=f"webhook-{job.job_id}", daemon=True)
+            t.start()
+
+    def _fire_webhook(self, job: Job, webhook_url: str) -> None:
+        """POST the terminal job manifest to ``webhook_url``. Errors swallowed."""
+        try:
+            import httpx  # local import: keeps server_config FastAPI-free
+        except ImportError:
+            LOG.warning("webhook dispatch skipped: httpx not installed")
+            return
+        payload = job.to_public_dict()
+        try:
+            with httpx.Client(timeout=self.config.webhook_timeout_seconds) as client:
+                client.post(webhook_url, json=payload)
+        except Exception as exc:  # pylint: disable=broad-except
+            redacted = _redact_secrets(str(exc), self.config.hf_token)
+            LOG.warning("webhook POST to %s failed: %s", webhook_url, redacted)
 
 
 class WarmupRunner:
