@@ -254,18 +254,12 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--remote",
-        help=(
-            "URL of a transcribe-anything daemon to use instead of running locally. "
-            "Also reads TRANSCRIBE_ANYTHING_REMOTE."
-        ),
+        help=("URL of a transcribe-anything daemon to use instead of running locally. " "Also reads TRANSCRIBE_ANYTHING_REMOTE."),
         default=None,
     )
     parser.add_argument(
         "--token",
-        help=(
-            "Auth token for the remote daemon (Authorization: Bearer). "
-            "Also reads TRANSCRIBE_ANYTHING_TOKEN."
-        ),
+        help=("Auth token for the remote daemon (Authorization: Bearer). " "Also reads TRANSCRIBE_ANYTHING_TOKEN."),
         default=None,
     )
     # add extra options that are passed into the transcribe function

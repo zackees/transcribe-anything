@@ -110,6 +110,7 @@ def test_transcribe_remote_surfaces_daemon_4xx(asgi_client_factory, tmp_path) ->
 
 def test_transcribe_remote_propagates_failed_job(monkeypatch, asgi_client_factory, tmp_path) -> None:
     """If the worker's transcribe() raises, the client should raise RemoteTranscriberError."""
+
     # Rebuild app with a failing transcribe_fn.
     def failing(**_kwargs):
         raise RuntimeError("boom")

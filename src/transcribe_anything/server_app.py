@@ -34,7 +34,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 
 # Re-export pure-logic surface so test modules and external callers keep
 # importing from ``server_app`` after the file split.
-from transcribe_anything.server_config import (  # noqa: F401
+from transcribe_anything.server_config import (
     DEFAULT_HOST,
     DEFAULT_PORT,
     Job,
@@ -46,7 +46,9 @@ from transcribe_anything.server_config import (  # noqa: F401
     WarmupRunner,
     _default_transcribe_fn,
     _redact_secrets,
-    check_auth as _check_auth,
+)
+from transcribe_anything.server_config import check_auth as _check_auth  # noqa: F401
+from transcribe_anything.server_config import (
     config_from_env,
     config_to_env,
     is_model_cached,
@@ -109,10 +111,7 @@ def create_app(
             return JSONResponse(
                 {
                     "status": "not_ready",
-                    "detail": (
-                        f"prefetch=none and model {config.model!r} is not cached locally. "
-                        "Pre-warm the HuggingFace cache or restart with --prefetch lazy/eager."
-                    ),
+                    "detail": (f"prefetch=none and model {config.model!r} is not cached locally. " "Pre-warm the HuggingFace cache or restart with --prefetch lazy/eager."),
                 },
                 status_code=503,
             )
@@ -146,10 +145,7 @@ def create_app(
         if config.prefetch == "none" and not is_model_cached(config.model):
             raise HTTPException(
                 status_code=503,
-                detail=(
-                    f"prefetch=none and model {config.model!r} is not cached locally. "
-                    "Pre-warm the HuggingFace cache or restart with --prefetch lazy/eager."
-                ),
+                detail=(f"prefetch=none and model {config.model!r} is not cached locally. " "Pre-warm the HuggingFace cache or restart with --prefetch lazy/eager."),
             )
 
         content_type = (request.headers.get("content-type") or "").lower()

@@ -6,7 +6,6 @@
 Tests transcribe_anything
 """
 
-
 import os
 import shutil
 import subprocess

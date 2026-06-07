@@ -120,9 +120,7 @@ def transcribe_remote(
                 data = {"options": json.dumps(options)} if options else {}
                 resp = client.post(f"{base_url}/v1/transcribe", files=files, data=data)
         if resp.status_code >= 400:
-            raise RemoteTranscriberError(
-                f"daemon at {base_url} rejected submission: {resp.status_code} {resp.text}"
-            )
+            raise RemoteTranscriberError(f"daemon at {base_url} rejected submission: {resp.status_code} {resp.text}")
         body = resp.json()
         job_id = body["job_id"]
 
@@ -161,9 +159,7 @@ def transcribe_remote(
             dest = out_path / name
             with client.stream("GET", f"{base_url}/v1/jobs/{job_id}/artifacts/{name}") as r:
                 if r.status_code >= 400:
-                    raise RemoteTranscriberError(
-                        f"failed to download artifact {name}: {r.status_code} {r.text}"
-                    )
+                    raise RemoteTranscriberError(f"failed to download artifact {name}: {r.status_code} {r.text}")
                 with dest.open("wb") as fh:
                     for chunk in r.iter_bytes():
                         fh.write(chunk)

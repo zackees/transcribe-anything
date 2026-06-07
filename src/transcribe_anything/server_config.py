@@ -89,10 +89,7 @@ class ServerConfig:
 
     def validate(self) -> None:
         if self.requires_auth() and not self.auth_token:
-            raise ValueError(
-                "Refusing to bind to a non-loopback host without an auth token. "
-                "Set --auth-token / --auth-token-env / --auth-token-file, or bind to 127.0.0.1."
-            )
+            raise ValueError("Refusing to bind to a non-loopback host without an auth token. " "Set --auth-token / --auth-token-env / --auth-token-file, or bind to 127.0.0.1.")
         if self.prefetch not in {"lazy", "eager", "none"}:
             raise ValueError(f"--prefetch must be one of lazy|eager|none, got {self.prefetch!r}")
         if self.max_queue < 1:
@@ -156,9 +153,7 @@ def validate_request_options(options: dict, config: ServerConfig) -> dict:
         if key == "model":
             if not config.allow_client_model and value != config.model:
                 raise SettingsViolation(
-                    f"daemon does not allow client model overrides "
-                    f"(configured model={config.model!r}, requested={value!r}). "
-                    "Start the daemon with --allow-client-model to permit this."
+                    f"daemon does not allow client model overrides " f"(configured model={config.model!r}, requested={value!r}). " "Start the daemon with --allow-client-model to permit this."
                 )
             cleaned["model"] = value
             continue
@@ -173,9 +168,7 @@ def validate_request_options(options: dict, config: ServerConfig) -> dict:
             except (TypeError, ValueError) as exc:
                 raise SettingsViolation(f"batch_size must be an integer, got {value!r}") from exc
             if requested > config.max_batch_size:
-                raise SettingsViolation(
-                    f"batch_size={requested} exceeds daemon limit {config.max_batch_size}"
-                )
+                raise SettingsViolation(f"batch_size={requested} exceeds daemon limit {config.max_batch_size}")
             cleaned["batch_size"] = requested
             continue
         cleaned[key] = value

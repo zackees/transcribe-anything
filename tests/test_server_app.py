@@ -32,7 +32,6 @@ from transcribe_anything.server_app import (
     validate_request_options,
 )
 
-
 # --------------------- helpers ---------------------
 
 
@@ -76,13 +75,16 @@ def _wait_for_status(client: TestClient, job_id: str, headers=None, timeout: flo
 
 def test_redact_secrets_strips_explicit_hf_token() -> None:
     msg = "boom! cmd was: insanely-fast-whisper --hf-token hf_abc123 --foo bar"
-    assert "hf_abc123" not in _redact_secrets(msg, "hf_abc123")
-    assert "<REDACTED>" in _redact_secrets(msg, "hf_abc123")
+    redacted = _redact_secrets(msg, "hf_abc123")
+    assert redacted is not None
+    assert "hf_abc123" not in redacted
+    assert "<REDACTED>" in redacted
 
 
 def test_redact_secrets_strips_cli_arg_even_without_token_known() -> None:
     msg = "Running: --hf_token hf_xyzzy --batch 4"
     out = _redact_secrets(msg, None)
+    assert out is not None
     assert "hf_xyzzy" not in out
     assert "<REDACTED>" in out
 

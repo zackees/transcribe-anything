@@ -33,10 +33,7 @@ def _src_root() -> Path:
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="transcribe-anything-serve",
-        description=(
-            "Launch the transcribe-anything daemon (FastAPI). "
-            "Local loopback bind needs no auth; any non-loopback bind requires --auth-token."
-        ),
+        description=("Launch the transcribe-anything daemon (FastAPI). " "Local loopback bind needs no auth; any non-loopback bind requires --auth-token."),
     )
     parser.add_argument("--host", default="127.0.0.1", help="bind host (default: 127.0.0.1)")
     parser.add_argument("--port", default=8765, type=int, help="bind port (default: 8765)")
@@ -208,11 +205,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     try:
         return _run_in_iso_env(config)
     except Exception as exc:  # pylint: disable=broad-except
-        sys.stderr.write(
-            f"transcribe-anything-serve: failed to launch in iso-env ({exc}). "
-            "Pass --no-iso-env to run in the current interpreter if you have "
-            "fastapi/uvicorn installed locally.\n"
-        )
+        sys.stderr.write(f"transcribe-anything-serve: failed to launch in iso-env ({exc}). " "Pass --no-iso-env to run in the current interpreter if you have " "fastapi/uvicorn installed locally.\n")
         return 1
 
 
