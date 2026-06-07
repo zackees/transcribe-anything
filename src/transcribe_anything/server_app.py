@@ -23,6 +23,7 @@ Design constraints (issue #107):
   backend). Queue is bounded; overflow returns 429.
 """
 
+import asyncio
 import io
 import json
 import shutil
@@ -30,9 +31,17 @@ import tempfile
 import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Iterable, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request  # noqa: F401
+from fastapi import (  # noqa: F401
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
 # Re-export pure-logic surface so test modules and external callers keep
@@ -40,13 +49,21 @@ from fastapi.responses import FileResponse, JSONResponse, Response, StreamingRes
 from transcribe_anything.server_config import (
     DEFAULT_HOST,
     DEFAULT_PORT,
+    WS_CLOSE_BUSY,
+    WS_CLOSE_DURATION_EXCEEDED,
+    WS_CLOSE_INTERNAL,
+    WS_CLOSE_NOT_ALLOWED,
+    WS_CLOSE_UNAUTHORIZED,
     Job,
     JobStatus,
     JobStore,
     QueueFull,
     ServerConfig,
     SettingsViolation,
+    StreamCancelled,
+    StreamSession,
     WarmupRunner,
+    _canned_streaming_fn,
     _default_transcribe_fn,
     _redact_secrets,
 )
@@ -64,6 +81,7 @@ def create_app(
     *,
     transcribe_fn: Optional[Callable[..., str]] = None,
     job_root: Optional[Path] = None,
+    streaming_fn: Optional[Callable[..., Iterable[dict]]] = None,
 ) -> FastAPI:
     """Build the FastAPI app. Pure factory — easy to unit-test."""
     config.validate()
@@ -74,6 +92,11 @@ def create_app(
 
     store = JobStore(config, transcribe_fn=transcribe_fn)
     store.start()
+    stream_session = StreamSession()
+    # Real backends (faster-whisper, whisper.cpp) will replace this via the
+    # streaming_fn= kwarg. The fallback is a canned scripted generator —
+    # safe to leave in place because allow_stream defaults to False.
+    active_streaming_fn = streaming_fn or _canned_streaming_fn
 
     warmup: Optional[WarmupRunner] = None
     if config.prefetch == "eager":
@@ -286,6 +309,171 @@ def create_app(
             media_type="application/zip",
             headers={"Content-Disposition": f'attachment; filename="job-{job_id}.zip"'},
         )
+
+    # ---- realtime streaming (#122) ----
+    # WebSocket handler implementing the wire protocol from the issue:
+    #   client → server: text "hello" frame, then binary PCM frames,
+    #                    optional "end_of_input" or "cancel" text frames.
+    #   server → client: text "ready", then any number of "partial" /
+    #                    "final" / "metrics" frames, then "done".
+    # The backend is pluggable via streaming_fn; the in-tree fallback is a
+    # canned scripted generator (safe because allow_stream defaults to off).
+    @app.websocket("/v1/stream")
+    async def stream(ws: WebSocket) -> None:
+        await ws.accept()
+        if not config.allow_stream:
+            await ws.send_json({"type": "error", "code": "stream_disabled", "message": "daemon was not started with --allow-stream"})
+            await ws.close(code=WS_CLOSE_NOT_ALLOWED)
+            return
+
+        if config.requires_auth():
+            auth = ws.headers.get("authorization") or ""
+            x_tok = ws.headers.get("x-transcribe-token")
+            if not _check_auth(config, auth, x_tok):
+                await ws.send_json({"type": "error", "code": "unauthorized"})
+                await ws.close(code=WS_CLOSE_UNAUTHORIZED)
+                return
+
+        if not stream_session.acquire():
+            await ws.send_json({"type": "error", "code": "busy", "message": "another stream is in-flight"})
+            await ws.close(code=WS_CLOSE_BUSY)
+            return
+
+        try:
+            # Wait for the hello frame (text). Anything else → error.
+            try:
+                hello_raw = await ws.receive_text()
+            except WebSocketDisconnect:
+                return
+            try:
+                hello = json.loads(hello_raw)
+            except json.JSONDecodeError:
+                await ws.send_json({"type": "error", "code": "bad_hello", "message": "first frame must be JSON"})
+                return
+            if not isinstance(hello, dict) or hello.get("type") != "hello":
+                await ws.send_json({"type": "error", "code": "bad_hello", "message": "first frame must be {'type':'hello',...}"})
+                return
+
+            await ws.send_json({"type": "ready"})
+
+            # Pull audio frames + control frames into an async queue so the
+            # backend generator (which is sync) can iterate them without
+            # blocking the event loop.
+            audio_queue: asyncio.Queue = asyncio.Queue(maxsize=256)
+            input_done = asyncio.Event()
+
+            async def _pump_inputs() -> None:
+                deadline = stream_session.runtime_seconds
+                while not input_done.is_set():
+                    try:
+                        msg = await ws.receive()
+                    except WebSocketDisconnect:
+                        stream_session.cancel()
+                        input_done.set()
+                        return
+                    if "bytes" in msg and msg["bytes"] is not None:
+                        await audio_queue.put(msg["bytes"])
+                    elif "text" in msg and msg["text"] is not None:
+                        try:
+                            ctrl = json.loads(msg["text"])
+                        except json.JSONDecodeError:
+                            continue
+                        if not isinstance(ctrl, dict):
+                            continue
+                        if ctrl.get("type") == "end_of_input":
+                            input_done.set()
+                            return
+                        if ctrl.get("type") == "cancel":
+                            stream_session.cancel()
+                            input_done.set()
+                            return
+                    # Hard cap on session duration to keep a misbehaving
+                    # client from pinning the GPU forever.
+                    runtime = stream_session.runtime_seconds
+                    if runtime is not None and runtime > config.max_stream_duration_seconds:
+                        await ws.send_json({"type": "error", "code": "duration_exceeded"})
+                        await ws.close(code=WS_CLOSE_DURATION_EXCEEDED)
+                        stream_session.cancel()
+                        input_done.set()
+                        return
+                    _ = deadline  # currently unused; placeholder for adaptive backpressure
+
+            pumper = asyncio.create_task(_pump_inputs())
+
+            def _audio_iterable():
+                """Non-blocking generator over the audio queue.
+
+                Yields whatever PCM frames are currently buffered, then
+                returns. The backend is expected to iterate this once per
+                decode cycle — looping forever inside it would block the
+                sync backend thread waiting on the async pumper.
+                """
+                while True:
+                    if stream_session.is_cancelled:
+                        return
+                    try:
+                        chunk = audio_queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        return
+                    yield chunk
+
+            # Drive the (sync) streaming backend in a thread so it doesn't
+            # block the event loop. Forward each emitted event over the
+            # socket as a text frame.
+            loop = asyncio.get_running_loop()
+            queue_out: asyncio.Queue = asyncio.Queue()
+
+            def _run_backend() -> None:
+                try:
+                    for event in active_streaming_fn(_audio_iterable(), session=stream_session, config=config, hello=hello):
+                        asyncio.run_coroutine_threadsafe(queue_out.put(event), loop)
+                except StreamCancelled:
+                    pass
+                except Exception as exc:  # pylint: disable=broad-except
+                    redacted = _redact_secrets(str(exc), config.hf_token)
+                    asyncio.run_coroutine_threadsafe(queue_out.put({"type": "error", "code": "backend_failure", "message": redacted}), loop)
+                finally:
+                    asyncio.run_coroutine_threadsafe(queue_out.put({"type": "done"}), loop)
+
+            backend_thread = asyncio.get_event_loop().run_in_executor(None, _run_backend)
+
+            try:
+                while True:
+                    event = await queue_out.get()
+                    try:
+                        await ws.send_json(event)
+                    except (WebSocketDisconnect, RuntimeError):
+                        stream_session.cancel()
+                        break
+                    if event.get("type") == "done":
+                        break
+            finally:
+                input_done.set()
+                pumper.cancel()
+                try:
+                    await backend_thread
+                except Exception:  # pylint: disable=broad-except
+                    pass
+
+            try:
+                await ws.close()
+            except RuntimeError:
+                pass
+        except Exception as exc:  # pylint: disable=broad-except
+            redacted = _redact_secrets(str(exc), config.hf_token)
+            try:
+                await ws.send_json({"type": "error", "code": "internal", "message": redacted})
+            except Exception:  # pylint: disable=broad-except
+                pass
+            try:
+                await ws.close(code=WS_CLOSE_INTERNAL)
+            except RuntimeError:
+                pass
+        finally:
+            stream_session.release()
+
+    # Stash for tests / introspection.
+    app.state.stream_session = stream_session
 
     return app
 

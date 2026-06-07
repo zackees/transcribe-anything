@@ -706,6 +706,31 @@ The compose file isolates the daemon to an internal network and only publishes 8
 
 If you prefer nginx, `examples/nginx.serve.conf` is a drop-in fragment with the right timeouts (4h `proxy_read_timeout`), `client_max_body_size 2g` to match `--max-upload-size`, and `proxy_buffering off` so the future SSE progress endpoint flushes events in real time.
 
+### Realtime streaming (`WS /v1/stream`) — protocol skeleton
+
+> **v1 status:** The WebSocket protocol and the single-stream serializer are wired up. The production backend (faster-whisper + silero-vad chunker) lands in a follow-up PR. Tracking issue: [#122](https://github.com/zackees/transcribe-anything/issues/122).
+
+Opt-in with `--allow-stream`:
+
+```bash
+transcribe-anything serve --allow-stream --max-stream-duration 3600
+```
+
+Wire protocol on `WS /v1/stream`:
+
+| Direction | Frame | Payload |
+|---|---|---|
+| C → S | text (first) | `{"type":"hello","model":"small.en","language":"en","sample_rate":16000,"encoding":"pcm16le"}` |
+| C → S | binary | raw PCM16-LE mono audio at the declared sample rate |
+| C → S | text (optional) | `{"type":"end_of_input"}` for graceful EOF, `{"type":"cancel"}` for immediate abort |
+| S → C | text | `{"type":"ready"}`, then `{"type":"partial"|"final","text":"…","rev":N}` events, then `{"type":"done"}` |
+
+`rev` increments monotonically. A `final` locks its span; later `partial`s never overwrite locked text. Close codes use the WebSocket private range (4401 unauthorized, 4429 busy — one streaming session per daemon, 4408 session duration exceeded, 4403 disabled).
+
+Auth: same `Authorization: Bearer <token>` (or `X-Transcribe-Token`) as `/v1/*`.
+
+The in-tree backend is a **canned scripted generator** intended for protocol validation only — it emits a fixed transcript regardless of audio. Real backends register via the `streaming_fn=…` kwarg on `create_app(...)` and will arrive in a follow-up PR per #122.
+
 ### Operational notes
 
 - **Non-goals for v1:** multi-tenant identity, persistent job queue across restarts, multi-GPU scheduling. TLS termination is documented above via the reverse-proxy recipe.
