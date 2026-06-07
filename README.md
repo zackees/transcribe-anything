@@ -706,15 +706,25 @@ The compose file isolates the daemon to an internal network and only publishes 8
 
 If you prefer nginx, `examples/nginx.serve.conf` is a drop-in fragment with the right timeouts (4h `proxy_read_timeout`), `client_max_body_size 2g` to match `--max-upload-size`, and `proxy_buffering off` so the future SSE progress endpoint flushes events in real time.
 
-### Realtime streaming (`WS /v1/stream`) — protocol skeleton
+### Realtime streaming (`WS /v1/stream`)
 
-> **v1 status:** The WebSocket protocol and the single-stream serializer are wired up. The production backend (faster-whisper + silero-vad chunker) lands in a follow-up PR. Tracking issue: [#122](https://github.com/zackees/transcribe-anything/issues/122).
-
-Opt-in with `--allow-stream`:
+Opt-in by installing the streaming extras and launching with `--allow-stream`:
 
 ```bash
-transcribe-anything serve --allow-stream --max-stream-duration 3600
+pip install 'transcribe-anything[server,stream]'
+transcribe-anything serve --no-iso-env --allow-stream --max-stream-duration 3600
 ```
+
+`[stream]` pulls in `faster-whisper`, `silero-vad`, `ctranslate2`, and `onnxruntime`. The daemon auto-detects them at startup and switches `WS /v1/stream` from the protocol-validation fallback to the real backend.
+
+Pipe a live mic into the daemon from the client side:
+
+```bash
+arecord -f S16_LE -c 1 -r 16000 -t raw - | \
+  transcribe-anything --remote ws://127.0.0.1:8765 --stream-in --model small.en
+```
+
+`--stream-in` reads PCM16-LE mono audio from stdin, opens the WebSocket, and prints `[partial]` / `[final]` lines as the daemon emits them. http(s):// URLs on `--remote` are auto-rewritten to ws(s)://.
 
 Wire protocol on `WS /v1/stream`:
 
@@ -729,7 +739,7 @@ Wire protocol on `WS /v1/stream`:
 
 Auth: same `Authorization: Bearer <token>` (or `X-Transcribe-Token`) as `/v1/*`.
 
-The in-tree backend is a **canned scripted generator** intended for protocol validation only — it emits a fixed transcript regardless of audio. Real backends register via the `streaming_fn=…` kwarg on `create_app(...)` and will arrive in a follow-up PR per #122.
+Without the `[stream]` extras, `--allow-stream` falls back to a canned scripted generator that emits a fixed transcript regardless of audio — useful for protocol validation in CI but not a real transcriber. A startup warning fires in that case so the operator notices.
 
 ### Operational notes
 

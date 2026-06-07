@@ -276,3 +276,154 @@ def resolve_remote_and_token(
     remote = remote_arg or os.environ.get("TRANSCRIBE_ANYTHING_REMOTE") or None
     token = token_arg or os.environ.get("TRANSCRIBE_ANYTHING_TOKEN") or None
     return remote, token
+
+
+# ---------------------------------------------------------------- streaming
+
+
+def _http_to_ws_url(url: str) -> str:
+    """Normalize an http(s):// or ws(s):// daemon URL to its ws variant."""
+    base = url.rstrip("/")
+    if base.startswith("http://"):
+        base = "ws://" + base[len("http://") :]
+    elif base.startswith("https://"):
+        base = "wss://" + base[len("https://") :]
+    return base
+
+
+async def stream_remote(
+    audio_iter,
+    *,
+    remote: str,
+    token: Optional[str] = None,
+    model: Optional[str] = None,
+    language: Optional[str] = None,
+    sample_rate: int = 16000,
+    on_event=None,
+):
+    """Stream PCM16-LE chunks from ``audio_iter`` to the daemon's ``WS /v1/stream``.
+
+    ``audio_iter`` may be either a regular iterable / generator or an
+    async iterable / async generator of ``bytes`` chunks. Each event
+    from the server (``partial`` / ``final`` / ``metrics`` / ``done`` /
+    ``error``) is forwarded to ``on_event(event_dict)`` if provided, and
+    also yielded so callers can ``async for`` over the stream.
+
+    Raises :class:`RemoteTranscriberError` if the daemon rejects the
+    connection or emits an ``error`` frame.
+    """
+    import json as _json
+
+    try:
+        from websockets.asyncio.client import (
+            connect as _ws_connect,  # type: ignore[import-not-found]
+        )
+    except ImportError as exc:  # pragma: no cover - exercised only without websockets
+        raise RemoteTranscriberError("websockets is required for --stream-in: pip install websockets") from exc
+
+    ws_url = _http_to_ws_url(remote) + "/v1/stream"
+    headers = []
+    if token:
+        headers.append(("Authorization", f"Bearer {token}"))
+
+    hello = {
+        "type": "hello",
+        "model": model or "small.en",
+        "language": language,
+        "sample_rate": sample_rate,
+        "encoding": "pcm16le",
+    }
+
+    async with _ws_connect(ws_url, additional_headers=headers or None) as ws:
+        await ws.send(_json.dumps(hello))
+        first = await ws.recv()
+        first_evt = _json.loads(first)
+        if first_evt.get("type") == "error":
+            raise RemoteTranscriberError(f"daemon rejected stream: {first_evt}")
+        if first_evt.get("type") != "ready":
+            raise RemoteTranscriberError(f"unexpected first event from daemon: {first_evt}")
+
+        import asyncio as _asyncio
+
+        async def _push_audio():
+            if hasattr(audio_iter, "__aiter__"):
+                async for chunk in audio_iter:
+                    if not chunk:
+                        break
+                    await ws.send(chunk)
+            else:
+                for chunk in audio_iter:
+                    if not chunk:
+                        break
+                    await ws.send(chunk)
+            # Graceful EOF — daemon flushes outstanding partials then sends `done`.
+            await ws.send(_json.dumps({"type": "end_of_input"}))
+
+        pusher = _asyncio.create_task(_push_audio())
+        try:
+            async for raw in ws:
+                evt = _json.loads(raw)
+                if on_event is not None:
+                    on_event(evt)
+                yield evt
+                if evt.get("type") == "done":
+                    break
+                if evt.get("type") == "error":
+                    raise RemoteTranscriberError(f"daemon error: {evt}")
+        finally:
+            pusher.cancel()
+            try:
+                await pusher
+            except (BaseException,):
+                pass
+
+
+def stream_pcm_from_stdin(
+    *,
+    remote: str,
+    token: Optional[str] = None,
+    model: Optional[str] = None,
+    language: Optional[str] = None,
+    chunk_bytes: int = 3200,  # 100ms @ 16kHz s16le mono
+) -> None:
+    """Sync entry point for ``transcribe-anything --remote ws://… --stream-in``.
+
+    Reads PCM16-LE bytes from stdin, streams them to the daemon, prints
+    transcript text to stdout as ``partial`` / ``final`` events arrive.
+    Blocks until the input pipe closes and the daemon sends ``done``.
+    """
+    import asyncio as _asyncio
+    import sys as _sys
+
+    def _stdin_chunks():
+        buf = _sys.stdin.buffer
+        while True:
+            chunk = buf.read(chunk_bytes)
+            if not chunk:
+                return
+            yield chunk
+
+    async def _run():
+        last_locked_end = 0  # length of confirmed-final text so far
+        agen = stream_remote(
+            _stdin_chunks(),
+            remote=remote,
+            token=token,
+            model=model,
+            language=language,
+        )
+        async for evt in agen:
+            kind = evt.get("type")
+            if kind == "partial":
+                _sys.stdout.write(f"\r[partial] {evt.get('text', '')}\033[K")
+                _sys.stdout.flush()
+            elif kind == "final":
+                _sys.stdout.write(f"\r[final]   {evt.get('text', '')}\n")
+                _sys.stdout.flush()
+                last_locked_end += len(evt.get("text", ""))
+            elif kind == "error":
+                raise RemoteTranscriberError(f"daemon error: {evt}")
+        _sys.stdout.write("\n")
+        _sys.stdout.flush()
+
+    _asyncio.run(_run())
