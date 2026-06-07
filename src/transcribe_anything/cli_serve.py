@@ -69,6 +69,17 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="permit clients to request --embed (burn subtitles into MP4). Off by default.",
     )
+    parser.add_argument(
+        "--allow-webhooks",
+        action="store_true",
+        help="permit clients to register a webhook_url for terminal-status callbacks. Off by default — outbound HTTP from the daemon can be abused.",
+    )
+    parser.add_argument(
+        "--webhook-timeout",
+        type=float,
+        default=10.0,
+        help="per-attempt timeout (seconds) for webhook POSTs. Default 10s.",
+    )
     parser.add_argument("--hf-token", default=None, help="HuggingFace token (never echoed to clients)")
     parser.add_argument(
         "--prefetch",
@@ -145,6 +156,8 @@ def _config_from_args(args: argparse.Namespace) -> "ServerConfig":  # type: igno
         artifact_ttl_seconds=args.artifact_ttl,
         job_root=str(args.job_root) if args.job_root else None,
         shutdown_grace_seconds=args.shutdown_grace,
+        allow_webhooks=bool(args.allow_webhooks),
+        webhook_timeout_seconds=args.webhook_timeout,
     )
 
 

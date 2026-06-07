@@ -358,6 +358,87 @@ def test_artifacts_zip_returns_404_for_unknown_job(server_client) -> None:
     assert r.status_code == 404
 
 
+# --------------------- /metrics endpoint ---------------------
+
+
+def test_metrics_endpoint_exposes_counters(server_client) -> None:
+    client, _ = server_client
+    # Run one job to bump the counters.
+    resp = client.post("/v1/transcribe", json={"url": "https://x"})
+    job_id = resp.json()["job_id"]
+    _wait_for_status(client, job_id)
+
+    r = client.get("/metrics")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/plain")
+    body = r.text
+    assert "transcribe_anything_jobs_total" in body
+    assert 'status="completed"' in body
+    assert "transcribe_anything_queue_depth" in body
+    assert "transcribe_anything_queue_capacity" in body
+    assert "transcribe_anything_jobs_in_flight" in body
+
+
+# --------------------- webhook callbacks ---------------------
+
+
+def test_webhook_rejected_when_not_allowed(server_client) -> None:
+    client, _ = server_client
+    r = client.post("/v1/transcribe", json={"url": "https://x", "webhook_url": "https://example.com/hook"})
+    assert r.status_code == 400
+    assert "webhook" in r.json()["detail"].lower()
+
+
+def test_webhook_rejected_when_not_http(tmp_path) -> None:
+    cfg = ServerConfig(host="127.0.0.1", model="tiny", allow_webhooks=True, job_root=str(tmp_path))
+    app = create_app(cfg, transcribe_fn=_fake_transcribe_factory())
+    with TestClient(app) as client:
+        r = client.post("/v1/transcribe", json={"url": "https://x", "webhook_url": "ftp://example.com/hook"})
+        assert r.status_code == 400
+        assert "http" in r.json()["detail"].lower()
+
+
+def test_webhook_fires_on_terminal_state(tmp_path, monkeypatch) -> None:
+    """End-to-end: enable webhooks, submit a job, capture the outbound POST."""
+    import threading
+
+    import httpx
+
+    captured: dict = {}
+    received = threading.Event()
+
+    class _FakeClient:
+        def __init__(self, *_a, **_kw):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            pass
+
+        def post(self, url, json):
+            captured["url"] = url
+            captured["payload"] = json
+            received.set()
+            return type("R", (), {"status_code": 200})()
+
+    monkeypatch.setattr(httpx, "Client", _FakeClient)
+
+    cfg = ServerConfig(host="127.0.0.1", model="tiny", allow_webhooks=True, job_root=str(tmp_path))
+    app = create_app(cfg, transcribe_fn=_fake_transcribe_factory())
+    with TestClient(app) as client:
+        r = client.post("/v1/transcribe", json={"url": "https://x", "webhook_url": "https://example.com/hook"})
+        assert r.status_code == 202
+        job_id = r.json()["job_id"]
+        _wait_for_status(client, job_id)
+        # Webhook fires on a daemon thread; wait briefly for it.
+        assert received.wait(timeout=2.0), "webhook never fired"
+        assert captured["url"] == "https://example.com/hook"
+        assert captured["payload"]["job_id"] == job_id
+        assert captured["payload"]["status"] == "completed"
+
+
 # --------------------- failure + redaction ---------------------
 
 
