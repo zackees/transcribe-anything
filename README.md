@@ -692,7 +692,8 @@ transcribe_remote(
 - **Non-goals for v1:** TLS termination (use nginx/caddy in front), multi-tenant identity, persistent job queue across restarts, multi-GPU scheduling.
 - **HF token redaction** — tokens supplied via `--hf-token` at daemon startup are stripped from every client-visible error and never appear in job-status responses (extends the redaction from PR #93 to the HTTP layer).
 - **Queue + concurrency** — the GPU is single-tenant per backend, so the daemon serializes work onto one worker. `--max-queue` (default 8) bounds the queue; overflow returns `429`.
-- **Endpoints** — `POST /v1/transcribe`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/artifacts/{filename}`, `DELETE /v1/jobs/{id}`, `GET /v1/capabilities`, `GET /healthz`, `GET /readyz`. Auth header is `Authorization: Bearer <token>` (or `X-Transcribe-Token: <token>`).
+- **Endpoints** — `POST /v1/transcribe`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/artifacts/{filename}`, `GET /v1/jobs/{id}/artifacts.zip` (all-artifacts bundle download), `DELETE /v1/jobs/{id}`, `GET /v1/capabilities`, `GET /healthz`, `GET /readyz`. Auth header is `Authorization: Bearer <token>` (or `X-Transcribe-Token: <token>`).
+- **In-process mode** — `pip install 'transcribe-anything[server]'` + `transcribe-anything serve --no-iso-env` skips the iso-env build and runs the daemon directly in your venv. Faster for dev / containers that already have FastAPI installed.
 
 ## Troubleshooting Common Issues
 

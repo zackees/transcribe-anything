@@ -24,6 +24,17 @@ dependencies = [
 version = "4.0.0"  # Update this manually or configure setuptools-scm for automatic versioning
 maintainers = [{ name = "Zachary Vorhies", email = "dont@email.me" }]
 
+[project.optional-dependencies]
+# `pip install transcribe-anything[server]` lets users run the daemon
+# directly in their main venv (transcribe-anything serve --no-iso-env)
+# instead of paying the iso-env build on first launch. Mirrors the
+# deps installed into the daemon iso-env in server_reqs.py.
+server = [
+    "fastapi>=0.110.0,<1.0.0",
+    "uvicorn>=0.27.0,<1.0.0",
+    "python-multipart>=0.0.9",
+]
+
 [project.urls]
 homepage = "https://github.com/zackees/transcribe-anything"
 
