@@ -23,15 +23,17 @@ Design constraints (issue #107):
   backend). Queue is bounded; overflow returns 429.
 """
 
+import io
 import json
 import shutil
 import tempfile
+import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Callable, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request  # noqa: F401
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
 # Re-export pure-logic surface so test modules and external callers keep
 # importing from ``server_app`` after the file split.
@@ -239,6 +241,26 @@ def create_app(
         if not path.is_file():
             raise HTTPException(status_code=404, detail="artifact not found")
         return FileResponse(str(path), filename=filename)
+
+    @app.get("/v1/jobs/{job_id}/artifacts.zip")
+    def get_artifacts_zip(job_id: str, _: None = Depends(_auth_dep)) -> StreamingResponse:
+        job = store.get(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail="unknown job")
+        artifact_dir = Path(job.artifact_dir)
+        files = sorted(p for p in artifact_dir.iterdir() if p.is_file()) if artifact_dir.is_dir() else []
+        if not files:
+            raise HTTPException(status_code=404, detail="no artifacts available for this job")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for f in files:
+                zf.write(f, arcname=f.name)
+        buf.seek(0)
+        return StreamingResponse(
+            buf,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="job-{job_id}.zip"'},
+        )
 
     return app
 

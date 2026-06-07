@@ -333,6 +333,31 @@ def test_delete_job_removes_artifacts(server_client) -> None:
     assert r2.status_code == 404
 
 
+def test_artifacts_zip_bundle_contains_all_outputs(server_client) -> None:
+    import io
+    import zipfile
+
+    client, _ = server_client
+    resp = client.post("/v1/transcribe", json={"url": "https://x"})
+    job_id = resp.json()["job_id"]
+    final = _wait_for_status(client, job_id)
+    assert final["status"] == "completed"
+
+    r = client.get(f"/v1/jobs/{job_id}/artifacts.zip")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("application/zip")
+    assert f'filename="job-{job_id}.zip"' in r.headers["content-disposition"]
+    with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+        names = set(zf.namelist())
+    assert {"out.txt", "out.srt", "out.vtt", "out.json"}.issubset(names)
+
+
+def test_artifacts_zip_returns_404_for_unknown_job(server_client) -> None:
+    client, _ = server_client
+    r = client.get("/v1/jobs/does-not-exist/artifacts.zip")
+    assert r.status_code == 404
+
+
 # --------------------- failure + redaction ---------------------
 
 
