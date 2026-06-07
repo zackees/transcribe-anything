@@ -1,0 +1,24 @@
+# Caddy config for the serve-compose.yml example.
+#
+# Uses the {$TRANSCRIBE_PUBLIC_HOST} env var so the same file works for
+# any hostname. Caddy automatically obtains and renews a Let's Encrypt
+# cert for that hostname.
+#
+# Set max body to match `--max-upload-size` on the daemon (default 2 GB).
+
+{$TRANSCRIBE_PUBLIC_HOST} {
+    reverse_proxy daemon:8765 {
+        # Long transcriptions can run for many minutes; bump per-request
+        # timeouts well above Caddy's default 60s.
+        transport http {
+            read_timeout 4h
+            write_timeout 4h
+        }
+    }
+
+    request_body {
+        max_size 2GB
+    }
+
+    encode gzip
+}

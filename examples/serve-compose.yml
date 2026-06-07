@@ -1,0 +1,80 @@
+# `transcribe-anything serve` deployment example.
+#
+# Drops the daemon behind a Caddy reverse proxy that terminates TLS via
+# Let's Encrypt and forwards to the internal :8765 port. The daemon
+# itself binds to 0.0.0.0 inside its container and requires the bearer
+# token defined via the TRANSCRIBE_ANYTHING_TOKEN env var. Caddy and
+# the daemon talk over an internal docker network — the daemon's port
+# is NOT published to the host.
+#
+# Usage:
+#   export TRANSCRIBE_ANYTHING_TOKEN=$(openssl rand -hex 32)
+#   export TRANSCRIBE_PUBLIC_HOST=transcribe.example.com
+#   docker compose -f examples/serve-compose.yml up -d
+#
+# Then from any client:
+#   transcribe-anything video.mp4 \
+#     --remote "https://${TRANSCRIBE_PUBLIC_HOST}" \
+#     --token  "${TRANSCRIBE_ANYTHING_TOKEN}"
+
+services:
+  daemon:
+    build: ..
+    command:
+      - transcribe-anything-serve
+      - --host=0.0.0.0
+      - --device=insane
+      - --model=large-v3
+      - --prefetch=eager
+      - --auth-token-env=TRANSCRIBE_ANYTHING_TOKEN
+    environment:
+      # Sourced from the shell that runs `docker compose up`.
+      - TRANSCRIBE_ANYTHING_TOKEN
+      # Mount a host directory (or named volume) here to keep the HF
+      # cache across container rebuilds — otherwise every `up` redownloads
+      # multi-GB of weights.
+      - HF_HOME=/cache/huggingface
+      - TRANSCRIBE_ANYTHING_CACHE_DIR=/cache/transcribe-anything
+    volumes:
+      - models:/cache/huggingface
+      - venvs:/cache/transcribe-anything
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    # No `ports:` — the daemon is only reachable via the caddy service.
+    networks:
+      - internal
+    healthcheck:
+      # /healthz blocks until eager-prefetch warmup completes.
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8765/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 600s
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      - daemon
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - TRANSCRIBE_PUBLIC_HOST
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  models:
+  venvs:
+  caddy_data:
+  caddy_config:
