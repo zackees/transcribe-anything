@@ -6,3 +6,6 @@ ruff
 isort
 pytest
 twine
+fastapi>=0.110.0
+python-multipart>=0.0.9
+uvicorn>=0.27.0

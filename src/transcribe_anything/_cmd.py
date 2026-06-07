@@ -252,6 +252,22 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         type=str,
     )
+    parser.add_argument(
+        "--remote",
+        help=(
+            "URL of a transcribe-anything daemon to use instead of running locally. "
+            "Also reads TRANSCRIBE_ANYTHING_REMOTE."
+        ),
+        default=None,
+    )
+    parser.add_argument(
+        "--token",
+        help=(
+            "Auth token for the remote daemon (Authorization: Bearer). "
+            "Also reads TRANSCRIBE_ANYTHING_TOKEN."
+        ),
+        default=None,
+    )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
     if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, "clear_nvidia_cache", False):
@@ -281,6 +297,12 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> int:
     """Main entry point for the command line tool."""
+    # `transcribe-anything serve …` is shorthand for the dedicated daemon launcher.
+    if len(sys.argv) > 1 and sys.argv[1] == "serve":
+        from transcribe_anything.cli_serve import main as serve_main
+
+        return serve_main(sys.argv[2:])
+
     unsupported_msg = detect_macos_x86_unsupported()
     if unsupported_msg is not None:
         print(unsupported_msg, file=sys.stderr)
@@ -358,6 +380,47 @@ def main() -> int:
     if unknown:
         print(f"Args passed to whisper backend: {unknown}")
     print(f"Running transcribe_audio on {args.url_or_file}")
+
+    from transcribe_anything.client import resolve_remote_and_token
+
+    remote, token = resolve_remote_and_token(
+        remote_arg=getattr(args, "remote", None),
+        token_arg=getattr(args, "token", None),
+    )
+    if remote:
+        from transcribe_anything.client import (
+            RemoteTranscriberError,
+            transcribe_remote,
+        )
+
+        print(f"Submitting to remote daemon at {remote}")
+        try:
+            transcribe_remote(
+                url_or_file=args.url_or_file,
+                remote=remote,
+                output_dir=args.output_dir,
+                token=token,
+                model=args.model if args.model != "None" else None,
+                task=args.task,
+                language=args.language if args.language != "None" else None,
+                initial_prompt=args.initial_prompt,
+                align=align,
+                align_model=align_model if align else None,
+                other_args=unknown,
+                embed=args.embed,
+            )
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt")
+            return 1
+        except RemoteTranscriberError as e:
+            sys.stderr.write(f"Error: {e}\nwhile submitting {args.url_or_file} to {remote}\n")
+            return 1
+        except Exception as e:  # pylint: disable=broad-except
+            stack = traceback.format_exc()
+            sys.stderr.write(f"Error: {e}\n{stack}\nwhile submitting {args.url_or_file} to {remote}\n")
+            return 1
+        return 0
+
     try:
         from transcribe_anything.api import transcribe
 
