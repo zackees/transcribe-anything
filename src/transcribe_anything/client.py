@@ -12,6 +12,7 @@ deps so client mode works out of the box.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sys
@@ -166,6 +167,104 @@ def transcribe_remote(
         return str(out_path)
     finally:
         client.close()
+
+
+async def transcribe_remote_async(
+    url_or_file: str,
+    *,
+    remote: str,
+    output_dir: Optional[str] = None,
+    token: Optional[str] = None,
+    model: Optional[str] = None,
+    task: Optional[str] = None,
+    language: Optional[str] = None,
+    initial_prompt: Optional[str] = None,
+    align: bool = False,
+    align_model: Optional[str] = None,
+    other_args: Optional[list[str]] = None,
+    embed: bool = False,
+    poll_interval_seconds: float = 1.0,
+    request_timeout_seconds: float = 30.0,
+    job_timeout_seconds: float = 60 * 60 * 4,
+) -> str:
+    """Async mirror of :func:`transcribe_remote`.
+
+    Same contract as the sync variant: submit a job, poll until terminal,
+    download artifacts into ``output_dir``, return the path. Uses
+    ``httpx.AsyncClient`` and ``asyncio.sleep`` so callers can drive
+    many remote transcriptions concurrently without burning a thread per
+    job.
+    """
+    base_url = _normalize_base_url(remote)
+    headers = _build_headers(token)
+    options = _collect_options(
+        model=model,
+        task=task,
+        language=language,
+        initial_prompt=initial_prompt,
+        align=align,
+        align_model=align_model,
+        other_args=other_args,
+        embed=embed,
+    )
+
+    is_url = url_or_file.startswith("http://") or url_or_file.startswith("https://") or url_or_file.startswith("ftp://")
+
+    async with httpx.AsyncClient(timeout=request_timeout_seconds, headers=headers) as client:
+        if is_url:
+            payload = {"url": url_or_file, **options}
+            resp = await client.post(f"{base_url}/v1/transcribe", json=payload)
+        else:
+            local = Path(url_or_file)
+            if not local.is_file():
+                raise RemoteTranscriberError(f"local file not found: {url_or_file}")
+            with local.open("rb") as fh:
+                files = {"file": (local.name, fh, "application/octet-stream")}
+                data = {"options": json.dumps(options)} if options else {}
+                resp = await client.post(f"{base_url}/v1/transcribe", files=files, data=data)
+        if resp.status_code >= 400:
+            raise RemoteTranscriberError(f"daemon at {base_url} rejected submission: {resp.status_code} {resp.text}")
+        body = resp.json()
+        job_id = body["job_id"]
+
+        deadline = time.time() + job_timeout_seconds
+        last_status = None
+        while True:
+            if time.time() > deadline:
+                raise RemoteTranscriberError(f"job {job_id} timed out after {job_timeout_seconds}s")
+            jr = await client.get(f"{base_url}/v1/jobs/{job_id}")
+            if jr.status_code >= 400:
+                raise RemoteTranscriberError(f"daemon returned {jr.status_code} fetching job status: {jr.text}")
+            job = jr.json()
+            status = job.get("status")
+            if status != last_status:
+                sys.stderr.write(f"remote job {job_id}: {status}\n")
+                last_status = status
+            if status == "completed":
+                break
+            if status == "failed":
+                raise RemoteTranscriberError(f"daemon job {job_id} failed: {job.get('error')}")
+            await asyncio.sleep(poll_interval_seconds)
+
+        if output_dir is None:
+            base = Path(url_or_file).name
+            stem = Path(base).stem if not is_url else (base or "remote")
+            output_dir = f"text_{stem or 'remote'}"
+        out_path = Path(output_dir).resolve()
+        out_path.mkdir(parents=True, exist_ok=True)
+
+        artifacts = job.get("artifacts") or []
+        if not artifacts:
+            raise RemoteTranscriberError(f"daemon job {job_id} reported no artifacts")
+        for name in artifacts:
+            dest = out_path / name
+            async with client.stream("GET", f"{base_url}/v1/jobs/{job_id}/artifacts/{name}") as r:
+                if r.status_code >= 400:
+                    raise RemoteTranscriberError(f"failed to download artifact {name}: {r.status_code} {await r.aread()!r}")
+                with dest.open("wb") as fh:
+                    async for chunk in r.aiter_bytes():
+                        fh.write(chunk)
+        return str(out_path)
 
 
 def resolve_remote_and_token(

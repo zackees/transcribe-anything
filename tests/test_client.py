@@ -6,9 +6,11 @@ no subprocess. The actual transcribe() call is mocked.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
+import httpx
 import pytest
 from starlette.testclient import TestClient
 
@@ -17,6 +19,7 @@ from transcribe_anything.client import (
     RemoteTranscriberError,
     resolve_remote_and_token,
     transcribe_remote,
+    transcribe_remote_async,
 )
 from transcribe_anything.server_app import create_app
 from transcribe_anything.server_config import ServerConfig
@@ -156,3 +159,80 @@ def test_resolve_remote_and_token_returns_none_when_unset(monkeypatch) -> None:
     remote, token = resolve_remote_and_token(remote_arg=None, token_arg=None)
     assert remote is None
     assert token is None
+
+
+# --------------------- async client ---------------------
+
+
+@pytest.fixture
+def asgi_async_client_factory(asgi_app, monkeypatch):
+    """Monkeypatch ``httpx.AsyncClient`` used by ``transcribe_remote_async``.
+
+    Unlike sync httpx, the async client *does* accept ``ASGITransport``
+    directly, so we just inject one pointing at the in-process FastAPI app.
+    """
+    transport = httpx.ASGITransport(app=asgi_app)
+    real_async_client = httpx.AsyncClient
+
+    def factory(*args, **kwargs):
+        kwargs.setdefault("transport", transport)
+        kwargs.setdefault("base_url", "http://testserver")
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr(client_mod.httpx, "AsyncClient", factory)
+    return factory
+
+
+def test_transcribe_remote_async_url_path(asgi_async_client_factory, tmp_path) -> None:
+    out_dir = tmp_path / "out"
+    result = asyncio.run(
+        transcribe_remote_async(
+            url_or_file="https://example.com/foo.mp3",
+            remote="http://testserver",
+            output_dir=str(out_dir),
+            poll_interval_seconds=0.01,
+        )
+    )
+    assert Path(result).resolve() == out_dir.resolve()
+    assert (out_dir / "out.txt").is_file()
+    assert (out_dir / "out.srt").is_file()
+
+
+def test_transcribe_remote_async_file_upload(asgi_async_client_factory, tmp_path) -> None:
+    src = tmp_path / "audio.wav"
+    src.write_bytes(b"RIFF\x00\x00\x00\x00WAVEfmt ")
+    out_dir = tmp_path / "out"
+    result = asyncio.run(
+        transcribe_remote_async(
+            url_or_file=str(src),
+            remote="http://testserver",
+            output_dir=str(out_dir),
+            poll_interval_seconds=0.01,
+        )
+    )
+    assert Path(result).resolve() == out_dir.resolve()
+    assert (out_dir / "out.txt").read_text(encoding="utf-8") == "hello"
+
+
+def test_transcribe_remote_async_rejects_missing_file(asgi_async_client_factory, tmp_path) -> None:
+    with pytest.raises(RemoteTranscriberError):
+        asyncio.run(
+            transcribe_remote_async(
+                url_or_file=str(tmp_path / "nope.wav"),
+                remote="http://testserver",
+                output_dir=str(tmp_path / "out"),
+            )
+        )
+
+
+def test_transcribe_remote_async_surfaces_daemon_4xx(asgi_async_client_factory, tmp_path) -> None:
+    with pytest.raises(RemoteTranscriberError) as exc:
+        asyncio.run(
+            transcribe_remote_async(
+                url_or_file="https://example.com/x.mp3",
+                remote="http://testserver",
+                output_dir=str(tmp_path / "out"),
+                model="large-v3",  # locked field, daemon default is "tiny"
+            )
+        )
+    assert "400" in str(exc.value)
