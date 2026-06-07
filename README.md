@@ -621,6 +621,79 @@ transcribe-anything video.mp4 --device cpu
 transcribe-anything video.mp4 --device cpu --model medium --language fr --task transcribe
 ```
 
+## Daemon Mode (`transcribe-anything serve` / `--remote`)
+
+For batch workflows or shared GPU hosts, the cold-start cost (iso-env build, `torch` import, HF model load, CUDA context init) dominates wall-clock time of every CLI invocation. **Daemon mode** pays those costs once at startup; subsequent transcriptions submit over HTTP to the long-running FastAPI server and download artifacts back into the same `text_<file>/` layout you get from a local run.
+
+Two deployment shapes:
+
+| Mode | Bind | Auth | Use case |
+|---|---|---|---|
+| **Local** (default) | `127.0.0.1:8765` | none | Developer laptop, local batch script |
+| **Public** | `--host 0.0.0.0` (any non-loopback) | **required** — daemon refuses to start without `--auth-token` | Trusted LAN, reverse-proxied deployment |
+
+### Start the daemon
+
+```bash
+# Local, no auth, lazy model load on first request
+transcribe-anything serve
+
+# Lock to a backend + model and pre-warm them at startup
+transcribe-anything serve --device insane --model large-v3 --prefetch eager
+
+# Bind to all interfaces (auth required) — read the token from an env var
+TRANSCRIBE_ANYTHING_TOKEN=$(openssl rand -hex 32) \
+  transcribe-anything serve --host 0.0.0.0 --auth-token-env TRANSCRIBE_ANYTHING_TOKEN
+```
+
+The daemon **locks the backend, HF token, and prefetch policy at startup**. Per-request overrides of those fields are rejected with `400 daemon-locked`. By default the `model` is also locked to the daemon-configured default — pass `--allow-client-model` if you want clients to request different Whisper variants.
+
+`--prefetch` modes:
+
+- `lazy` *(default)* — daemon boots immediately; the first request pays the model download.
+- `eager` — boot blocks `/healthz` until a synthetic 1-second warmup transcription completes. First real request is fast. Good for hosted deployments.
+- `none` — refuse requests until weights are already cached. Pre-bake the cache in your container build.
+
+### Use the CLI as a client
+
+```bash
+# Talk to a local daemon
+transcribe-anything video.mp4 --remote http://127.0.0.1:8765
+
+# Talk to a public daemon with auth
+transcribe-anything https://youtu.be/... \
+  --remote https://transcribe.example.com \
+  --token "$TRANSCRIBE_ANYTHING_TOKEN"
+
+# Or via env vars (works with every other transcribe-anything flag)
+export TRANSCRIBE_ANYTHING_REMOTE=http://127.0.0.1:8765
+export TRANSCRIBE_ANYTHING_TOKEN=...
+transcribe-anything video.mp4
+```
+
+When `--remote` is set, the CLI uploads local files (or forwards URLs for the daemon to download), polls for completion, and writes the standard `out.txt` / `out.srt` / `out.vtt` / `out.json` files into `output_dir` — identical to a local invocation. If `--remote` is unset, behavior is unchanged.
+
+### Python API
+
+```python
+from transcribe_anything.client import transcribe_remote
+
+transcribe_remote(
+    "video.mp4",
+    remote="http://127.0.0.1:8765",
+    output_dir="text_video",
+    model="large-v3",
+    language="en",
+)
+```
+
+### Operational notes
+
+- **Non-goals for v1:** TLS termination (use nginx/caddy in front), multi-tenant identity, persistent job queue across restarts, multi-GPU scheduling.
+- **HF token redaction** — tokens supplied via `--hf-token` at daemon startup are stripped from every client-visible error and never appear in job-status responses (extends the redaction from PR #93 to the HTTP layer).
+- **Queue + concurrency** — the GPU is single-tenant per backend, so the daemon serializes work onto one worker. `--max-queue` (default 8) bounds the queue; overflow returns `429`.
+- **Endpoints** — `POST /v1/transcribe`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/artifacts/{filename}`, `DELETE /v1/jobs/{id}`, `GET /v1/capabilities`, `GET /healthz`, `GET /readyz`. Auth header is `Authorization: Bearer <token>` (or `X-Transcribe-Token: <token>`).
+
 ## Troubleshooting Common Issues
 
 ### Out of Memory Errors
