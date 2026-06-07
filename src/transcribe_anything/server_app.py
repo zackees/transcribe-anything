@@ -26,6 +26,7 @@ Design constraints (issue #107):
 import json
 import shutil
 import tempfile
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -77,10 +78,18 @@ def create_app(
         warmup = WarmupRunner(config, transcribe_fn or _default_transcribe_fn)
         warmup.start()
 
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        try:
+            yield
+        finally:
+            store.stop()
+
     app = FastAPI(
         title="transcribe-anything daemon",
         version="1",
         description="Persistent FastAPI daemon for transcribe-anything (issue #107).",
+        lifespan=lifespan,
     )
 
     # Stash for tests / introspection.
@@ -230,10 +239,6 @@ def create_app(
         if not path.is_file():
             raise HTTPException(status_code=404, detail="artifact not found")
         return FileResponse(str(path), filename=filename)
-
-    @app.on_event("shutdown")
-    def _shutdown() -> None:
-        store.stop()
 
     return app
 
