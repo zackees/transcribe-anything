@@ -687,9 +687,28 @@ transcribe_remote(
 )
 ```
 
+### Self-hosted with Docker + TLS reverse proxy
+
+`examples/serve-compose.yml` runs the daemon behind a Caddy reverse proxy with automatic Let's Encrypt TLS:
+
+```bash
+export TRANSCRIBE_ANYTHING_TOKEN=$(openssl rand -hex 32)
+export TRANSCRIBE_PUBLIC_HOST=transcribe.example.com
+docker compose -f examples/serve-compose.yml up -d
+
+# Then from any client
+transcribe-anything video.mp4 \
+  --remote "https://${TRANSCRIBE_PUBLIC_HOST}" \
+  --token  "${TRANSCRIBE_ANYTHING_TOKEN}"
+```
+
+The compose file isolates the daemon to an internal network and only publishes 80/443 from Caddy — the daemon's own `:8765` is never exposed to the host. Named volumes preserve the HuggingFace model cache and per-backend iso-envs across container rebuilds.
+
+If you prefer nginx, `examples/nginx.serve.conf` is a drop-in fragment with the right timeouts (4h `proxy_read_timeout`), `client_max_body_size 2g` to match `--max-upload-size`, and `proxy_buffering off` so the future SSE progress endpoint flushes events in real time.
+
 ### Operational notes
 
-- **Non-goals for v1:** TLS termination (use nginx/caddy in front), multi-tenant identity, persistent job queue across restarts, multi-GPU scheduling.
+- **Non-goals for v1:** multi-tenant identity, persistent job queue across restarts, multi-GPU scheduling. TLS termination is documented above via the reverse-proxy recipe.
 - **HF token redaction** — tokens supplied via `--hf-token` at daemon startup are stripped from every client-visible error and never appear in job-status responses (extends the redaction from PR #93 to the HTTP layer).
 - **Queue + concurrency** — the GPU is single-tenant per backend, so the daemon serializes work onto one worker. `--max-queue` (default 8) bounds the queue; overflow returns `429`.
 - **Endpoints** — `POST /v1/transcribe`, `GET /v1/jobs/{id}`, `GET /v1/jobs/{id}/artifacts/{filename}`, `DELETE /v1/jobs/{id}`, `GET /v1/capabilities`, `GET /healthz`, `GET /readyz`. Auth header is `Authorization: Bearer <token>` (or `X-Transcribe-Token: <token>`).
