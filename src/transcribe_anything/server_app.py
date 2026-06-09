@@ -93,10 +93,39 @@ def create_app(
     store = JobStore(config, transcribe_fn=transcribe_fn)
     store.start()
     stream_session = StreamSession()
-    # Real backends (faster-whisper, whisper.cpp) will replace this via the
-    # streaming_fn= kwarg. The fallback is a canned scripted generator —
-    # safe to leave in place because allow_stream defaults to False.
-    active_streaming_fn = streaming_fn or _canned_streaming_fn
+    # Streaming backend resolution:
+    #   1. explicit streaming_fn= wins (tests, custom backends)
+    #   2. when allow_stream is on, try the real faster-whisper backend
+    #      (#124). It imports cleanly only if `transcribe-anything[stream]`
+    #      is installed; otherwise we fall back to the canned protocol-
+    #      validation backend with a warning so the operator notices.
+    #   3. otherwise the canned backend (safe because allow_stream
+    #      defaults to off, so the WS handler refuses connections).
+    if streaming_fn is not None:
+        active_streaming_fn = streaming_fn
+    elif config.allow_stream:
+        try:
+            # Probe the heavy deps so we fail loud at startup, not
+            # at first-connect.
+            from transcribe_anything.stream_backend import (
+                _lazy_imports,
+                faster_whisper_streaming_fn,
+            )
+
+            _lazy_imports()
+            active_streaming_fn = faster_whisper_streaming_fn
+        except ImportError as exc:
+            import logging as _logging
+
+            _logging.getLogger("transcribe_anything.server").warning(
+                "allow_stream is on but the faster-whisper backend is not available (%s). "
+                "Falling back to the canned protocol-validation backend. Install "
+                "`transcribe-anything[stream]` for real transcription.",
+                exc,
+            )
+            active_streaming_fn = _canned_streaming_fn
+    else:
+        active_streaming_fn = _canned_streaming_fn
 
     warmup: Optional[WarmupRunner] = None
     if config.prefetch == "eager":

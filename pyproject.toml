@@ -35,6 +35,19 @@ server = [
     "python-multipart>=0.0.9",
     "websockets>=12.0",
 ]
+# `pip install transcribe-anything[stream]` adds the realtime backend's
+# dependencies. Pairs with `transcribe-anything serve --allow-stream
+# --no-iso-env` so the daemon picks the real faster-whisper + silero-vad
+# path when this extras group is installed. Without the extras (or
+# inside the small daemon iso-env), --allow-stream falls back to the
+# canned protocol-validation backend.
+stream = [
+    "faster-whisper>=1.1.0,<2.0.0",
+    "silero-vad>=5.1.2",
+    "ctranslate2>=4.4.0,<5.0.0",
+    "onnxruntime>=1.17.0",
+    "numpy>=1.26.0,<3.0.0",
+]
 
 [project.urls]
 homepage = "https://github.com/zackees/transcribe-anything"

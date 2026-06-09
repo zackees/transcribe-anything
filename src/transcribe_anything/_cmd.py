@@ -262,9 +262,19 @@ def parse_arguments() -> argparse.Namespace:
         help=("Auth token for the remote daemon (Authorization: Bearer). " "Also reads TRANSCRIBE_ANYTHING_TOKEN."),
         default=None,
     )
+    parser.add_argument(
+        "--stream-in",
+        action="store_true",
+        help=(
+            "Realtime mode (#124): read PCM16-LE mono audio from stdin and stream transcripts "
+            "to stdout as they arrive. Requires --remote pointing at a daemon with --allow-stream. "
+            "Example: arecord -f S16_LE -c 1 -r 16000 -t raw - | "
+            "transcribe-anything --remote ws://127.0.0.1:8765 --stream-in"
+        ),
+    )
     # add extra options that are passed into the transcribe function
     args, unknown = parser.parse_known_args()
-    if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, "clear_nvidia_cache", False):
+    if args.url_or_file is None and args.query_gpu_json_path is None and not getattr(args, "clear_nvidia_cache", False) and not getattr(args, "stream_in", False):
         print("No file or url provided")
         parser.print_help()
         sys.exit(1)
@@ -381,6 +391,35 @@ def main() -> int:
         remote_arg=getattr(args, "remote", None),
         token_arg=getattr(args, "token", None),
     )
+    if remote and getattr(args, "stream_in", False):
+        from transcribe_anything.client import (
+            RemoteTranscriberError,
+            stream_pcm_from_stdin,
+        )
+
+        # --stream-in: pipe stdin PCM to the daemon's WS /v1/stream and
+        # print transcripts as they arrive. The daemon must be on a
+        # WebSocket URL (ws:// or wss://) — http(s):// is auto-rewritten.
+        print(f"Streaming to remote daemon at {remote}", file=sys.stderr)
+        try:
+            stream_pcm_from_stdin(
+                remote=remote,
+                token=token,
+                model=args.model if args.model != "None" else None,
+                language=args.language if args.language != "None" else None,
+            )
+            return 0
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt", file=sys.stderr)
+            return 130
+        except RemoteTranscriberError as e:
+            sys.stderr.write(f"Error: {e}\nwhile streaming to {remote}\n")
+            return 1
+        except Exception as e:  # pylint: disable=broad-except
+            stack = traceback.format_exc()
+            sys.stderr.write(f"Error: {e}\n{stack}\nwhile streaming to {remote}\n")
+            return 1
+
     if remote:
         from transcribe_anything.client import (
             RemoteTranscriberError,
