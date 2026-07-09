@@ -41,7 +41,9 @@ _SERVER_DEPS = [
     # Mirror of the host base deps so `import transcribe_anything.*` works
     # against the host source via PYTHONPATH.
     "static-ffmpeg>=3.0",
-    "yt-dlp>=2025.1.15",
+    # >=2026.6.9: fixes --exec command injection, aria2c manifest code
+    # exec, filename sanitization bypass, and cookie leak advisories.
+    "yt-dlp>=2026.6.9",
     "appdirs>=1.4.4",
     "disklru>=1.0.7",
     "FileLock",

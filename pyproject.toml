@@ -11,7 +11,9 @@ keywords = ["transcribe", "openai", "whisper"]
 license = { text = "BSD-3-Clause" }
 dependencies = [
     "static-ffmpeg>=3.0",
-    "yt-dlp>=2025.1.15",
+    # >=2026.6.9: GHSA-537c/69qj/vx4q/c6mh — --exec command injection,
+    # aria2c manifest code exec, filename sanitization bypass, cookie leak
+    "yt-dlp>=2026.6.9",
     "appdirs>=1.4.4",
     "disklru>=1.0.7",
     "FileLock",
@@ -84,6 +86,11 @@ disable_error_code = ["import-untyped"]
 [tool.black]
 line-length = 200
 target-version = ['py310']
+
+[tool.uv]
+# Transitive floor (via yt-dlp -> secretstorage on Linux):
+# cryptography < 48.0.1 bundles a vulnerable OpenSSL (GHSA-537c-gmf6-5ccf).
+constraint-dependencies = ["cryptography>=48.0.1"]
 
 [tool.uv.workspace]
 members = ["tmp"]
