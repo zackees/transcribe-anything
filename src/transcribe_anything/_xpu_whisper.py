@@ -4,6 +4,7 @@ Drop-in replacement for insanely-fast-whisper CLI that supports XPU device.
 
 import argparse
 import json
+
 import torch
 from transformers import pipeline
 
@@ -22,8 +23,17 @@ parser.add_argument("--transcript-path", required=False, default="output.json", 
 parser.add_argument("--model-name", required=False, default="openai/whisper-large-v3", type=str)
 parser.add_argument("--task", required=False, default="transcribe", type=str, choices=["transcribe", "translate"])
 parser.add_argument("--language", required=False, default="None", type=str)
+
+
+def _str_to_bool(value: str) -> bool:
+    """argparse type=bool treats any non-empty string ("False") as truthy."""
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
 parser.add_argument("--batch-size", required=False, default=24, type=int)
-parser.add_argument("--flash", required=False, default=False, type=bool)
+# Accepted for CLI parity with insanely-fast-whisper (both bare "--flash" and
+# "--flash True/False"); flash attention is not used on XPU.
+parser.add_argument("--flash", required=False, default=False, type=_str_to_bool, nargs="?", const=True)
 parser.add_argument("--timestamp", required=False, default="chunk", type=str, choices=["chunk", "word"])
 parser.add_argument("--hf-token", required=False, default="no_token", type=str)
 parser.add_argument("--diarization_model", required=False, default="pyannote/speaker-diarization-3.1", type=str)
