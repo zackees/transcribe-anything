@@ -21,15 +21,17 @@ CUDA_AVAILABLE: Optional[bool] = None
 # Set the versions
 TENSOR_VERSION = "2.7.0"
 CUDA_VERSION = "cu128"
-EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+XPU_VERSION = "xpu"
+CUDA_EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+XPU_EXTRA_INDEX_URL = "https://download.pytorch.org/whl/xpu"
 
 IS_MAC = sys.platform == "darwin"
 
 
-def get_environment() -> IsoEnv:
+def get_environment(use_xpu: bool = False) -> IsoEnv:
     """Returns the environment."""
-    venv_dir = get_runtime_venv_dir("whisper")
-    needs_extra_index = not IS_MAC and has_nvidia_smi()
+    venv_dir = get_runtime_venv_dir("whisper-xpu" if use_xpu else "whisper")
+    needs_extra_index = (not IS_MAC and has_nvidia_smi()) or use_xpu
     content_lines: list[str] = []
 
     content_lines.append("[build-system]")
@@ -46,26 +48,38 @@ def get_environment() -> IsoEnv:
     content_lines.append('  "numpy==1.26.4",')
     # f"torch=={TENSOR_VERSION}"
     if needs_extra_index:
-        content_lines.append(f'  "torch=={TENSOR_VERSION}+{CUDA_VERSION}",')
+        if use_xpu:
+            content_lines.append(f'  "torch=={TENSOR_VERSION}+{XPU_VERSION}",')
+        else:
+            content_lines.append(f'  "torch=={TENSOR_VERSION}+{CUDA_VERSION}",')
     content_lines.append("]")
 
     # Constrain setuptools < 82 for build isolation because
     # openai-whisper imports pkg_resources which was removed in setuptools 82.
     content_lines.append("")
     content_lines.append("[tool.uv]")
+    if use_xpu:
+        content_lines.append('index-strategy = "unsafe-best-match"')
     content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
 
-    needs_extra_index = not IS_MAC and has_nvidia_smi()
+    needs_extra_index = (not IS_MAC and has_nvidia_smi()) or use_xpu
     if needs_extra_index:
         content_lines.append("")
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
-        content_lines.append("  { index = 'pytorch-cu128' },")
+        if use_xpu:
+            content_lines.append("  { index = 'pytorch-xpu' },")
+        else:
+            content_lines.append("  { index = 'pytorch-cu128' },")
         content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
-        content_lines.append('name = "pytorch-cu128"')
-        content_lines.append(f'url = "{EXTRA_INDEX_URL}"')
-        content_lines.append("explicit = true")
+        if use_xpu:
+            content_lines.append('name = "pytorch-xpu"')
+            content_lines.append(f'url = "{XPU_EXTRA_INDEX_URL}"')
+        else:
+            content_lines.append('name = "pytorch-cu128"')
+            content_lines.append(f'url = "{CUDA_EXTRA_INDEX_URL}"')
+            content_lines.append("explicit = true")
 
     content = "\n".join(content_lines)
 

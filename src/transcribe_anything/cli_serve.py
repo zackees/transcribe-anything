@@ -55,7 +55,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--device",
         default=None,
-        choices=[None, "cpu", "cuda", "insane", "insane-flash", "whisperx", "sensevoice", "mlx"],
+        choices=[None, "cpu", "cuda", "xpu", "insane", "insane-flash", "whisperx", "sensevoice", "mlx"],
         help="lock the daemon to this backend (default: auto-detect)",
     )
     parser.add_argument("--model", default="small", help="default whisper model (default: small)")

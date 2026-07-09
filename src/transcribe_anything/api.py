@@ -72,6 +72,7 @@ class Device(Enum):
 
     CPU = "cpu"
     CUDA = "cuda"
+    XPU = "xpu"
     INSANE = "insane"
     INSANE_FLASH = "insane-flash"
     WHISPERX = "whisperx"
@@ -91,6 +92,8 @@ class Device(Enum):
             return Device.CPU
         if device == "cuda":
             return Device.CUDA
+        if device == "xpu":
+            return Device.XPU
         if device == "insane":
             return Device.INSANE
         if device == "insane-flash":
@@ -216,7 +219,7 @@ def transcribe(
         model: Whisper model to use (tiny, small, medium, large, etc.)
         task: Task to perform (transcribe or translate)
         language: Language of the audio (auto-detected if None)
-        device: Device to use (cuda, cpu, insane, insane-flash, whisperx, mlx)
+        device: Device to use (cuda, xpu, cpu, insane, insane-flash, whisperx, mlx)
         embed: Whether to embed subtitles into video file
         hugging_face_token: Token for speaker diarization
         other_args: Additional arguments to pass to Whisper backend
@@ -276,6 +279,10 @@ def transcribe(
             print("#####################################")
             print("######### GPU ACCELERATED! ##########")
             print("#####################################")
+        elif device_enum == Device.XPU:
+            print("#####################################")
+            print("####### INTEL XPU MODE! #############")
+            print("#####################################")
         elif device_enum == Device.INSANE:
             print("#####################################")
             print("####### INSANE GPU MODE! ############")
@@ -314,7 +321,7 @@ def transcribe(
 
         print(f"Running whisper on {tmp_wav} (will install models on first run)")
         with tempfile.TemporaryDirectory() as tmpdir:
-            if device_enum in (Device.INSANE, Device.INSANE_FLASH):
+            if device_enum in (Device.INSANE, Device.INSANE_FLASH, Device.XPU):
                 run_insanely_fast_whisper(
                     input_wav=Path(tmp_wav),
                     model=model_str,
@@ -326,6 +333,7 @@ def transcribe(
                     flash=device_enum == Device.INSANE_FLASH,
                     align=align,
                     align_model=align_model,
+                    use_xpu=device_enum == Device.XPU,
                 )
             elif device_enum == Device.WHISPERX:
                 global run_whisperx
@@ -345,6 +353,7 @@ def transcribe(
                     language=language_str,
                     hugging_face_token=hugging_face_token,
                     other_args=other_args,
+                    use_xpu=device_enum == Device.XPU,
                 )
             elif device_enum == Device.SENSEVOICE:
                 global run_sensevoice
