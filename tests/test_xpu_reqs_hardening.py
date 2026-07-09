@@ -28,16 +28,20 @@ def _assert_hardened_xpu_index(content: str) -> None:
     xpu_index = next(i for i in indexes if i["name"] == "pytorch-xpu")
     assert xpu_index["url"] == "https://download.pytorch.org/whl/xpu"
     assert xpu_index["explicit"] is True
-    # pytorch-triton-xpu (torch+xpu's triton backend) is quarantined on PyPI
-    # and only exists on the pytorch-xpu index, so it must be declared and
-    # pinned there for resolution to succeed with an explicit index.
+    # torch+xpu's triton backend (pytorch-triton-xpu through torch 2.8/2.9;
+    # renamed triton-xpu in torch 2.10) is only usable from the pytorch-xpu
+    # index (PyPI: quarantined / stale beta respectively), so it must be
+    # declared and pinned there for resolution to succeed with an explicit
+    # index.
     sources = parsed["tool"]["uv"]["sources"]
-    assert sources["pytorch-triton-xpu"] == [{"index": "pytorch-xpu"}]
+    triton_name = next((n for n in ("triton-xpu", "pytorch-triton-xpu") if n in sources), None)
+    assert triton_name is not None, "triton backend must be pinned in tool.uv.sources"
+    assert sources[triton_name] == [{"index": "pytorch-xpu"}]
     deps = parsed["project"]["dependencies"]
-    triton_dep = next(d for d in deps if d.startswith("pytorch-triton-xpu"))
+    triton_dep = next(d for d in deps if d.startswith(triton_name))
     # Exact version pin: the resolved artifact must be deterministic, not
     # whatever latest version appears on the index.
-    assert triton_dep.startswith("pytorch-triton-xpu=="), f"triton must be exact-pinned: {triton_dep}"
+    assert triton_dep.startswith(f"{triton_name}=="), f"triton must be exact-pinned: {triton_dep}"
     # XPU wheels are linux/windows only; universal resolution must not
     # attempt the mac split.
     environments = parsed["tool"]["uv"]["environments"]

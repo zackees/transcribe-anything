@@ -20,7 +20,11 @@ WRAP_SRT_PY = HERE / "srt_wrap.py"
 def get_environment() -> IsoEnv:
     """Returns the environment."""
     venv_path = get_runtime_venv_dir("srttranslator")
-    reqs_text = "\n".join(["srtranslator==0.3.9", "requests==2.28.1", "urllib3==1.26.13"])
+    # srtranslator pins selenium==4.7.2, which caps urllib3 to 1.26.x; keep
+    # the patched floors within that cap (PYSEC-2023-192/212, PYSEC-2026-1995,
+    # requests PYSEC-2023-74/2026-187x, CVE-2026-25645). Only SrtFile parsing
+    # is used here — the selenium translation machinery is never launched.
+    reqs_text = "\n".join(["srtranslator==0.3.9", "requests>=2.33.0", "urllib3>=1.26.19"])
     reqs = Requirements(
         reqs_text,
         python_version="==3.11.*",

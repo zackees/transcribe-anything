@@ -17,15 +17,18 @@ from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
 HERE = Path(__file__).parent
 
 # Set the versions
-TENSOR_VERSION = "2.7.0"
+# 2.7.1 fixes PYSEC-2025-191/205/207/208/209. Cannot go to 2.9/2.10
+# (CVE-2025-2999/3001) until pyannote.audio supports torchaudio>=2.9,
+# which removed torchaudio.AudioMetaData used by pyannote 3.3.2.
+TENSOR_VERSION = "2.7.1"
 CUDA_VERSION = "cu128"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 XPU_VERSION = "xpu"
 TENSOR_XPU_VERSION = f"{TENSOR_VERSION}+{XPU_VERSION}"
-# torch 2.7.0+xpu requires exactly this triton version; pin it so the
+# torch 2.7.1+xpu requires exactly this triton version; pin it so the
 # resolved artifact is deterministic (index-pinned AND version-pinned).
-TRITON_XPU_VERSION = "3.3.0"
+TRITON_XPU_VERSION = "3.3.1"
 XPU_EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{XPU_VERSION}"
 PYTHON_VERSION = "==3.11.*"
 INSANE_ENV_NAME = "insanely_fast_whisper"
@@ -51,9 +54,12 @@ def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
         "datasets==2.17.1",
         "pytorch-lightning==2.5.0",
         "torchmetrics==1.6.1",
-        "srtranslator==0.3.5",
+        # srtranslator (and its safeIO companion) was removed: srt_wrap runs
+        # in the dedicated srttranslator iso-env (srt_translation.py), the
+        # in-env call here has long been disabled, and srtranslator dragged
+        # in a 2022-era web stack (selenium 4.7.2 -> urllib3<2, old lxml,
+        # requests, certifi, ...) carrying 20+ known advisories.
         # "numpy==2.2.0",
-        "safeIO==1.2",
         "llvmlite==0.44.0",
         "numba==0.61.0",
     ]
@@ -81,8 +87,9 @@ def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
     else:
         content_lines.append(f"torch=={TENSOR_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_VERSION}")
-    if sys.platform != "darwin":
-        # Add the windows specific dependencies.
+    if sys.platform != "darwin" and not use_xpu:
+        # Add the windows specific dependencies. Skipped on XPU because
+        # torch+xpu pins its own intel-openmp (2.10.0 needs ==2025.3.1).
         content_lines.append("intel-openmp==2024.0.3")
 
     return content_lines
