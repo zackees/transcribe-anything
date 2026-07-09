@@ -64,8 +64,8 @@ def test_insane_flash_pyproject_contains_direct_wheel_hash() -> None:
 
     assert "flash-attn @ https://github.com/mjun0812/flash-attention-prebuild-wheels" in content
     assert "#sha256=ee22b69054b067de658e4a85183fc0d494b495770c8ff557e2d85b34f1f477fb" in content
-    assert "torch==2.7.0+cu128" in content
-    assert "torchaudio==2.7.0+cu128" in content
+    assert "torch==2.7.1+cu128" in content
+    assert "torchaudio==2.7.1+cu128" in content
     assert "https://download.pytorch.org/whl/cu128" in content
 
 

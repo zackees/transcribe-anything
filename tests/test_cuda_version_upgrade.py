@@ -374,7 +374,7 @@ class TestPyTorchWheelUrl(unittest.TestCase):
             self.skipTest(f"Network unavailable: {e}")
 
     def test_cu128_torch_2_7_0_wheel_exists(self):
-        """Verify that torch 2.7.0 cu128 wheel page exists."""
+        """Verify that the pinned torch cu128 wheel exists on the index."""
         import urllib.error
         import urllib.request
 
@@ -383,7 +383,7 @@ class TestPyTorchWheelUrl(unittest.TestCase):
         try:
             resp = urllib.request.urlopen(req, timeout=15)
             body = resp.read().decode("utf-8", errors="replace")
-            self.assertIn("2.7.0", body, "torch 2.7.0 wheel not found in cu128 index")
+            self.assertIn("2.7.1", body, "torch 2.7.1 wheel not found in cu128 index")
         except urllib.error.HTTPError as e:
             self.fail(f"cu128 torch index returned HTTP {e.code}: {url}")
         except urllib.error.URLError as e:
