@@ -201,9 +201,9 @@ class TestModuleConstants(unittest.TestCase):
         self.assertEqual(CUDA_VERSION, "cu128")
 
     def test_whisper_extra_index_url(self):
-        from transcribe_anything.whisper import EXTRA_INDEX_URL
+        from transcribe_anything.whisper import CUDA_EXTRA_INDEX_URL
 
-        self.assertEqual(EXTRA_INDEX_URL, "https://download.pytorch.org/whl/cu128")
+        self.assertEqual(CUDA_EXTRA_INDEX_URL, "https://download.pytorch.org/whl/cu128")
 
     def test_insane_tensor_version(self):
         from transcribe_anything.insanley_fast_whisper_reqs import TENSOR_VERSION

@@ -188,11 +188,16 @@ def test_run_insanely_fast_whisper_uses_flash_env_and_forces_flash_arg(monkeypat
     env_calls: list[bool] = []
 
     class FakeProc:
+        returncode = 0
+
         def poll(self) -> int:
             return 0
 
         def wait(self) -> int:
             return 0
+
+        def communicate(self) -> tuple[str, str]:
+            return ("", "")
 
     class FakeEnv:
         def __init__(self) -> None:
@@ -212,8 +217,8 @@ def test_run_insanely_fast_whisper_uses_flash_env_and_forces_flash_arg(monkeypat
 
     fake_env = FakeEnv()
 
-    def fake_get_environment(*, flash: bool = False, has_nvidia: bool | None = None) -> FakeEnv:
-        del has_nvidia
+    def fake_get_environment(*, flash: bool = False, has_nvidia: bool | None = None, use_xpu: bool = False) -> FakeEnv:
+        del has_nvidia, use_xpu
         env_calls.append(flash)
         return fake_env
 

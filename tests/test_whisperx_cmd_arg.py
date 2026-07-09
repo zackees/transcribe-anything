@@ -170,6 +170,7 @@ def test_api_routes_device_whisperx_to_whisperx_backend(monkeypatch: pytest.Monk
             "language": "en",
             "hugging_face_token": "hf_test",
             "other_args": ["--batch_size", "4", "--compute_type", "float16"],
+            "use_xpu": False,
         }
     ]
     for filename in ["out.srt", "out.vtt", "out.txt", "out.json"]:
@@ -211,7 +212,7 @@ def test_run_whisperx_uses_isolated_env_and_forwards_backend_args(monkeypatch: p
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     fake_env = FakeEnv()
-    monkeypatch.setattr(whisperx, "get_environment", lambda: fake_env)
+    monkeypatch.setattr(whisperx, "get_environment", lambda use_xpu=False: fake_env)
     monkeypatch.setattr(whisperx.static_ffmpeg, "add_paths", lambda *args, **kwargs: None)
 
     whisperx.run_whisperx(
