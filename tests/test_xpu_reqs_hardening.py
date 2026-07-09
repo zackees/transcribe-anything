@@ -11,6 +11,8 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
+import pytest
+
 SRC = Path(__file__).parent.parent / "src" / "transcribe_anything"
 
 
@@ -57,11 +59,14 @@ def test_whisperx_xpu_pyproject_is_hardened() -> None:
     _assert_hardened_xpu_index(build_pyproject_toml(has_nvidia=False, use_xpu=True))
 
 
-def test_whisper_cuda_pyproject_unchanged() -> None:
+def test_whisper_cuda_pyproject_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
     """Hardening the XPU path must not disturb the CUDA config."""
-    from transcribe_anything.whisper import build_pyproject_toml
+    import transcribe_anything.whisper as whisper
 
-    content = build_pyproject_toml(has_nvidia=True, use_xpu=False)
+    # The CUDA extra index is only emitted off-mac; force that path so the
+    # assertion holds on macOS CI runners too.
+    monkeypatch.setattr(whisper, "IS_MAC", False)
+    content = whisper.build_pyproject_toml(has_nvidia=True, use_xpu=False)
     idx = content.find('name = "pytorch-cu128"')
     assert idx != -1
     assert "explicit = true" in content[idx:]
