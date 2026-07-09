@@ -13,6 +13,34 @@
 
 Over 1200+⭐'s because this program just works! Works great for windows and mac. This whisper front-end app is the only one to generate a `speaker.json` file which partitions the conversation by who doing the speaking.
 
+## How it works
+
+One CLI, one router: `--device` picks the backend (auto-detected if omitted), and every backend runs in its **own isolated environment** built on first use — no CUDA/torch dependency hell in your python.
+
+```mermaid
+flowchart TD
+    IN["🎬 Input<br/>local file · YouTube · any URL"] --> FETCH["yt-dlp + static-ffmpeg<br/>normalize to 16-bit wav"]
+    FETCH --> ROUTER{"device router<br/>--device (auto-detects if omitted)"}
+
+    ROUTER -->|"cpu / cuda"| W["openai-whisper<br/>reference backend"]
+    ROUTER -->|"insane / insane-flash"| IFW["insanely-fast-whisper<br/>batched HF pipeline · FlashAttention2<br/>optional --align word timestamps"]
+    ROUTER -->|"xpu"| XPU["Intel Arc GPU<br/>HF pipeline on torch+xpu"]
+    ROUTER -->|"whisperx"| WX["WhisperX<br/>VAD · wav2vec2 alignment · diarization"]
+    ROUTER -->|"sensevoice"| SV["SenseVoice<br/>CJK-optimized"]
+    ROUTER -->|"mlx (Apple Silicon)"| MLX["lightning-whisper-mlx<br/>Metal GPU"]
+
+    subgraph ISO["each backend gets its own isolated uv venv, built on first run"]
+        W
+        IFW
+        XPU
+        WX
+        SV
+        MLX
+    end
+
+    W & IFW & XPU & WX & SV & MLX --> OUT["📄 out.txt · out.srt · out.vtt · out.json<br/>🎙️ speaker.json — who said what, when"]
+```
+
 [![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
 
 ## Sponsored by [Recall.ai](https://www.recall.ai)
