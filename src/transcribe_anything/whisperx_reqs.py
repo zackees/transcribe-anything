@@ -18,6 +18,9 @@ TORCHAUDIO_VERSION = "2.8.0"
 TORCHVISION_VERSION = "0.23.0"
 CUDA_VERSION = "cu128"
 XPU_VERSION = "xpu"
+# torch 2.8.0+xpu requires exactly this triton version; pin it so the
+# resolved artifact is deterministic (index-pinned AND version-pinned).
+TRITON_XPU_VERSION = "3.4.0"
 CUDA_EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 XPU_EXTRA_INDEX_URL = "https://download.pytorch.org/whl/xpu"
 
@@ -48,7 +51,7 @@ def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
         # torch+xpu's triton backend only exists on the pytorch-xpu index
         # (the PyPI project is quarantined), so it must be a declared
         # dependency for its [tool.uv.sources] pin to apply.
-        reqs.append("pytorch-triton-xpu; sys_platform == 'linux' or sys_platform == 'win32'")
+        reqs.append(f"pytorch-triton-xpu=={TRITON_XPU_VERSION}; sys_platform == 'linux' or sys_platform == 'win32'")
     return reqs
 
 

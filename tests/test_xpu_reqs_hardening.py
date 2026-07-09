@@ -34,7 +34,10 @@ def _assert_hardened_xpu_index(content: str) -> None:
     sources = parsed["tool"]["uv"]["sources"]
     assert sources["pytorch-triton-xpu"] == [{"index": "pytorch-xpu"}]
     deps = parsed["project"]["dependencies"]
-    assert any(d.startswith("pytorch-triton-xpu") for d in deps)
+    triton_dep = next(d for d in deps if d.startswith("pytorch-triton-xpu"))
+    # Exact version pin: the resolved artifact must be deterministic, not
+    # whatever latest version appears on the index.
+    assert triton_dep.startswith("pytorch-triton-xpu=="), f"triton must be exact-pinned: {triton_dep}"
     # XPU wheels are linux/windows only; universal resolution must not
     # attempt the mac split.
     environments = parsed["tool"]["uv"]["environments"]
