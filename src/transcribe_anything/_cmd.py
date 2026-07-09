@@ -142,7 +142,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         choices=[None] + whisper_options["language"],
     )
-    choices = [None, "cpu", "cuda", "insane", "insane-flash", "whisperx", "sensevoice"]
+    choices = [None, "cpu", "cuda", "xpu", "insane", "insane-flash", "whisperx", "sensevoice"]
     if platform.system() == "Darwin":
         choices.extend(["mlx", "mps"])  # mps for backward compatibility
     parser.add_argument(

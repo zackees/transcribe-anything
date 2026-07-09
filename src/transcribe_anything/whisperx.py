@@ -247,6 +247,13 @@ def _default_device() -> str:
     return "cuda" if has_nvidia_smi() else "cpu"
 
 
+def _has_intel_gpu() -> bool:
+    """Check if system has Intel GPU support (via oneAPI or similar)."""
+    # This is a simple check; more sophisticated detection could be added later
+    import shutil
+    return shutil.which("sycl-ls") is not None or shutil.which("level-zero-loader") is not None
+
+
 def _format_srt_time(seconds: float) -> str:
     milliseconds = int(round(seconds * 1000))
     hours, remainder = divmod(milliseconds, 3600 * 1000)
@@ -433,12 +440,13 @@ def run_whisperx(  # pylint: disable=too-many-arguments
     language: str,
     hugging_face_token: str | None = None,
     other_args: list[str] | None = None,
+    use_xpu: bool = False,
 ) -> None:
     """Run WhisperX through its isolated environment."""
     ffmpeg_cache = get_static_ffmpeg_runtime_dir()
     static_ffmpeg_run.LOCK_FILE = str(ffmpeg_cache / "lock.file")
     static_ffmpeg.add_paths(download_dir=str(ffmpeg_cache / static_ffmpeg_run.get_platform_key()))
-    iso_env = get_environment()
+    iso_env = get_environment(use_xpu=use_xpu)
     passthrough_args, arg_hf_token = _parse_other_args(other_args)
     hf_token = hugging_face_token or arg_hf_token
 
@@ -465,7 +473,10 @@ def run_whisperx(  # pylint: disable=too-many-arguments
         if language:
             cmd_list.extend(["--language", language])
         if not _has_cli_option(passthrough_args, "--device"):
-            cmd_list.extend(["--device", _default_device()])
+            if use_xpu:
+                cmd_list.extend(["--device", "xpu"])
+            else:
+                cmd_list.extend(["--device", _default_device()])
         if hf_token:
             cmd_list.extend(["--hf_token", hf_token])
         cmd_list.extend(passthrough_args)

@@ -393,6 +393,7 @@ def run_insanely_fast_whisper(
     flash: bool = False,
     align: bool = False,
     align_model: str | None = None,
+    use_xpu: bool = False,
 ) -> None:
     """Runs insanely fast whisper.
 
@@ -407,7 +408,7 @@ def run_insanely_fast_whisper(
     ffmpeg_cache = get_static_ffmpeg_runtime_dir()
     static_ffmpeg_run.LOCK_FILE = str(ffmpeg_cache / "lock.file")
     static_ffmpeg.add_paths(download_dir=str(ffmpeg_cache / static_ffmpeg_run.get_platform_key()))
-    iso_env = get_environment(flash=flash)
+    iso_env = get_environment(flash=flash, use_xpu=use_xpu)
     backend_args = _prepare_insane_args(other_args, force_flash=flash)
     if flash:
         verify_flash_attention_available(iso_env)
@@ -417,7 +418,6 @@ def run_insanely_fast_whisper(
         # to be necessary since a recent update.
         env["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0"
         # env["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-    device_id = get_device_id()
     cmd_list = []
     output_dir.mkdir(parents=True, exist_ok=True)
     outfile = output_dir / "out.json"
@@ -429,12 +429,23 @@ def run_insanely_fast_whisper(
     # Set the text mode to UTF-8 on Windows.
     # cmd_list.extend(["cmd.exe", "/c"])
     # cmd_list.extend(["chcp", "65001", "&&"])
+    if use_xpu:
+        xpu_script = HERE / "_xpu_whisper.py"
+        cmd_list += [
+            "python",
+            str(xpu_script),
+            "--device-id", "xpu",
+        ]
+    else:
+        device_id = get_device_id()
+        cmd_list += [
+            "insanely-fast-whisper",
+            "--device-id",
+            f"{device_id}",
+        ]
     cmd_list += [
-        "insanely-fast-whisper",
         "--file-name",
         str(input_wav),
-        "--device-id",
-        f"{device_id}",
     ]
     if model:
         cmd_list += [
@@ -485,17 +496,13 @@ def run_insanely_fast_whisper(
         universal_newlines=True,
         encoding="utf-8",
         env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
-    while True:
-        rtn = proc.poll()
-        if rtn is None:
-            time.sleep(0.1)
-            continue
-        if rtn != 0:
-            msg = f"Failed to execute {cmd_safe}\n "
-            raise OSError(msg)
-        break
-    proc.wait()
+    stdout, stderr = proc.communicate()
+    if proc.returncode != 0:
+        msg = f"Failed to execute {cmd_safe}\n--- stderr ---\n{stderr}\n--- stdout ---\n{stdout}\n"
+        raise OSError(msg)
     assert outfile.exists(), f"Expected {outfile} to exist."
     json_text = outfile.read_text(encoding="utf-8")
     json_data = json.loads(json_text)

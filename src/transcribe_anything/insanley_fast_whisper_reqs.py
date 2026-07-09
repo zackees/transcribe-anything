@@ -21,9 +21,14 @@ TENSOR_VERSION = "2.7.0"
 CUDA_VERSION = "cu128"
 TENSOR_CUDA_VERSION = f"{TENSOR_VERSION}+{CUDA_VERSION}"
 EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+XPU_VERSION = "xpu"
+TENSOR_XPU_VERSION = f"{TENSOR_VERSION}+{XPU_VERSION}"
+XPU_EXTRA_INDEX_URL = f"https://download.pytorch.org/whl/{XPU_VERSION}"
 PYTHON_VERSION = "==3.11.*"
 INSANE_ENV_NAME = "insanely_fast_whisper"
 INSANE_FLASH_ENV_NAME = "insanely_fast_whisper_flash"
+INSANE_XPU_ENV_NAME = "insanely_fast_whisper_xpu"
+INSANE_FLASH_XPU_ENV_NAME = "insanely_fast_whisper_flash_xpu"
 SHARED_INSANE_BACKEND_ENV_VAR = "TRANSCRIBE_ANYTHING_SHARED_INSANE_BACKEND"
 
 
@@ -32,7 +37,7 @@ def get_current_python_version() -> str:
     return f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
 
-def _get_reqs_generic(has_nvidia: bool) -> list[str]:
+def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
     """Generate the requirements for the generic case."""
     deps = [
         # Whisper long-form/chunk timestamp fixes need >=4.53.0 (PRs #34537, #35750)
@@ -54,7 +59,10 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
 
     for dep in deps:
         content_lines.append(dep)
-    if has_nvidia:
+    if use_xpu:
+        content_lines.append(f"torch=={TENSOR_XPU_VERSION}")
+        content_lines.append(f"torchaudio=={TENSOR_XPU_VERSION}")
+    elif has_nvidia:
         content_lines.append(f"torch=={TENSOR_CUDA_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_CUDA_VERSION}")
         # torch 2.7.0+cu128 dlopens libcusparseLt.so.0 at import on Linux; the
@@ -73,9 +81,9 @@ def _get_reqs_generic(has_nvidia: bool) -> list[str]:
     return content_lines
 
 
-def build_pyproject_toml(has_nvidia: bool, flash: bool = False) -> str:
+def build_pyproject_toml(has_nvidia: bool, flash: bool = False, use_xpu: bool = False) -> str:
     """Build the uv pyproject content for the isolated insane backend env."""
-    dep_lines = _get_reqs_generic(has_nvidia)
+    dep_lines = _get_reqs_generic(has_nvidia, use_xpu=use_xpu)
     if flash:
         wheel = get_flash_attention_wheel(has_nvidia=has_nvidia, python_tag=SUPPORTED_PYTHON_TAG)
         dep_lines.append(wheel.requirement)
@@ -103,9 +111,21 @@ def build_pyproject_toml(has_nvidia: bool, flash: bool = False) -> str:
     # setuptools 82. Mirrors the same guard in whisper.py.
     content_lines.append("")
     content_lines.append("[tool.uv]")
+    if use_xpu:
+        content_lines.append('index-strategy = "unsafe-best-match"')
     content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
 
-    if has_nvidia:
+    if use_xpu:
+        content_lines.append("")
+        content_lines.append("[tool.uv.sources]")
+        for package in ("torch", "torchaudio"):
+            content_lines.append(f"{package} = [")
+            content_lines.append("  { index = 'pytorch-xpu' },")
+            content_lines.append("]")
+        content_lines.append("[[tool.uv.index]]")
+        content_lines.append('name = "pytorch-xpu"')
+        content_lines.append(f'url = "{XPU_EXTRA_INDEX_URL}"')
+    elif has_nvidia:
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
         content_lines.append("  { index = 'pytorch-cu128' },")
@@ -129,14 +149,17 @@ def _use_shared_flash_backend(has_nvidia: bool, flash: bool) -> bool:
     return has_nvidia and value in {"1", "true", "yes", "y", "on", "flash", "insane-flash"}
 
 
-def get_environment(has_nvidia: bool | None = None, flash: bool = False) -> IsoEnv:
+def get_environment(has_nvidia: bool | None = None, flash: bool = False, use_xpu: bool = False) -> IsoEnv:
     """Returns the isolated insane or insane-flash environment."""
     if has_nvidia is None:
         has_nvidia = has_nvidia_smi()
-    flash = _use_shared_flash_backend(has_nvidia=has_nvidia, flash=flash)
-    env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
+    if use_xpu:
+        env_name = INSANE_FLASH_XPU_ENV_NAME if flash else INSANE_XPU_ENV_NAME
+    else:
+        flash = _use_shared_flash_backend(has_nvidia=has_nvidia, flash=flash)
+        env_name = INSANE_FLASH_ENV_NAME if flash else INSANE_ENV_NAME
     venv_dir = get_runtime_venv_dir(env_name)
-    content = build_pyproject_toml(has_nvidia=has_nvidia, flash=flash)
+    content = build_pyproject_toml(has_nvidia=has_nvidia, flash=flash, use_xpu=use_xpu)
     build_info = PyProjectToml(content)
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)
     env = IsoEnv(args)
