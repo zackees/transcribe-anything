@@ -28,10 +28,9 @@ XPU_EXTRA_INDEX_URL = "https://download.pytorch.org/whl/xpu"
 IS_MAC = sys.platform == "darwin"
 
 
-def get_environment(use_xpu: bool = False) -> IsoEnv:
-    """Returns the environment."""
-    venv_dir = get_runtime_venv_dir("whisper-xpu" if use_xpu else "whisper")
-    needs_extra_index = (not IS_MAC and has_nvidia_smi()) or use_xpu
+def build_pyproject_toml(has_nvidia: bool, use_xpu: bool = False) -> str:
+    """Build the uv pyproject content for the isolated whisper env."""
+    needs_extra_index = (not IS_MAC and has_nvidia) or use_xpu
     content_lines: list[str] = []
 
     content_lines.append("[build-system]")
@@ -50,6 +49,10 @@ def get_environment(use_xpu: bool = False) -> IsoEnv:
     if needs_extra_index:
         if use_xpu:
             content_lines.append(f'  "torch=={TENSOR_VERSION}+{XPU_VERSION}",')
+            # torch+xpu's triton backend only exists on the pytorch-xpu
+            # index (the PyPI project is quarantined), so it must be a
+            # declared dependency for its [tool.uv.sources] pin to apply.
+            content_lines.append("  \"pytorch-triton-xpu; sys_platform == 'linux' or sys_platform == 'win32'\",")
         else:
             content_lines.append(f'  "torch=={TENSOR_VERSION}+{CUDA_VERSION}",')
     content_lines.append("]")
@@ -59,11 +62,17 @@ def get_environment(use_xpu: bool = False) -> IsoEnv:
     content_lines.append("")
     content_lines.append("[tool.uv]")
     if use_xpu:
-        content_lines.append('index-strategy = "unsafe-best-match"')
+        # XPU wheels only exist for linux/windows; keep universal
+        # resolution from failing on the mac split.
+        content_lines.append("environments = [")
+        content_lines.append("    \"sys_platform == 'win32'\",")
+        content_lines.append("    \"sys_platform == 'linux'\",")
+        content_lines.append("]")
     content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
 
-    needs_extra_index = (not IS_MAC and has_nvidia_smi()) or use_xpu
     if needs_extra_index:
+        # The extra torch index is explicit: only packages pinned to it via
+        # [tool.uv.sources] resolve from it, everything else stays on PyPI.
         content_lines.append("")
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")
@@ -72,6 +81,10 @@ def get_environment(use_xpu: bool = False) -> IsoEnv:
         else:
             content_lines.append("  { index = 'pytorch-cu128' },")
         content_lines.append("]")
+        if use_xpu:
+            content_lines.append("pytorch-triton-xpu = [")
+            content_lines.append("  { index = 'pytorch-xpu' },")
+            content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
         if use_xpu:
             content_lines.append('name = "pytorch-xpu"')
@@ -79,14 +92,15 @@ def get_environment(use_xpu: bool = False) -> IsoEnv:
         else:
             content_lines.append('name = "pytorch-cu128"')
             content_lines.append(f'url = "{CUDA_EXTRA_INDEX_URL}"')
-            content_lines.append("explicit = true")
+        content_lines.append("explicit = true")
 
-    content = "\n".join(content_lines)
+    return "\n".join(content_lines)
 
-    # Debug: Log the pyproject.toml content hash to track changes
-    # content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()[:8]
-    # print(f"Debug: whisper.py pyproject.toml hash: {content_hash}, needs_extra_index: {needs_extra_index}", file=sys.stderr)
 
+def get_environment(use_xpu: bool = False) -> IsoEnv:
+    """Returns the environment."""
+    venv_dir = get_runtime_venv_dir("whisper-xpu" if use_xpu else "whisper")
+    content = build_pyproject_toml(has_nvidia=has_nvidia_smi(), use_xpu=use_xpu)
     pyproject_toml = PyProjectToml(content)
     args = IsoEnvArgs(venv_dir, build_info=pyproject_toml)
     env = IsoEnv(args)

@@ -38,12 +38,18 @@ def _torch_requirement(package: str, version: str, has_nvidia: bool, use_xpu: bo
 
 def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
     """Generate WhisperX backend requirements."""
-    return [
+    reqs = [
         f"whisperx=={WHISPERX_VERSION}",
         _torch_requirement("torch", TORCH_VERSION, has_nvidia, use_xpu=use_xpu),
         _torch_requirement("torchaudio", TORCHAUDIO_VERSION, has_nvidia, use_xpu=use_xpu),
         _torch_requirement("torchvision", TORCHVISION_VERSION, has_nvidia, use_xpu=use_xpu),
     ]
+    if use_xpu:
+        # torch+xpu's triton backend only exists on the pytorch-xpu index
+        # (the PyPI project is quarantined), so it must be a declared
+        # dependency for its [tool.uv.sources] pin to apply.
+        reqs.append("pytorch-triton-xpu; sys_platform == 'linux' or sys_platform == 'win32'")
+    return reqs
 
 
 def build_pyproject_toml(has_nvidia: bool, use_xpu: bool = False) -> str:
@@ -81,13 +87,23 @@ def build_pyproject_toml(has_nvidia: bool, use_xpu: bool = False) -> str:
     elif use_xpu:
         content_lines.append("")
         content_lines.append("[tool.uv]")
-        content_lines.append('index-strategy = "unsafe-best-match"')
-        content_lines.append('override-dependencies = [')
-        content_lines.append('    "torchcodec; python_version < \'3.0\'",')
-        content_lines.append(']')
+        # XPU wheels only exist for linux/windows; keep universal
+        # resolution from failing on the mac split.
+        content_lines.append("environments = [")
+        content_lines.append("    \"sys_platform == 'win32'\",")
+        content_lines.append("    \"sys_platform == 'linux'\",")
+        content_lines.append("]")
+        # torchcodec ships no XPU wheels; the impossible python_version
+        # marker drops it from resolution entirely (whisperx only needs it
+        # for torchaudio's optional decoding path, which XPU does not use).
+        content_lines.append("override-dependencies = [")
+        content_lines.append("    \"torchcodec; python_version < '3.0'\",")
+        content_lines.append("]")
         content_lines.append("")
+        # Explicit index: only the torch family resolves from pytorch-xpu,
+        # everything else stays on PyPI (mirrors the pytorch-cu128 config).
         content_lines.append("[tool.uv.sources]")
-        for package in ("torch", "torchaudio", "torchvision"):
+        for package in ("torch", "torchaudio", "torchvision", "pytorch-triton-xpu"):
             content_lines.append(f"{package} = [")
             content_lines.append("  { index = 'pytorch-xpu' },")
             content_lines.append("]")
@@ -95,6 +111,7 @@ def build_pyproject_toml(has_nvidia: bool, use_xpu: bool = False) -> str:
         content_lines.append("[[tool.uv.index]]")
         content_lines.append('name = "pytorch-xpu"')
         content_lines.append(f'url = "{XPU_EXTRA_INDEX_URL}"')
+        content_lines.append("explicit = true")
 
     return "\n".join(content_lines)
 

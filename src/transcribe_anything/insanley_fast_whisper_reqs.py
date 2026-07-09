@@ -62,6 +62,10 @@ def _get_reqs_generic(has_nvidia: bool, use_xpu: bool = False) -> list[str]:
     if use_xpu:
         content_lines.append(f"torch=={TENSOR_XPU_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_XPU_VERSION}")
+        # torch+xpu's triton backend only exists on the pytorch-xpu index
+        # (the PyPI project is quarantined), so it must be a declared
+        # dependency for its [tool.uv.sources] pin to apply.
+        content_lines.append("pytorch-triton-xpu; sys_platform == 'linux' or sys_platform == 'win32'")
     elif has_nvidia:
         content_lines.append(f"torch=={TENSOR_CUDA_VERSION}")
         content_lines.append(f"torchaudio=={TENSOR_CUDA_VERSION}")
@@ -112,19 +116,27 @@ def build_pyproject_toml(has_nvidia: bool, flash: bool = False, use_xpu: bool = 
     content_lines.append("")
     content_lines.append("[tool.uv]")
     if use_xpu:
-        content_lines.append('index-strategy = "unsafe-best-match"')
+        # XPU wheels only exist for linux/windows; keep universal
+        # resolution from failing on the mac split.
+        content_lines.append("environments = [")
+        content_lines.append("    \"sys_platform == 'win32'\",")
+        content_lines.append("    \"sys_platform == 'linux'\",")
+        content_lines.append("]")
     content_lines.append('build-constraint-dependencies = ["setuptools<82"]')
 
     if use_xpu:
+        # Explicit index: only the torch family resolves from pytorch-xpu,
+        # everything else stays on PyPI (mirrors the pytorch-cu128 config).
         content_lines.append("")
         content_lines.append("[tool.uv.sources]")
-        for package in ("torch", "torchaudio"):
+        for package in ("torch", "torchaudio", "pytorch-triton-xpu"):
             content_lines.append(f"{package} = [")
             content_lines.append("  { index = 'pytorch-xpu' },")
             content_lines.append("]")
         content_lines.append("[[tool.uv.index]]")
         content_lines.append('name = "pytorch-xpu"')
         content_lines.append(f'url = "{XPU_EXTRA_INDEX_URL}"')
+        content_lines.append("explicit = true")
     elif has_nvidia:
         content_lines.append("[tool.uv.sources]")
         content_lines.append("torch = [")

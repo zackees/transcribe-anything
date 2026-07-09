@@ -434,7 +434,8 @@ def run_insanely_fast_whisper(
         cmd_list += [
             "python",
             str(xpu_script),
-            "--device-id", "xpu",
+            "--device-id",
+            "xpu",
         ]
     else:
         device_id = get_device_id()

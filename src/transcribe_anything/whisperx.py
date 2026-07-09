@@ -247,13 +247,6 @@ def _default_device() -> str:
     return "cuda" if has_nvidia_smi() else "cpu"
 
 
-def _has_intel_gpu() -> bool:
-    """Check if system has Intel GPU support (via oneAPI or similar)."""
-    # This is a simple check; more sophisticated detection could be added later
-    import shutil
-    return shutil.which("sycl-ls") is not None or shutil.which("level-zero-loader") is not None
-
-
 def _format_srt_time(seconds: float) -> str:
     milliseconds = int(round(seconds * 1000))
     hours, remainder = divmod(milliseconds, 3600 * 1000)
