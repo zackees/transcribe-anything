@@ -23,7 +23,7 @@ dependencies = [
     "httpx>=0.27.0",
 ]
 # VERSION
-version = "4.0.0"  # Update this manually or configure setuptools-scm for automatic versioning
+version = "4.1.0"  # Update this manually or configure setuptools-scm for automatic versioning
 maintainers = [{ name = "Zachary Vorhies", email = "dont@email.me" }]
 
 [project.optional-dependencies]
