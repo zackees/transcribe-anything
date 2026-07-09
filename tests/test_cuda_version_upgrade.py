@@ -91,7 +91,7 @@ class TestWhisperPyprojectGeneration(unittest.TestCase):
 
     def test_nvidia_pyproject_has_cu128_torch(self):
         content = _capture_whisper_pyproject(has_nvidia=True)
-        self.assertIn("torch==2.7.0+cu128", content)
+        self.assertIn("torch==2.10.0+cu128", content)
 
     def test_nvidia_pyproject_has_cu128_index(self):
         content = _capture_whisper_pyproject(has_nvidia=True)
@@ -133,11 +133,11 @@ class TestInsanePyprojectGeneration(unittest.TestCase):
 
     def test_nvidia_pyproject_has_cu128_torch(self):
         content = _capture_insane_pyproject(has_nvidia=True)
-        self.assertIn("torch==2.7.0+cu128", content)
+        self.assertIn("torch==2.7.1+cu128", content)
 
     def test_nvidia_pyproject_has_cu128_torchaudio(self):
         content = _capture_insane_pyproject(has_nvidia=True)
-        self.assertIn("torchaudio==2.7.0+cu128", content)
+        self.assertIn("torchaudio==2.7.1+cu128", content)
 
     def test_nvidia_pyproject_has_cu128_index(self):
         content = _capture_insane_pyproject(has_nvidia=True)
@@ -162,12 +162,12 @@ class TestInsanePyprojectGeneration(unittest.TestCase):
 
     def test_no_nvidia_pyproject_has_cpu_torch(self):
         content = _capture_insane_pyproject(has_nvidia=False)
-        self.assertIn("torch==2.7.0", content)
+        self.assertIn("torch==2.7.1", content)
         self.assertNotIn("+cu", content)
 
     def test_no_nvidia_pyproject_has_cpu_torchaudio(self):
         content = _capture_insane_pyproject(has_nvidia=False)
-        self.assertIn("torchaudio==2.7.0", content)
+        self.assertIn("torchaudio==2.7.1", content)
 
     def test_no_nvidia_pyproject_no_cuda_index(self):
         content = _capture_insane_pyproject(has_nvidia=False)
@@ -193,7 +193,7 @@ class TestModuleConstants(unittest.TestCase):
     def test_whisper_tensor_version(self):
         from transcribe_anything.whisper import TENSOR_VERSION
 
-        self.assertEqual(TENSOR_VERSION, "2.7.0")
+        self.assertEqual(TENSOR_VERSION, "2.10.0")
 
     def test_whisper_cuda_version(self):
         from transcribe_anything.whisper import CUDA_VERSION
@@ -208,7 +208,7 @@ class TestModuleConstants(unittest.TestCase):
     def test_insane_tensor_version(self):
         from transcribe_anything.insanley_fast_whisper_reqs import TENSOR_VERSION
 
-        self.assertEqual(TENSOR_VERSION, "2.7.0")
+        self.assertEqual(TENSOR_VERSION, "2.7.1")
 
     def test_insane_cuda_version(self):
         from transcribe_anything.insanley_fast_whisper_reqs import CUDA_VERSION
@@ -218,7 +218,7 @@ class TestModuleConstants(unittest.TestCase):
     def test_insane_tensor_cuda_version(self):
         from transcribe_anything.insanley_fast_whisper_reqs import TENSOR_CUDA_VERSION
 
-        self.assertEqual(TENSOR_CUDA_VERSION, "2.7.0+cu128")
+        self.assertEqual(TENSOR_CUDA_VERSION, "2.7.1+cu128")
 
     def test_insane_extra_index_url(self):
         from transcribe_anything.insanley_fast_whisper_reqs import EXTRA_INDEX_URL
