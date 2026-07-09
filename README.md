@@ -55,6 +55,22 @@ flowchart TD
 - **99.9% uptime SLA** with enterprise-grade security (SOC 2, HIPAA, ISO 27001)
 - **One API for all meeting platforms** — no platform-specific integrations required
 
+### New in 4.1! 🎉 — Intel Arc GPU support
+
+**Your Intel Arc GPU is now a transcription device.** `--device xpu` runs the blazing HF-pipeline path on PyTorch's XPU backend — Arc A-series and B-series discrete cards and recent Iris Xe iGPUs, on Windows and Linux.
+
+```bash
+transcribe-anything video.mp4 --device xpu
+```
+
+- **Whole-hog isolated env**: torch+xpu wheels pull from PyTorch's official XPU index only — pinned by exact version *and* explicit index, so nothing in the XPU dependency chain can ever resolve from an untrusted source (the `pytorch-triton-xpu` name on PyPI is literally quarantined; we don't go anywhere near it).
+- **WhisperX on Arc too**: the `whisperx` backend gains the same XPU wiring.
+- Experimental — file issues with your card model if something misbehaves.
+
+Also in 4.1: dependency security refresh across every isolated backend env (`yt-dlp` 2026.7.4, `cryptography` 49.0.0, per-env torch updates, and a 36-package dead-weight drop from the `insane` env).
+
+Thanks to [@Mischala](https://github.com/Mischala) for kicking off the XPU support (#127, closes #23).
+
 ### New in 4.0! 🎉
 
 **Three new backends, phoneme-precise word-level timestamps for the fast path, and read-only installs.** This is the biggest release since the `--device insane` debut. If you ran 3.2 and squinted at end-of-audio timestamps, this is the one to upgrade to.
