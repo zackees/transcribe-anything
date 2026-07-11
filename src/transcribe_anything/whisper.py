@@ -11,6 +11,7 @@ from typing import Optional
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
+from transcribe_anything.xpu_iso_env import XpuIsoEnv
 
 # from isolated_environment import isolated_environment  # type: ignore
 
@@ -107,7 +108,7 @@ def get_environment(use_xpu: bool = False) -> IsoEnv:
     content = build_pyproject_toml(has_nvidia=has_nvidia_smi(), use_xpu=use_xpu)
     pyproject_toml = PyProjectToml(content)
     args = IsoEnvArgs(venv_dir, build_info=pyproject_toml)
-    env = IsoEnv(args)
+    env = XpuIsoEnv(args, python="3.10") if use_xpu else IsoEnv(args)
     return env
 
 
