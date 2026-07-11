@@ -8,6 +8,7 @@ from pathlib import Path
 from iso_env import IsoEnv, IsoEnvArgs, PyProjectToml  # type: ignore
 
 from transcribe_anything.util import get_runtime_venv_dir, has_nvidia_smi
+from transcribe_anything.xpu_iso_env import XpuIsoEnv
 
 HERE = Path(__file__).parent
 
@@ -126,5 +127,5 @@ def get_environment(has_nvidia: bool | None = None, use_xpu: bool = False) -> Is
         has_nvidia = has_nvidia_smi()
     build_info = PyProjectToml(build_pyproject_toml(has_nvidia, use_xpu=use_xpu))
     args = IsoEnvArgs(venv_path=venv_dir, build_info=build_info)
-    env = IsoEnv(args)
+    env = XpuIsoEnv(args, python="3.11") if use_xpu else IsoEnv(args)
     return env
