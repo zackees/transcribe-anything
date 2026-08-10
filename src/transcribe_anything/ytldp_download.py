@@ -14,11 +14,23 @@ def ytdlp_download(url: str, outdir: str) -> str:
     # remove all files in the directory
     for file in os.listdir(outdir):
         os.remove(os.path.join(outdir, file))
-    cmd = f'yt-dlp --no-check-certificate -x {url} -o "out.%(ext)s"'
-    print(f"Running:\n  {cmd}")
+    # Pass argv directly instead of a shell string: a URL containing shell
+    # metacharacters (`&`, `;`, `|`, backticks, `$(...)`) would otherwise be
+    # interpreted by the shell rather than handed to yt-dlp. Note the -o
+    # template is unquoted here -- with shell=False there is no shell to
+    # strip the quotes, so quoting it would put literal `"` in the filename.
+    cmd = [
+        "yt-dlp",
+        "--no-check-certificate",
+        "-x",
+        url,
+        "-o",
+        "out.%(ext)s",
+    ]
+    print(f"Running:\n  {subprocess.list2cmdline(cmd)}")
     subprocess.run(
         cmd,
-        shell=True,
+        shell=False,
         cwd=outdir,
         check=True,
         timeout=PROCESS_TIMEOUT,
