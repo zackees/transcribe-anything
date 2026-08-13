@@ -41,7 +41,7 @@ flowchart TD
     W & IFW & XPU & WX & SV & MLX --> OUT["📄 out.txt · out.srt · out.vtt · out.json<br/>🎙️ speaker.json — who said what, when"]
 ```
 
-[![Star History Chart](https://api.star-history.com/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.com/#zackees/transcribe-anything&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=zackees/transcribe-anything&type=Date)](https://star-history.dera.page/#zackees/transcribe-anything&type=Date)
 
 ## Sponsored by [Recall.ai](https://www.recall.ai)
 
