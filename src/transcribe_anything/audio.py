@@ -93,7 +93,7 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                     cmd_list,
                     cwd=tmpdir,
                     shell=False,
-                    check=False,
+                    check=True,
                     capture_output=True,
                     timeout=PROCESS_TIMEOUT,
                 )
