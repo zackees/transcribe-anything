@@ -170,13 +170,13 @@ def get_video_name_from_url(url: str) -> str:
             # env["set PYTHONIOENCODING=utf-8"]
             env["PYTHONIOENCODING"] = "utf-8"
             cp = subprocess.run(
-                cmd_str,
+                cmd_list,
                 check=True,
                 capture_output=True,
                 universal_newlines=True,
                 cwd=temp_dir,
                 env=env,
-                shell=True,
+                shell=False,
             )
             stdout = cp.stdout
             lines = stdout.split("\n")
@@ -415,7 +415,7 @@ def transcribe(
                 if static_ffmpeg_path is None:
                     raise FileNotFoundError("static_ffmpeg not found")
                 embed_ffmpeg_cmd_list = [
-                    "static_ffmpeg",
+                    static_ffmpeg_path,
                     "-y",
                     "-i",
                     url_or_file,
@@ -429,11 +429,11 @@ def transcribe(
                 print(f"Running:\n  {embed_ffmpeg_cmd}")
                 try:
                     _ = subprocess.run(
-                        embed_ffmpeg_cmd,
+                        embed_ffmpeg_cmd_list,
                         universal_newlines=True,
                         check=True,
                         capture_output=True,
-                        shell=True,
+                        shell=False,
                     )
                 except subprocess.CalledProcessError as exc:
                     stdout = exc.stdout
