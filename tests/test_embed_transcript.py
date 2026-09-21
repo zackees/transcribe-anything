@@ -8,8 +8,9 @@ Tests transcribe_anything
 import os
 import shutil
 import unittest
+from unittest.mock import Mock, patch
 
-from transcribe_anything.api import transcribe
+from transcribe_anything.api import _embed_subtitles, fix_subtitles_path, transcribe
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 LOCALFILE_DIR = os.path.join(HERE, "localfile")
@@ -38,6 +39,33 @@ class TranscribeAnythingApiEmbedTester(unittest.TestCase):
                 os.path.exists(expected_path),
                 f"expected path {expected_path} not found",
             )
+
+    @patch("transcribe_anything.api.subprocess.run")
+    def test_embed_does_not_invoke_a_shell(self, run_mock: Mock) -> None:
+        """Treat shell metacharacters in an input filename as literal text."""
+        input_path = "video&whoami&.mp4"
+        srt_path = "subtitle.srt"
+        output_path = "out.mp4"
+
+        _embed_subtitles(input_path, srt_path, output_path)
+
+        run_mock.assert_called_once_with(
+            [
+                "static_ffmpeg",
+                "-y",
+                "-i",
+                input_path,
+                "-i",
+                srt_path,
+                "-vf",
+                f"subtitles={fix_subtitles_path(srt_path)}",
+                output_path,
+            ],
+            universal_newlines=True,
+            check=True,
+            capture_output=True,
+            shell=False,
+        )
 
 
 if __name__ == "__main__":

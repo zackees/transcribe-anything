@@ -196,6 +196,29 @@ def get_video_name_from_url(url: str) -> str:
         return os.path.basename(url)
 
 
+def _embed_subtitles(input_path: str, srt_path: str, output_path: str) -> None:
+    """Embed subtitles without passing user-controlled paths through a shell."""
+    command = [
+        "static_ffmpeg",
+        "-y",
+        "-i",
+        input_path,
+        "-i",
+        srt_path,
+        "-vf",
+        f"subtitles={fix_subtitles_path(srt_path)}",
+        output_path,
+    ]
+    print(f"Running:\n  {' '.join(repr(argument) for argument in command)}")
+    subprocess.run(
+        command,
+        universal_newlines=True,
+        check=True,
+        capture_output=True,
+        shell=False,
+    )
+
+
 def transcribe(
     url_or_file: str,
     output_dir: Optional[str] = None,
@@ -414,27 +437,8 @@ def transcribe(
                 static_ffmpeg_path = shutil.which("static_ffmpeg")
                 if static_ffmpeg_path is None:
                     raise FileNotFoundError("static_ffmpeg not found")
-                embed_ffmpeg_cmd_list = [
-                    "static_ffmpeg",
-                    "-y",
-                    "-i",
-                    url_or_file,
-                    "-i",
-                    srt_file,
-                    "-vf",
-                    f"subtitles={fix_subtitles_path(srt_file)}",
-                    out_mp4,
-                ]
-                embed_ffmpeg_cmd = subprocess.list2cmdline(embed_ffmpeg_cmd_list)
-                print(f"Running:\n  {embed_ffmpeg_cmd}")
                 try:
-                    _ = subprocess.run(
-                        embed_ffmpeg_cmd,
-                        universal_newlines=True,
-                        check=True,
-                        capture_output=True,
-                        shell=True,
-                    )
+                    _embed_subtitles(url_or_file, srt_file, out_mp4)
                 except subprocess.CalledProcessError as exc:
                     stdout = exc.stdout
                     stderr = exc.stderr
