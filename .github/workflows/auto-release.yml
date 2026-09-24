@@ -1,0 +1,160 @@
+name: Auto Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - pyproject.toml
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build and verify without publishing to PyPI or creating a GitHub Release.
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: auto-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: Detect release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_build: ${{ steps.detect.outputs.should_build }}
+      should_publish: ${{ steps.detect.outputs.should_publish }}
+      project: ${{ steps.detect.outputs.project }}
+      version: ${{ steps.detect.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Decide whether to build and publish
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          DRY_RUN: ${{ inputs['dry-run'] }}
+        run: >-
+          python .github/scripts/release.py detect
+          --event "$EVENT_NAME"
+          --ref "$GITHUB_REF"
+          --default-branch "$DEFAULT_BRANCH"
+          --before "$BEFORE_SHA"
+          --dry-run "$DRY_RUN"
+
+  build:
+    name: Build distributions
+    needs: detect
+    if: needs.detect.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - name: Build sdist and wheel
+        run: uv build --out-dir dist
+      - name: Verify distributions
+        run: python .github/scripts/release.py verify-dist --dist dist --version "${{ needs.detect.outputs.version }}"
+      - name: Check package metadata
+        run: uvx twine check dist/*
+      - name: Smoke-install the wheel
+        env:
+          PROJECT: ${{ needs.detect.outputs.project }}
+          VERSION: ${{ needs.detect.outputs.version }}
+        run: |
+          set -euo pipefail
+          uv venv --python 3.12 "$RUNNER_TEMP/smoke"
+          uv pip install --python "$RUNNER_TEMP/smoke/bin/python" --no-deps dist/*.whl
+          "$RUNNER_TEMP/smoke/bin/python" - <<'PY'
+          import importlib.metadata as metadata
+          import os
+          import sys
+
+          dist = metadata.distribution(os.environ["PROJECT"])
+          scripts = [ep.name for ep in dist.entry_points if ep.group == "console_scripts"]
+          print(f"{dist.metadata['Name']} {dist.version}: {len(scripts)} console scripts")
+          sys.exit(0 if dist.version == os.environ["VERSION"] and scripts else 1)
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/*
+          if-no-files-found: error
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [detect, build]
+    if: needs.detect.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: pypi
+      url: https://pypi.org/project/${{ needs.detect.outputs.project }}/${{ needs.detect.outputs.version }}/
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: repo
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Publish distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          print-hash: true
+          skip-existing: true
+      - name: Wait until PyPI lists every file
+        run: >-
+          python repo/.github/scripts/release.py wait-pypi
+          --project "${{ needs.detect.outputs.project }}"
+          --version "${{ needs.detect.outputs.version }}"
+          --dist dist
+
+  github-release:
+    name: Tag and create GitHub Release
+    needs: [detect, publish-pypi]
+    if: needs.detect.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ needs.detect.outputs.version }}
+          TITLE: ${{ needs.detect.outputs.project }} ${{ needs.detect.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "$TITLE" --generate-notes
+          fi
