@@ -93,15 +93,17 @@ def fetch_audio(url_or_file: str, out_wav: str) -> None:
                     cmd_list,
                     cwd=tmpdir,
                     shell=False,
-                    check=False,
+                    check=True,
                     capture_output=True,
                     timeout=PROCESS_TIMEOUT,
                 )
                 shutil.copyfile(os.path.join(tmpdir, "out.wav"), out_wav_abs)
             except subprocess.CalledProcessError as exc:
                 print(f"Failed to run {cmd_str} with error {exc}")
-                print(f"stdout: {exc.stdout.decode()}")
-                print(f"stderr: {exc.stderr.decode()}")
+                stdout = exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout
+                stderr = exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr
+                print(f"stdout: {stdout}")
+                print(f"stderr: {stderr}")
                 raise
         assert os.path.exists(out_wav), f"The expected file {out_wav} doesn't exist"
 
