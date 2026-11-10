@@ -73,7 +73,7 @@ def generate_speaker_json(json_data: dict) -> list[dict]:
             timestamp_end = float(chunk["timestamp"][1])
             text = chunk["text"]
             chunks.append(Chunk(speaker, timestamp_start, timestamp_end, text))
-        except KeyError:
+        except (KeyError, TypeError, ValueError, IndexError):
             import warnings
 
             warnings.warn(f"Invalid chunk: {chunk}")
